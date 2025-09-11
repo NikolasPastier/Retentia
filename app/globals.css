@@ -1,0 +1,154 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Updated color tokens to match learning app design brief */
+  --background: #101010; /* Black background */
+  --foreground: #ffffff; /* White text */
+  --card: #001f3f; /* Dark Blue for cards */
+  --card-foreground: #ffffff; /* White text on cards */
+  --popover: #001f3f; /* Dark Blue for popovers */
+  --popover-foreground: #ffffff; /* White text in popovers */
+  --primary: #001f3f; /* Dark Blue for primary actions */
+  --primary-foreground: #ffffff; /* White text on primary */
+  --secondary: #007bff; /* Bright Blue for secondary actions */
+  --secondary-foreground: #ffffff; /* White text on secondary */
+  --muted: #4b5563; /* Muted gray for less emphasized elements */
+  --muted-foreground: #ffffff; /* White text for muted */
+  --accent: #007bff; /* Bright Blue for interactive elements */
+  --accent-foreground: #ffffff; /* White text on accent */
+  --destructive: #dc2626; /* Red for destructive actions */
+  --destructive-foreground: #ffffff; /* White text for destructive */
+  --border: #4b5563; /* Gray borders */
+  --input: #ffffff; /* White input fields */
+  --ring: #007bff; /* Bright Blue for focus rings */
+  --chart-1: #007bff;
+  --chart-2: #001f3f;
+  --chart-3: #ffffff;
+  --chart-4: #4b5563;
+  --chart-5: #dc2626;
+  --radius: 0.5rem; /* Rounded corners */
+  --sidebar: #001f3f; /* Dark Blue sidebar */
+  --sidebar-foreground: #ffffff; /* White sidebar text */
+  --sidebar-primary: #007bff; /* Bright Blue for primary sidebar */
+  --sidebar-primary-foreground: #ffffff; /* White text on sidebar primary */
+  --sidebar-accent: #4b5563; /* Muted gray for sidebar accent */
+  --sidebar-accent-foreground: #ffffff; /* White text on sidebar accent */
+  --sidebar-border: #4b5563; /* Gray sidebar borders */
+  --sidebar-ring: #007bff; /* Bright Blue for sidebar focus */
+  --font-instrument-serif: "Instrument Serif", serif;
+  --font-figtree: "Figtree", sans-serif;
+}
+
+.dark {
+  /* Dark mode uses same colors for consistency */
+  --background: #101010;
+  --foreground: #ffffff;
+  --card: #001f3f;
+  --card-foreground: #ffffff;
+  --popover: #001f3f;
+  --popover-foreground: #ffffff;
+  --primary: #001f3f;
+  --primary-foreground: #ffffff;
+  --secondary: #007bff;
+  --secondary-foreground: #ffffff;
+  --muted: #4b5563;
+  --muted-foreground: #ffffff;
+  --accent: #007bff;
+  --accent-foreground: #ffffff;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: #4b5563;
+  --input: #ffffff;
+  --ring: #007bff;
+  --chart-1: #007bff;
+  --chart-2: #001f3f;
+  --chart-3: #ffffff;
+  --chart-4: #4b5563;
+  --chart-5: #dc2626;
+  --sidebar: #001f3f;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #007bff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #4b5563;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #4b5563;
+  --sidebar-ring: #007bff;
+  --font-instrument-serif: "Instrument Serif", serif;
+  --font-figtree: "Figtree", sans-serif;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --font-instrument-serif: var(--font-instrument-serif);
+  --font-sans: var(--font-figtree);
+  --font-figtree: var(--font-figtree);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-figtree);
+  }
+}
+
+.instrument {
+  font-family: var(--font-instrument-serif);
+}
+
+/* Added custom gradient background for learning app */
+.gradient-bg {
+  background: linear-gradient(135deg, #101010 0%, #001f3f 50%, #101010 100%);
+}
+
+/* Added smooth animations for transitions */
+.smooth-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Added glass morphism effect for cards */
+.glass-card {
+  backdrop-filter: blur(10px);
+  background: rgba(0, 31, 63, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
