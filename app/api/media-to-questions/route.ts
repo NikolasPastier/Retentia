@@ -4,6 +4,8 @@ import { generateObject } from "ai"
 import { createGroq } from "@ai-sdk/groq"
 import { questionsSchema } from "@/lib/questions-schema"
 
+export const runtime = "nodejs"
+
 const groqClient = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 })
@@ -12,69 +14,147 @@ const groq = createGroq({
   apiKey: process.env.GROQ_API_KEY,
 })
 
+function sanitizeFilename(filename: string): string {
+  return filename.replace(/[^a-zA-Z0-9._-]/g, "_")
+}
+
+async function fetchFileAsBuffer(url: string): Promise<{ buffer: Buffer; filename: string }> {
+  console.log("[v0] Fetching remote file:", url)
+  const response = await fetch(url)
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch file: ${response.statusText}`)
+  }
+
+  const arrayBuffer = await response.arrayBuffer()
+  const buffer = Buffer.from(arrayBuffer)
+
+  // Extract filename from URL
+  const urlParts = url.split("/")
+  const filename = urlParts[urlParts.length - 1] || "audio-file"
+
+  return { buffer, filename }
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const formData = await request.formData()
-    const file = formData.get("file") as File
-    const difficulty = (formData.get("difficulty") as string) || "medium"
-    const questionCount = Number(formData.get("questionCount")) || 5
-    const questionType = (formData.get("questionType") as string) || "mixed"
+    const contentType = request.headers.get("content-type") || ""
 
-    if (!file) {
-      return NextResponse.json({ error: "No file provided" }, { status: 400 })
+    let file: File | null = null
+    let fileBuffer: Buffer
+    let filename: string
+    let difficulty = "medium"
+    let questionCount = 5
+    let questionType = "mixed"
+
+    if (contentType.includes("application/json")) {
+      // Handle JSON request with fileUrl (for S3 uploads)
+      console.log("[v0] Processing JSON request with fileUrl")
+      const body = await request.json()
+      const {
+        fileUrl,
+        difficulty: reqDifficulty,
+        questionCount: reqQuestionCount,
+        questionType: reqQuestionType,
+      } = body
+
+      if (!fileUrl) {
+        return NextResponse.json({ error: "No fileUrl provided" }, { status: 400 })
+      }
+
+      difficulty = reqDifficulty || difficulty
+      questionCount = Number(reqQuestionCount) || questionCount
+      questionType = reqQuestionType || questionType
+
+      // Fetch the file from S3
+      const { buffer, filename: fetchedFilename } = await fetchFileAsBuffer(fileUrl)
+      fileBuffer = buffer
+      filename = sanitizeFilename(fetchedFilename)
+    } else {
+      // Handle FormData request (direct upload)
+      console.log("[v0] Processing FormData request")
+      const formData = await request.formData()
+      file = formData.get("file") as File
+      difficulty = (formData.get("difficulty") as string) || difficulty
+      questionCount = Number(formData.get("questionCount")) || questionCount
+      questionType = (formData.get("questionType") as string) || questionType
+
+      if (!file) {
+        return NextResponse.json({ error: "No file provided" }, { status: 400 })
+      }
+
+      const arrayBuffer = await file.arrayBuffer()
+      fileBuffer = Buffer.from(arrayBuffer)
+      filename = sanitizeFilename(file.name)
     }
 
-    console.log(`[v0] Received file: ${file.name}`)
+    console.log(`[v0] Received file: ${filename}`)
 
-    // Validate file type and size
-    const allowedTypes = [
-      "audio/mpeg",
-      "audio/wav",
-      "audio/m4a",
-      "audio/mp3",
-      "audio/x-m4a",
-      "video/mp4",
-      "video/mov",
-      "video/avi",
-      "video/quicktime",
-    ]
+    const allowedExtensions = ["mp3", "wav", "m4a", "mp4", "mov", "avi"]
+    const fileExtension = filename.toLowerCase().split(".").pop()
 
-    const isValidType = allowedTypes.some(
-      (type) => file.type === type || file.name.toLowerCase().includes(type.split("/")[1]),
-    )
+    if (file) {
+      // Validate MIME type for direct uploads
+      const allowedTypes = [
+        "audio/mpeg",
+        "audio/wav",
+        "audio/m4a",
+        "audio/mp3",
+        "audio/x-m4a",
+        "video/mp4",
+        "video/mov",
+        "video/avi",
+        "video/quicktime",
+      ]
 
-    if (!isValidType) {
-      return NextResponse.json(
-        { error: "Unsupported file type. Please use MP3, WAV, M4A, MP4, or MOV files." },
-        { status: 400 },
+      const isValidType = allowedTypes.some(
+        (type) => file.type === type || file.name.toLowerCase().includes(type.split("/")[1]),
       )
+
+      if (!isValidType) {
+        return NextResponse.json(
+          { error: "Unsupported file type. Please use MP3, WAV, M4A, MP4, or MOV files." },
+          { status: 400 },
+        )
+      }
+    } else {
+      // Validate extension for S3 uploads
+      if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
+        return NextResponse.json(
+          { error: "Unsupported file type. Please use MP3, WAV, M4A, MP4, or MOV files." },
+          { status: 400 },
+        )
+      }
     }
 
-    if (file.size > 100 * 1024 * 1024) {
-      // 100MB limit
+    if (fileBuffer.length > 100 * 1024 * 1024) {
       return NextResponse.json({ error: "File too large (max 100MB)" }, { status: 400 })
     }
 
     // For video files, we'll process them as audio for now
-    // In a full implementation, you'd extract audio using ffmpeg
-    if (file.type.includes("video")) {
-      console.log("[v0] Extracting audio from video...")
+    if (filename.includes("mp4") || filename.includes("mov") || filename.includes("avi")) {
+      console.log("[v0] Processing video file as audio")
     }
 
-    // Transcribe using Groq Whisper
     console.log("[v0] Starting transcription...")
 
     try {
       const transcription = await groqClient.audio.transcriptions.create({
-        file: file,
+        file: fileBuffer,
         model: "whisper-large-v3",
         response_format: "text",
+        filename: filename,
       })
 
-      console.log("[v0] Transcription complete.")
+      console.log("[v0] Transcription complete")
 
       if (!transcription || transcription.length < 10) {
-        return NextResponse.json({ error: "Failed to transcribe file or transcript too short" }, { status: 400 })
+        return NextResponse.json(
+          {
+            error: "Failed to transcribe file or transcript too short",
+          },
+          { status: 400 },
+        )
       }
 
       // Clean and trim transcript
@@ -178,11 +258,17 @@ Return ONLY a valid JSON object in this exact format:
         success: true,
         transcript: cleanTranscript,
         questions: questionsResult.questions,
-        filename: file.name,
+        filename: filename,
       })
     } catch (transcriptionError) {
       console.error("[v0] Transcription error:", transcriptionError)
-      return NextResponse.json({ error: "Failed to transcribe file." }, { status: 500 })
+      return NextResponse.json(
+        {
+          error:
+            "Failed to transcribe audio. Please ensure the file contains clear speech and is in a supported format.",
+        },
+        { status: 500 },
+      )
     }
   } catch (error) {
     console.error("[v0] Media processing error:", error)

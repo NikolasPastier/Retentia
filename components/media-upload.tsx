@@ -11,12 +11,19 @@ interface MediaUploadProps {
   onQuestionsGenerated: (questions: any[], transcript: string, filename: string) => void
 }
 
+function sanitizeFilename(filename: string): string {
+  return filename.replace(/[^a-zA-Z0-9._-]/g, "_")
+}
+
 export default function MediaUpload({ onQuestionsGenerated }: MediaUploadProps) {
   const [isProcessing, setIsProcessing] = useState(false)
   const [dragActive, setDragActive] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [uploadProgress, setUploadProgress] = useState<string>("")
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const FILE_SIZE_THRESHOLD = 8 * 1024 * 1024 // 8MB
 
   const handleFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return
@@ -26,40 +33,130 @@ export default function MediaUpload({ onQuestionsGenerated }: MediaUploadProps) 
     setError(null)
   }
 
+  const handleApiError = async (response: Response): Promise<string> => {
+    if (response.ok) return ""
+
+    try {
+      const errorData = await response.json()
+      return errorData.error || `Request failed with status ${response.status}`
+    } catch {
+      try {
+        const errorText = await response.text()
+        return errorText || response.statusText || `Request failed with status ${response.status}`
+      } catch {
+        return response.statusText || `Request failed with status ${response.status}`
+      }
+    }
+  }
+
+  const uploadToS3 = async (file: File): Promise<string> => {
+    console.log("[v0] Using S3 presigned upload for large file")
+    setUploadProgress("Getting upload URL...")
+
+    const sanitizedFilename = sanitizeFilename(file.name)
+
+    const urlResponse = await fetch("/api/get-upload-url", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        filename: sanitizedFilename,
+        contentType: file.type,
+      }),
+    })
+
+    if (!urlResponse.ok) {
+      const errorMsg = await handleApiError(urlResponse)
+      throw new Error(`Failed to get upload URL: ${errorMsg}`)
+    }
+
+    const { url, fields, publicUrl } = await urlResponse.json()
+
+    setUploadProgress("Uploading to S3...")
+
+    const formData = new FormData()
+    Object.entries(fields).forEach(([key, value]) => {
+      formData.append(key, value as string)
+    })
+    formData.append("file", file)
+
+    const uploadResponse = await fetch(url, {
+      method: "POST",
+      body: formData,
+    })
+
+    if (!uploadResponse.ok) {
+      const errorMsg = await handleApiError(uploadResponse)
+      throw new Error(`S3 upload failed: ${errorMsg}`)
+    }
+
+    console.log("[v0] S3 upload successful")
+    return publicUrl
+  }
+
   const handleProcessFile = async () => {
     if (!selectedFile) return
 
     setError(null)
     setIsProcessing(true)
+    setUploadProgress("")
 
     try {
-      console.log(`[v0] Processing file: ${selectedFile.name}`)
+      console.log(`[v0] Processing file: ${selectedFile.name} (${(selectedFile.size / (1024 * 1024)).toFixed(1)}MB)`)
 
-      const formData = new FormData()
-      formData.append("file", selectedFile)
+      let response: Response
 
-      const response = await fetch("/api/media-to-questions", {
-        method: "POST",
-        body: formData,
-      })
+      if (selectedFile.size > FILE_SIZE_THRESHOLD) {
+        const fileUrl = await uploadToS3(selectedFile)
+
+        setUploadProgress("Processing with AI...")
+
+        response = await fetch("/api/media-to-questions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fileUrl,
+            difficulty: "medium",
+            questionCount: 5,
+            questionType: "mixed",
+          }),
+        })
+      } else {
+        console.log("[v0] Using direct FormData upload for small file")
+        setUploadProgress("Uploading and processing...")
+
+        const formData = new FormData()
+        formData.append("file", selectedFile)
+        formData.append("difficulty", "medium")
+        formData.append("questionCount", "5")
+        formData.append("questionType", "mixed")
+
+        response = await fetch("/api/media-to-questions", {
+          method: "POST",
+          body: formData,
+        })
+      }
+
+      if (!response.ok) {
+        const errorMsg = await handleApiError(response)
+        throw new Error(errorMsg)
+      }
 
       const result = await response.json()
 
-      if (!response.ok) {
-        throw new Error(result.error || "Failed to process file")
-      }
-
       if (result.success) {
+        console.log("[v0] Questions generated successfully")
         onQuestionsGenerated(result.questions, result.transcript, result.filename)
         setSelectedFile(null)
+        setUploadProgress("")
       } else {
-        throw new Error("Failed to generate questions")
+        throw new Error(result.error || "Failed to generate questions")
       }
     } catch (err) {
       console.error("[v0] Media upload error:", err)
       setError(err instanceof Error ? err.message : "Failed to process file")
     } finally {
       setIsProcessing(false)
+      setUploadProgress("")
     }
   }
 
@@ -87,6 +184,7 @@ export default function MediaUpload({ onQuestionsGenerated }: MediaUploadProps) 
   const handleRemoveFile = () => {
     setSelectedFile(null)
     setError(null)
+    setUploadProgress("")
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
     }
@@ -110,7 +208,9 @@ export default function MediaUpload({ onQuestionsGenerated }: MediaUploadProps) 
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
             <div className="space-y-2">
               <p className="text-sm font-medium">Processing your file...</p>
-              <p className="text-xs text-muted-foreground">Transcribing audio and generating questions...</p>
+              <p className="text-xs text-muted-foreground">
+                {uploadProgress || "Transcribing audio and generating questions..."}
+              </p>
             </div>
           </div>
         ) : (
@@ -136,7 +236,14 @@ export default function MediaUpload({ onQuestionsGenerated }: MediaUploadProps) 
             <CheckCircle className="h-5 w-5 text-green-500" />
             <div>
               <p className="font-medium text-foreground">{selectedFile.name}</p>
-              <p className="text-sm text-muted-foreground">{(selectedFile.size / (1024 * 1024)).toFixed(1)} MB</p>
+              <p className="text-sm text-muted-foreground">
+                {(selectedFile.size / (1024 * 1024)).toFixed(1)} MB
+                {selectedFile.size > FILE_SIZE_THRESHOLD && (
+                  <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                    Large file - S3 upload
+                  </span>
+                )}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">

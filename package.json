@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@ai-sdk/groq": "latest",
+    "@aws-sdk/client-s3": "latest",
+    "@aws-sdk/s3-presigned-post": "latest",
     "@emotion/is-prop-valid": "latest",
     "@hookform/resolvers": "^3.10.0",
     "@paper-design/shaders-react": "latest",
