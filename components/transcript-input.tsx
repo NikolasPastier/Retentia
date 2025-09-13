@@ -5,7 +5,7 @@ import type React from "react"
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, Settings, Loader2, X, File, Link, ChevronRight } from "lucide-react"
+import { Plus, Settings, Loader2, X, File, Link, ChevronRight, Grid3X3 } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth"
 import { saveStudySession } from "@/lib/firebase/firestore"
 import { checkGenerationLimit, recordGeneration, checkInputLimits } from "@/lib/plans/plan-limits"
@@ -587,6 +587,7 @@ export default function TranscriptInput({
                     className="h-10 px-4 rounded-full bg-muted/50 hover:bg-muted border border-border/50 flex items-center gap-2"
                     onClick={() => openDropdown("mode")}
                   >
+                    <Grid3X3 className="h-4 w-4" />
                     <span className="text-sm">{getModeDisplayName(mode)}</span>
                   </Button>
 
