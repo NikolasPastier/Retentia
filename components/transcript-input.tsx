@@ -454,6 +454,15 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
   }
 
   const openDropdown = (dropdownType: string) => {
+    if (dropdownType === "settings" && showSettingsDropdown) {
+      closeAllDropdowns()
+      return
+    }
+    if (dropdownType === "upload" && showUploadOptions) {
+      closeAllDropdowns()
+      return
+    }
+
     closeAllDropdowns()
 
     switch (dropdownType) {
@@ -463,6 +472,26 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
       case "upload":
         setShowUploadOptions(true)
         break
+      case "difficulty":
+        setShowDifficultyDropdown(true)
+        break
+      case "count":
+        setShowCountDropdown(true)
+        break
+      case "type":
+        setShowTypeDropdown(true)
+        break
+    }
+  }
+
+  const openSubMenu = (subMenuType: string) => {
+    // Close all sub-menus first
+    setShowDifficultyDropdown(false)
+    setShowCountDropdown(false)
+    setShowTypeDropdown(false)
+
+    // Open the requested sub-menu
+    switch (subMenuType) {
       case "difficulty":
         setShowDifficultyDropdown(true)
         break
@@ -601,7 +630,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                             variant="ghost"
                             size="sm"
                             className="w-full justify-between gap-2 text-sm"
-                            onClick={() => openDropdown("difficulty")}
+                            onClick={() => openSubMenu("difficulty")}
                           >
                             <span>Difficulty: {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}</span>
                             <ChevronRight className="h-4 w-4" />
@@ -654,7 +683,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                             variant="ghost"
                             size="sm"
                             className="w-full justify-between gap-2 text-sm"
-                            onClick={() => openDropdown("count")}
+                            onClick={() => openSubMenu("count")}
                           >
                             <span>Questions: {questionCount}</span>
                             <ChevronRight className="h-4 w-4" />
@@ -718,7 +747,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                             variant="ghost"
                             size="sm"
                             className="w-full justify-between gap-2 text-sm"
-                            onClick={() => openDropdown("type")}
+                            onClick={() => openSubMenu("type")}
                           >
                             <span>
                               Type:{" "}
