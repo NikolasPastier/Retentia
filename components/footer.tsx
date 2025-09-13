@@ -3,6 +3,7 @@
 import { ChevronDown, Globe } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
+import Link from "next/link" // Added Next.js Link import
 
 const translations = {
   en: {
@@ -12,6 +13,7 @@ const translations = {
     privacyPolicy: "Privacy Policy",
     termsOfService: "Terms of Service",
     contact: "Contact",
+    cookies: "Cookies", // Added cookies translation
   },
   es: {
     howItWorks: "Cómo Funciona",
@@ -20,6 +22,7 @@ const translations = {
     privacyPolicy: "Política de Privacidad",
     termsOfService: "Términos de Servicio",
     contact: "Contacto",
+    cookies: "Cookies", // Added cookies translation
   },
   fr: {
     howItWorks: "Comment Ça Marche",
@@ -28,6 +31,7 @@ const translations = {
     privacyPolicy: "Politique de Confidentialité",
     termsOfService: "Conditions d'Utilisation",
     contact: "Contact",
+    cookies: "Cookies", // Added cookies translation
   },
   de: {
     howItWorks: "Wie Es Funktioniert",
@@ -36,6 +40,7 @@ const translations = {
     privacyPolicy: "Datenschutzrichtlinie",
     termsOfService: "Nutzungsbedingungen",
     contact: "Kontakt",
+    cookies: "Cookies", // Added cookies translation
   },
   it: {
     howItWorks: "Come Funziona",
@@ -44,6 +49,7 @@ const translations = {
     privacyPolicy: "Informativa sulla Privacy",
     termsOfService: "Termini di Servizio",
     contact: "Contatto",
+    cookies: "Cookies", // Added cookies translation
   },
   pt: {
     howItWorks: "Como Funciona",
@@ -52,6 +58,7 @@ const translations = {
     privacyPolicy: "Política de Privacidade",
     termsOfService: "Termos de Serviço",
     contact: "Contato",
+    cookies: "Cookies", // Added cookies translation
   },
 }
 
@@ -70,11 +77,10 @@ export default function Footer() {
 
   const footerLinks = [
     { label: t.howItWorks, href: "#how-it-works" },
-    { label: t.pricing, href: "#pricing" },
-    { label: t.helpCenter, href: "#help" },
-    { label: t.privacyPolicy, href: "/privacy" },
-    { label: t.termsOfService, href: "#terms" },
-    { label: t.contact, href: "#contact" },
+    { label: t.pricing, href: "/pricing", isRoute: true }, // Updated pricing link to route to dedicated pricing page
+    { label: t.privacyPolicy, href: "/privacy", isRoute: true },
+    { label: t.termsOfService, href: "/terms", isRoute: true },
+    { label: t.cookies, href: "/cookies", isRoute: true },
   ]
 
   const [isLanguageOpen, setIsLanguageOpen] = useState(false)
@@ -255,9 +261,21 @@ export default function Footer() {
             <div className="flex items-center gap-1 whitespace-nowrap">
               {footerLinks.map((link, index) => (
                 <div key={link.label} className="flex items-center">
-                  <a href={link.href} className="hover:text-foreground transition-colors px-1">
-                    {link.label}
-                  </a>
+                  {link.isRoute ? (
+                    <Link
+                      href={link.href}
+                      className="hover:text-foreground hover:underline transition-all duration-200 px-1"
+                    >
+                      {link.label}
+                    </Link>
+                  ) : (
+                    <a
+                      href={link.href}
+                      className="hover:text-foreground hover:underline transition-all duration-200 px-1"
+                    >
+                      {link.label}
+                    </a>
+                  )}
                   {index < footerLinks.length - 1 && <span className="mx-2 text-muted-foreground/60">|</span>}
                 </div>
               ))}
@@ -267,7 +285,7 @@ export default function Footer() {
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setIsLanguageOpen(!isLanguageOpen)}
-              className="flex items-center gap-2 px-3 py-1.5 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-background/20"
+              className="flex items-center gap-2 px-3 py-1.5 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-all duration-200 rounded-md hover:bg-background/20 hover:scale-105"
             >
               <Globe className="h-3 w-3 sm:h-4 sm:w-4" />
               <span>{currentLanguage.display}</span>
@@ -280,7 +298,7 @@ export default function Footer() {
                   <button
                     key={language.code}
                     onClick={() => handleLanguageSelect(language)}
-                    className={`w-full text-left px-3 py-2 text-xs sm:text-sm transition-colors first:rounded-t-md last:rounded-b-md ${
+                    className={`w-full text-left px-3 py-2 text-xs sm:text-sm transition-all duration-200 first:rounded-t-md last:rounded-b-md hover:scale-[1.02] ${
                       language.code === locale
                         ? "text-foreground bg-background/50"
                         : "text-muted-foreground hover:text-foreground hover:bg-background/50"
