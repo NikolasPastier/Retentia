@@ -12,14 +12,23 @@ import { checkGenerationLimit, recordGeneration, checkInputLimits } from "@/lib/
 import { useToast } from "@/hooks/use-toast"
 import AuthModal from "@/components/auth/auth-modal"
 import UsageLimitModal from "@/components/plans/usage-limit-modal"
+import ExplainMode from "@/components/explain-mode"
+import SummariseMode from "@/components/summarise-mode"
+import type { StudyMode } from "./locale-page-client"
 
 interface TranscriptInputProps {
   transcript: string
   setTranscript: (transcript: string) => void
   onQuestionsGenerated: (questions: any[]) => void
+  mode: StudyMode // Added mode prop
 }
 
-export default function TranscriptInput({ transcript, setTranscript, onQuestionsGenerated }: TranscriptInputProps) {
+export default function TranscriptInput({
+  transcript,
+  setTranscript,
+  onQuestionsGenerated,
+  mode,
+}: TranscriptInputProps) {
   const [difficulty, setDifficulty] = useState("medium")
   const [questionCount, setQuestionCount] = useState("5")
   const [questionType, setQuestionType] = useState("mixed")
@@ -46,6 +55,9 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [showLimitModal, setShowLimitModal] = useState(false)
   const [limitMessage, setLimitMessage] = useState("")
+
+  const [explainResult, setExplainResult] = useState<any>(null)
+  const [summariseResult, setSummariseResult] = useState<any>(null)
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -161,243 +173,78 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
 
     setIsGenerating(true)
     try {
-      const response = await fetch("/api/generate-questions", {
+      let apiEndpoint = "/api/generate-questions"
+      let requestBody: any = {
+        text: text,
+        userId: user.uid,
+      }
+
+      if (mode === "study") {
+        requestBody = {
+          ...requestBody,
+          difficulty,
+          questionCount: Number.parseInt(questionCount),
+          questionType,
+        }
+      } else if (mode === "explain") {
+        apiEndpoint = "/api/explain-feedback"
+        // For explain mode, we'll handle this in the ExplainMode component
+        return
+      } else if (mode === "summarise") {
+        apiEndpoint = "/api/summarise"
+      }
+
+      const response = await fetch(apiEndpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          text: text,
-          difficulty,
-          questionCount: Number.parseInt(questionCount),
-          questionType,
-          userId: user.uid, // Added user ID for tracking
-        }),
+        body: JSON.stringify(requestBody),
       })
 
       if (!response.ok) {
-        throw new Error("Failed to generate questions")
+        throw new Error(`Failed to ${mode === "summarise" ? "generate summary" : "generate questions"}`)
       }
 
       const data = await response.json()
 
       await recordGeneration(user.uid)
 
-      // Save study session to Firebase
-      const sessionTitle = `Study Session - ${new Date().toLocaleDateString()}`
-      const sessionId = await saveStudySession({
+      const sessionTitle = `${mode.charAt(0).toUpperCase() + mode.slice(1)} Session - ${new Date().toLocaleDateString()}`
+      const sessionData: any = {
         userId: user.uid,
         title: sessionTitle,
-        questions: data.questions,
         createdAt: new Date(),
         transcript: text,
-      })
+        mode: mode, // Added mode to session data
+      }
+
+      if (mode === "study") {
+        sessionData.questions = data.questions
+        onQuestionsGenerated(data.questions)
+      } else if (mode === "summarise") {
+        sessionData.summary = data.summary
+        setSummariseResult(data)
+      }
+
+      const sessionId = await saveStudySession(sessionData)
 
       if (sessionId) {
         toast({
           title: "Study Session Saved",
-          description: "Your questions have been saved to your dashboard",
+          description: `Your ${mode} session has been saved to your dashboard`,
         })
       }
-
-      onQuestionsGenerated(data.questions)
     } catch (error) {
-      console.error("Error generating questions:", error)
+      console.error(`Error in ${mode} mode:`, error)
       toast({
-        title: "Generation Failed",
-        description: "There was an error generating your questions. Please try again.",
+        title: `${mode.charAt(0).toUpperCase() + mode.slice(1)} Failed`,
+        description: `There was an error processing your ${mode} request. Please try again.`,
         variant: "destructive",
       })
     } finally {
       setIsGenerating(false)
     }
-  }
-
-  const handleConsolidatedGenerate = async () => {
-    if (!hasContent) return
-
-    if (!user) {
-      setShowAuthModal(true)
-      return
-    }
-
-    try {
-      // If there's a selected file, upload and process it first
-      if (selectedFile) {
-        const planLimits = checkInputLimits(userProfile?.plan || "free", transcript, 1)
-        if (!planLimits.valid) {
-          setLimitMessage(planLimits.reason || "File upload limit exceeded")
-          setShowLimitModal(true)
-          return
-        }
-
-        setIsUploading(true)
-        setUploadError(null)
-
-        const formData = new FormData()
-        formData.append("file", selectedFile)
-
-        const response = await fetch("/api/upload-file", {
-          method: "POST",
-          body: formData,
-        })
-
-        if (!response.ok) {
-          let errorMessage = "Failed to upload file"
-          try {
-            const errorData = await response.json()
-            errorMessage = errorData.error || errorMessage
-          } catch {
-            errorMessage = response.statusText || errorMessage
-          }
-          throw new Error(errorMessage)
-        }
-
-        const data = await response.json()
-        if (!data || !data.success || typeof data.text !== "string") {
-          throw new Error("Invalid response: missing text content")
-        }
-
-        // Set transcript and clear file, then generate questions
-        setTranscript(data.text)
-        setSelectedFile(null)
-        if (fileInputRef.current) {
-          fileInputRef.current.value = ""
-        }
-        setIsUploading(false)
-
-        // Generate questions from the uploaded file content
-        await generateQuestionsFromText(data.text)
-        return
-      }
-
-      // If there's a YouTube URL, process it
-      if (detectedYoutubeUrl && isValidYouTubeUrl(detectedYoutubeUrl)) {
-        if (userProfile?.plan === "free") {
-          setLimitMessage("Link input is only available for Paid Plan users. Upgrade to process YouTube videos.")
-          setShowLimitModal(true)
-          return
-        }
-
-        if (!workerUrl) {
-          setYoutubeError("YouTube worker service is not configured. Please contact support.")
-          return
-        }
-
-        setIsProcessingYoutube(true)
-        setYoutubeError(null)
-
-        // Call worker service to download audio
-        const workerResponse = await fetch(`${workerUrl}/api/download-audio`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            youtubeUrl: detectedYoutubeUrl.trim(),
-          }),
-        })
-
-        const workerData = await workerResponse.json()
-
-        if (!workerResponse.ok) {
-          let errorMessage = "Failed to download YouTube audio"
-          if (workerData.error) {
-            errorMessage = workerData.error
-          }
-          throw new Error(errorMessage)
-        }
-
-        if (!workerData.success || !workerData.fileUrl) {
-          throw new Error("Worker did not return a valid audio file URL")
-        }
-
-        // Process with Vercel API
-        const response = await fetch("/api/youtube-to-questions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            fileUrl: workerData.fileUrl,
-            difficulty,
-            questionCount: Number.parseInt(questionCount),
-            questionType,
-            userId: user.uid, // Added user ID
-          }),
-        })
-
-        const data = await response.json()
-
-        if (!response.ok) {
-          let errorMessage = "Failed to process YouTube video"
-          try {
-            errorMessage = data.error || errorMessage
-          } catch {
-            errorMessage = response.statusText || errorMessage
-          }
-          throw new Error(errorMessage)
-        }
-
-        if (data.success === false) {
-          setYoutubeError(data.error || "Failed to process the audio file.")
-          return
-        }
-
-        if (data.questions && data.questions.length > 0) {
-          await recordGeneration(user.uid)
-
-          const sessionTitle = `YouTube Study - ${new Date().toLocaleDateString()}`
-          const sessionId = await saveStudySession({
-            userId: user.uid,
-            title: sessionTitle,
-            questions: data.questions,
-            createdAt: new Date(),
-            transcript: data.transcript || "",
-          })
-
-          if (sessionId) {
-            toast({
-              title: "Study Session Saved",
-              description: "Your YouTube questions have been saved to your dashboard",
-            })
-          }
-
-          onQuestionsGenerated(data.questions)
-          setDetectedYoutubeUrl("")
-          setTranscript("")
-        } else if (data.transcript) {
-          setTranscript(data.transcript)
-          setDetectedYoutubeUrl("")
-        } else {
-          throw new Error("No content received from YouTube video")
-        }
-
-        setIsProcessingYoutube(false)
-        return
-      }
-
-      // If there's only text, generate questions directly
-      if (transcript.trim()) {
-        await generateQuestionsFromText(transcript)
-      }
-    } catch (error) {
-      console.error("Error in consolidated generate:", error)
-      const errorMessage = error instanceof Error ? error.message : "Failed to process content"
-
-      if (selectedFile) {
-        setUploadError(errorMessage)
-        setIsUploading(false)
-      } else if (detectedYoutubeUrl) {
-        setYoutubeError(errorMessage)
-        setIsProcessingYoutube(false)
-      }
-    }
-  }
-
-  const isValidYouTubeUrl = (url: string) => {
-    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/|v\/)|youtu\.be\/)[\w-]+/
-    return youtubeRegex.test(url)
   }
 
   const handleYouTubeProcess = async () => {
@@ -406,7 +253,8 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
       return
     }
 
-    if (!isValidYouTubeUrl(youtubeUrl)) {
+    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/|v\/)|youtu\.be\/)[\w-]+/
+    if (!youtubeRegex.test(youtubeUrl)) {
       setYoutubeError("Please enter a valid YouTube URL.")
       return
     }
@@ -512,17 +360,12 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
     }
   }
 
-  const handleMediaQuestionsGenerated = (questions: any[], transcriptText: string, filename: string) => {
-    console.log(`[v0] Media questions generated from ${filename}`)
-    setTranscript(transcriptText)
-    onQuestionsGenerated(questions)
-  }
-
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value
     setTranscript(value)
 
-    if (isValidYouTubeUrl(value.trim())) {
+    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/|v\/)|youtu\.be\/)[\w-]+/
+    if (youtubeRegex.test(value.trim())) {
       setDetectedYoutubeUrl(value.trim())
       setYoutubeError(null)
     } else {
@@ -598,6 +441,34 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
         setShowTypeDropdown(true)
         break
     }
+  }
+
+  if (mode === "explain") {
+    return (
+      <ExplainMode
+        transcript={transcript}
+        setTranscript={setTranscript}
+        selectedFile={selectedFile}
+        setSelectedFile={setSelectedFile}
+        fileInputRef={fileInputRef}
+        onResult={setExplainResult}
+        result={explainResult}
+      />
+    )
+  }
+
+  if (mode === "summarise") {
+    return (
+      <SummariseMode
+        transcript={transcript}
+        setTranscript={setTranscript}
+        selectedFile={selectedFile}
+        setSelectedFile={setSelectedFile}
+        fileInputRef={fileInputRef}
+        onResult={setSummariseResult}
+        result={summariseResult}
+      />
+    )
   }
 
   return (
@@ -924,8 +795,8 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                 <span className="text-xs text-muted-foreground">{transcript.length}/10,000</span>
 
                 <Button
-                  onClick={handleConsolidatedGenerate}
-                  disabled={isProcessing || !hasContent}
+                  onClick={handleYouTubeProcess}
+                  disabled={isProcessing || !detectedYoutubeUrl}
                   className="h-10 w-10 rounded-full bg-muted/50 hover:bg-muted border border-border/50 p-0 disabled:opacity-50 disabled:cursor-not-allowed"
                   size="sm"
                 >
