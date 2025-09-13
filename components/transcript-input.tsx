@@ -487,18 +487,13 @@ export default function TranscriptInput({
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold text-foreground text-balance">Transform Your Learning Materials</h1>
-        <p className="text-xl text-muted-foreground text-pretty">
-          Upload transcripts, videos, or audio files to generate personalized practice questions
+        <h1 className="text-5xl md:text-6xl font-bold text-white text-balance tracking-tight">
+          Change The Way You{" "}
+          <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Study</span>
+        </h1>
+        <p className="text-xl text-white/80 text-pretty max-w-2xl mx-auto">
+          Test yourself, explain topics, generate AI-powered summaries.
         </p>
-        {!user && (
-          <p className="text-sm text-muted-foreground">
-            <Button variant="link" className="p-0 h-auto text-accent" onClick={() => setShowAuthModal(true)}>
-              Sign in
-            </Button>{" "}
-            to save your study sessions and track your progress
-          </p>
-        )}
       </div>
 
       <div

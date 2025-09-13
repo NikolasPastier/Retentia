@@ -24,6 +24,16 @@ export default function Navigation({
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [showSignupModal, setShowSignupModal] = useState(false)
 
+  const switchToSignup = () => {
+    setShowLoginModal(false)
+    setShowSignupModal(true)
+  }
+
+  const switchToLogin = () => {
+    setShowSignupModal(false)
+    setShowLoginModal(true)
+  }
+
   return (
     <>
       <header className="relative z-20 mx-6 mt-6">
@@ -37,13 +47,13 @@ export default function Navigation({
 
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setShowLoginModal(true)}
+              onClick={switchToLogin}
               className="px-4 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200 text-sm font-medium"
             >
               Log In
             </button>
             <button
-              onClick={() => setShowSignupModal(true)}
+              onClick={switchToSignup}
               className="px-4 py-2 rounded-lg bg-white text-gray-900 hover:bg-gray-100 transition-all duration-200 text-sm font-medium"
             >
               Get Started
@@ -52,8 +62,8 @@ export default function Navigation({
         </div>
       </header>
 
-      <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
-      <SignupModal isOpen={showSignupModal} onClose={() => setShowSignupModal(false)} />
+      <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} onSwitchToSignup={switchToSignup} />
+      <SignupModal isOpen={showSignupModal} onClose={() => setShowSignupModal(false)} onSwitchToLogin={switchToLogin} />
     </>
   )
 }

@@ -7,10 +7,11 @@ import { X } from "lucide-react"
 interface SignupModalProps {
   isOpen: boolean
   onClose: () => void
+  onSwitchToLogin: () => void
 }
 
-export default function SignupModal({ isOpen, onClose }: SignupModalProps) {
-  const [name, setName] = useState("")
+export default function SignupModal({ isOpen, onClose, onSwitchToLogin }: SignupModalProps) {
+  const [username, setUsername] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -24,7 +25,7 @@ export default function SignupModal({ isOpen, onClose }: SignupModalProps) {
       return
     }
     // Handle signup logic here
-    console.log("Signup attempt:", { name, email, password })
+    console.log("Signup attempt:", { username, email, password })
     onClose()
   }
 
@@ -40,13 +41,13 @@ export default function SignupModal({ isOpen, onClose }: SignupModalProps) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Username</label>
             <input
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter your full name"
+              placeholder="Choose a username"
               required
             />
           </div>
@@ -96,7 +97,10 @@ export default function SignupModal({ isOpen, onClose }: SignupModalProps) {
         </form>
 
         <p className="text-center text-gray-400 mt-6">
-          Already have an account? <button className="text-blue-400 hover:text-blue-300 font-medium">Log in</button>
+          Already have an account?{" "}
+          <button onClick={onSwitchToLogin} className="text-blue-400 hover:text-blue-300 font-medium">
+            Log in
+          </button>
         </p>
       </div>
     </div>

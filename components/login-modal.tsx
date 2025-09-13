@@ -7,10 +7,11 @@ import { X } from "lucide-react"
 interface LoginModalProps {
   isOpen: boolean
   onClose: () => void
+  onSwitchToSignup: () => void
 }
 
-export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
-  const [email, setEmail] = useState("")
+export default function LoginModal({ isOpen, onClose, onSwitchToSignup }: LoginModalProps) {
+  const [emailOrUsername, setEmailOrUsername] = useState("")
   const [password, setPassword] = useState("")
 
   if (!isOpen) return null
@@ -18,7 +19,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     // Handle login logic here
-    console.log("Login attempt:", { email, password })
+    console.log("Login attempt:", { emailOrUsername, password })
     onClose()
   }
 
@@ -34,13 +35,13 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Email or Username</label>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              value={emailOrUsername}
+              onChange={(e) => setEmailOrUsername(e.target.value)}
               className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter your email"
+              placeholder="Enter your email or username"
               required
             />
           </div>
@@ -66,7 +67,10 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         </form>
 
         <p className="text-center text-gray-400 mt-6">
-          Don't have an account? <button className="text-blue-400 hover:text-blue-300 font-medium">Sign up</button>
+          Don't have an account?{" "}
+          <button onClick={onSwitchToSignup} className="text-blue-400 hover:text-blue-300 font-medium">
+            Sign up
+          </button>
         </p>
       </div>
     </div>
