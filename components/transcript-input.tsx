@@ -16,12 +16,17 @@ import ExplainMode from "@/components/explain-mode"
 import SummariseMode from "@/components/summarise-mode"
 import type { StudyMode } from "./locale-page-client"
 
+const getPlaceholderText = () => {
+  return "Enter your transcript or paste a YouTube link here"
+}
+
 interface TranscriptInputProps {
   transcript: string
   setTranscript: (transcript: string) => void
   onQuestionsGenerated: (questions: any[]) => void
   mode: StudyMode // Added mode prop
   setting?: string
+  onModeChange: (mode: StudyMode) => void
 }
 
 export default function TranscriptInput({
@@ -30,6 +35,7 @@ export default function TranscriptInput({
   onQuestionsGenerated,
   mode,
   setting = "medium",
+  onModeChange,
 }: TranscriptInputProps) {
   const [difficulty, setDifficulty] = useState("medium")
   const [questionCount, setQuestionCount] = useState("5")
@@ -43,6 +49,7 @@ export default function TranscriptInput({
   const [youtubeError, setYoutubeError] = useState<string | null>(null)
   const [workerUrl, setWorkerUrl] = useState(process.env.NEXT_PUBLIC_YOUTUBE_WORKER_URL || "")
   const [showUploadOptions, setShowUploadOptions] = useState(false)
+  const [showModeSelector, setShowModeSelector] = useState(false)
   const [showSettingsDropdown, setShowSettingsDropdown] = useState(false)
   const [showDifficultyDropdown, setShowDifficultyDropdown] = useState(false)
   const [showCountDropdown, setShowCountDropdown] = useState(false)
@@ -393,6 +400,7 @@ export default function TranscriptInput({
     setShowCountDropdown(false)
     setShowTypeDropdown(false)
     setShowUploadOptions(false)
+    setShowModeSelector(false)
   }
 
   const openDropdown = (dropdownType: string) => {
@@ -401,6 +409,10 @@ export default function TranscriptInput({
       return
     }
     if (dropdownType === "upload" && showUploadOptions) {
+      closeAllDropdowns()
+      return
+    }
+    if (dropdownType === "mode" && showModeSelector) {
       closeAllDropdowns()
       return
     }
@@ -414,6 +426,9 @@ export default function TranscriptInput({
       case "upload":
         setShowUploadOptions(true)
         break
+      case "mode":
+        setShowModeSelector(true)
+        break
       case "difficulty":
         setShowDifficultyDropdown(true)
         break
@@ -426,32 +441,16 @@ export default function TranscriptInput({
     }
   }
 
-  const openSubMenu = (subMenuType: string) => {
-    setShowDifficultyDropdown(false)
-    setShowCountDropdown(false)
-    setShowTypeDropdown(false)
-
-    switch (subMenuType) {
-      case "difficulty":
-        setShowDifficultyDropdown(true)
-        break
-      case "count":
-        setShowCountDropdown(true)
-        break
-      case "type":
-        setShowTypeDropdown(true)
-        break
-    }
-  }
-
-  const getPlaceholderText = () => {
+  const getModeDisplayName = (mode: StudyMode) => {
     switch (mode) {
+      case "study":
+        return "Study"
       case "explain":
-        return "Write your explanation of the material here. The AI will provide feedback based on your selected audience level..."
+        return "Explain"
       case "summarise":
-        return "Paste your content here to generate a summary. The AI will create a summary based on your selected style..."
+        return "Summarise"
       default:
-        return "Paste your transcript, notes, or any text you want to study from..."
+        return "Study"
     }
   }
 
@@ -591,6 +590,57 @@ export default function TranscriptInput({
                     variant="ghost"
                     size="sm"
                     className="h-10 px-4 rounded-full bg-muted/50 hover:bg-muted border border-border/50 flex items-center gap-2"
+                    onClick={() => openDropdown("mode")}
+                  >
+                    <span className="text-sm">{getModeDisplayName(mode)}</span>
+                  </Button>
+
+                  {showModeSelector && (
+                    <div className="absolute bottom-12 left-0 bg-background/95 backdrop-blur-sm border border-border rounded-xl p-2 shadow-lg z-10 min-w-[150px]">
+                      <div className="space-y-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full justify-start text-sm"
+                          onClick={() => {
+                            onModeChange("study")
+                            setShowModeSelector(false)
+                          }}
+                        >
+                          Study
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full justify-start text-sm"
+                          onClick={() => {
+                            onModeChange("explain")
+                            setShowModeSelector(false)
+                          }}
+                        >
+                          Explain
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full justify-start text-sm"
+                          onClick={() => {
+                            onModeChange("summarise")
+                            setShowModeSelector(false)
+                          }}
+                        >
+                          Summarise
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="relative">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-10 px-4 rounded-full bg-muted/50 hover:bg-muted border border-border/50 flex items-center gap-2"
                     onClick={() => openDropdown("settings")}
                   >
                     <Settings className="h-4 w-4" />
@@ -606,7 +656,7 @@ export default function TranscriptInput({
                             variant="ghost"
                             size="sm"
                             className="w-full justify-between gap-2 text-sm"
-                            onClick={() => openSubMenu("difficulty")}
+                            onClick={() => openDropdown("difficulty")}
                           >
                             <span>Difficulty: {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}</span>
                             <ChevronRight className="h-4 w-4" />
@@ -659,7 +709,7 @@ export default function TranscriptInput({
                             variant="ghost"
                             size="sm"
                             className="w-full justify-between gap-2 text-sm"
-                            onClick={() => openSubMenu("count")}
+                            onClick={() => openDropdown("count")}
                           >
                             <span>Questions: {questionCount}</span>
                             <ChevronRight className="h-4 w-4" />
@@ -723,7 +773,7 @@ export default function TranscriptInput({
                             variant="ghost"
                             size="sm"
                             className="w-full justify-between gap-2 text-sm"
-                            onClick={() => openSubMenu("type")}
+                            onClick={() => openDropdown("type")}
                           >
                             <span>
                               Type:{" "}

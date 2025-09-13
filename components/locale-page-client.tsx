@@ -59,6 +59,7 @@ export default function LocalePageClient() {
               onQuestionsGenerated={handleQuestionsGenerated}
               mode={currentMode}
               setting={currentSetting}
+              onModeChange={handleModeChange}
             />
 
             {questions.length > 0 && (
