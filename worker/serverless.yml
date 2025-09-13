@@ -4,8 +4,6 @@ provider:
   name: aws
   runtime: nodejs18.x
   region: us-east-1
-  timeout: 300
-  memorySize: 1024
   environment:
     S3_BUCKET: ${env:S3_BUCKET}
   iamRoleStatements:
@@ -20,11 +18,11 @@ functions:
     handler: lambda-youtube-worker.handler
     events:
       - http:
-          path: /api/download-audio
+          path: api/download-audio
           method: post
           cors: true
       - http:
-          path: /api/download-audio
+          path: api/download-audio
           method: options
           cors: true
 
