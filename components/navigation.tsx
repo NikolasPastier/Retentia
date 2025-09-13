@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { BarChart3, Upload } from "lucide-react"
 import Image from "next/image"
+import UserMenu from "@/components/auth/user-menu"
 
 interface NavigationProps {
   activeSection: string
@@ -24,21 +25,25 @@ export default function Navigation({ activeSection, setActiveSection }: Navigati
             <h1 className="text-xl font-bold text-foreground">Retentia</h1>
           </div>
 
-          <div className="flex items-center gap-2">
-            {navItems.map((item) => {
-              const Icon = item.icon
-              return (
-                <Button
-                  key={item.id}
-                  variant={activeSection === item.id ? "default" : "ghost"}
-                  onClick={() => setActiveSection(item.id)}
-                  className="flex items-center gap-2 smooth-transition"
-                >
-                  <Icon className="h-4 w-4" />
-                  {item.label}
-                </Button>
-              )
-            })}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              {navItems.map((item) => {
+                const Icon = item.icon
+                return (
+                  <Button
+                    key={item.id}
+                    variant={activeSection === item.id ? "default" : "ghost"}
+                    onClick={() => setActiveSection(item.id)}
+                    className="flex items-center gap-2 smooth-transition"
+                  >
+                    <Icon className="h-4 w-4" />
+                    {item.label}
+                  </Button>
+                )
+              })}
+            </div>
+
+            <UserMenu onDashboardClick={() => setActiveSection("dashboard")} />
           </div>
         </div>
       </div>

@@ -6,6 +6,12 @@ import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Plus, Settings, Loader2, X, File, Link, ChevronRight } from "lucide-react"
+import { useAuth } from "@/hooks/use-auth"
+import { saveStudySession } from "@/lib/firebase/firestore"
+import { checkGenerationLimit, recordGeneration, checkInputLimits } from "@/lib/plans/plan-limits"
+import { useToast } from "@/hooks/use-toast"
+import AuthModal from "@/components/auth/auth-modal"
+import UsageLimitModal from "@/components/plans/usage-limit-modal"
 
 interface TranscriptInputProps {
   transcript: string
@@ -34,6 +40,12 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   const [detectedYoutubeUrl, setDetectedYoutubeUrl] = useState("")
+
+  const { user, userProfile } = useAuth()
+  const { toast } = useToast()
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const [showLimitModal, setShowLimitModal] = useState(false)
+  const [limitMessage, setLimitMessage] = useState("")
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -126,6 +138,27 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
   }
 
   const generateQuestionsFromText = async (text: string) => {
+    if (!user) {
+      setShowAuthModal(true)
+      return
+    }
+
+    // Check plan limits
+    const planLimits = checkInputLimits(userProfile?.plan || "free", text, selectedFile ? 1 : 0)
+    if (!planLimits.valid) {
+      setLimitMessage(planLimits.reason || "Plan limit exceeded")
+      setShowLimitModal(true)
+      return
+    }
+
+    // Check generation limits
+    const canGenerate = await checkGenerationLimit(user.uid)
+    if (!canGenerate.allowed) {
+      setLimitMessage(canGenerate.reason || "Generation limit reached")
+      setShowLimitModal(true)
+      return
+    }
+
     setIsGenerating(true)
     try {
       const response = await fetch("/api/generate-questions", {
@@ -138,6 +171,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
           difficulty,
           questionCount: Number.parseInt(questionCount),
           questionType,
+          userId: user.uid, // Added user ID for tracking
         }),
       })
 
@@ -146,9 +180,34 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
       }
 
       const data = await response.json()
+
+      await recordGeneration(user.uid)
+
+      // Save study session to Firebase
+      const sessionTitle = `Study Session - ${new Date().toLocaleDateString()}`
+      const sessionId = await saveStudySession({
+        userId: user.uid,
+        title: sessionTitle,
+        questions: data.questions,
+        createdAt: new Date(),
+        transcript: text,
+      })
+
+      if (sessionId) {
+        toast({
+          title: "Study Session Saved",
+          description: "Your questions have been saved to your dashboard",
+        })
+      }
+
       onQuestionsGenerated(data.questions)
     } catch (error) {
       console.error("Error generating questions:", error)
+      toast({
+        title: "Generation Failed",
+        description: "There was an error generating your questions. Please try again.",
+        variant: "destructive",
+      })
     } finally {
       setIsGenerating(false)
     }
@@ -157,9 +216,21 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
   const handleConsolidatedGenerate = async () => {
     if (!hasContent) return
 
+    if (!user) {
+      setShowAuthModal(true)
+      return
+    }
+
     try {
       // If there's a selected file, upload and process it first
       if (selectedFile) {
+        const planLimits = checkInputLimits(userProfile?.plan || "free", transcript, 1)
+        if (!planLimits.valid) {
+          setLimitMessage(planLimits.reason || "File upload limit exceeded")
+          setShowLimitModal(true)
+          return
+        }
+
         setIsUploading(true)
         setUploadError(null)
 
@@ -202,6 +273,12 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
 
       // If there's a YouTube URL, process it
       if (detectedYoutubeUrl && isValidYouTubeUrl(detectedYoutubeUrl)) {
+        if (userProfile?.plan === "free") {
+          setLimitMessage("Link input is only available for Paid Plan users. Upgrade to process YouTube videos.")
+          setShowLimitModal(true)
+          return
+        }
+
         if (!workerUrl) {
           setYoutubeError("YouTube worker service is not configured. Please contact support.")
           return
@@ -246,6 +323,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
             difficulty,
             questionCount: Number.parseInt(questionCount),
             questionType,
+            userId: user.uid, // Added user ID
           }),
         })
 
@@ -267,6 +345,24 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
         }
 
         if (data.questions && data.questions.length > 0) {
+          await recordGeneration(user.uid)
+
+          const sessionTitle = `YouTube Study - ${new Date().toLocaleDateString()}`
+          const sessionId = await saveStudySession({
+            userId: user.uid,
+            title: sessionTitle,
+            questions: data.questions,
+            createdAt: new Date(),
+            transcript: data.transcript || "",
+          })
+
+          if (sessionId) {
+            toast({
+              title: "Study Session Saved",
+              description: "Your YouTube questions have been saved to your dashboard",
+            })
+          }
+
           onQuestionsGenerated(data.questions)
           setDetectedYoutubeUrl("")
           setTranscript("")
@@ -511,6 +607,14 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
         <p className="text-xl text-muted-foreground text-pretty">
           Upload transcripts, videos, or audio files to generate personalized practice questions
         </p>
+        {!user && (
+          <p className="text-sm text-muted-foreground">
+            <Button variant="link" className="p-0 h-auto text-accent" onClick={() => setShowAuthModal(true)}>
+              Sign in
+            </Button>{" "}
+            to save your study sessions and track your progress
+          </p>
+        )}
       </div>
 
       <div
@@ -857,6 +961,19 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
           className="hidden"
         />
       </div>
+
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={() => {
+          toast({
+            title: "Welcome!",
+            description: "You can now generate and save study sessions",
+          })
+        }}
+      />
+
+      <UsageLimitModal isOpen={showLimitModal} onClose={() => setShowLimitModal(false)} message={limitMessage} />
     </div>
   )
 }

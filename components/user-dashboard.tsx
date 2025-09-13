@@ -1,347 +1,295 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Trophy, Target, Clock, Brain, TrendingUp, Calendar, BookOpen, Award, Zap } from "lucide-react"
-
-interface StudySession {
-  id: string
-  date: string
-  topic: string
-  score: number
-  questionsAnswered: number
-  difficulty: "Easy" | "Medium" | "Hard"
-  timeSpent: number
-}
-
-interface Achievement {
-  id: string
-  title: string
-  description: string
-  icon: string
-  unlocked: boolean
-  progress?: number
-  maxProgress?: number
-}
+import { Target, Brain, Calendar, BookOpen, Zap, Crown, Plus } from "lucide-react"
+import { useAuth } from "@/hooks/use-auth"
+import { getUserStudySessions, type StudySession } from "@/lib/firebase/firestore"
+import AuthGuard from "@/components/auth/auth-guard"
+import UpgradeModal from "@/components/plans/upgrade-modal"
+import BillingPortal from "@/components/plans/billing-portal"
 
 export default function UserDashboard() {
-  const [selectedPeriod, setSelectedPeriod] = useState<"week" | "month" | "all">("week")
+  const { user, userProfile } = useAuth()
+  const [studySessions, setStudySessions] = useState<StudySession[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
-  // Mock user data
-  const userStats = {
-    totalQuestions: 247,
-    correctAnswers: 189,
-    accuracy: 76,
-    streak: 12,
-    totalStudyTime: 1440, // minutes
-    level: 8,
-    xp: 2340,
-    xpToNext: 660,
-  }
-
-  const recentSessions: StudySession[] = [
-    {
-      id: "1",
-      date: "2024-01-15",
-      topic: "Machine Learning Basics",
-      score: 85,
-      questionsAnswered: 12,
-      difficulty: "Medium",
-      timeSpent: 25,
-    },
-    {
-      id: "2",
-      date: "2024-01-14",
-      topic: "Neural Networks",
-      score: 92,
-      questionsAnswered: 15,
-      difficulty: "Hard",
-      timeSpent: 35,
-    },
-    {
-      id: "3",
-      date: "2024-01-13",
-      topic: "Data Preprocessing",
-      score: 78,
-      questionsAnswered: 10,
-      difficulty: "Easy",
-      timeSpent: 18,
-    },
-  ]
-
-  const achievements: Achievement[] = [
-    {
-      id: "1",
-      title: "First Steps",
-      description: "Complete your first quiz",
-      icon: "🎯",
-      unlocked: true,
-    },
-    {
-      id: "2",
-      title: "Streak Master",
-      description: "Maintain a 7-day study streak",
-      icon: "🔥",
-      unlocked: true,
-    },
-    {
-      id: "3",
-      title: "Perfect Score",
-      description: "Get 100% on any quiz",
-      icon: "⭐",
-      unlocked: false,
-      progress: 92,
-      maxProgress: 100,
-    },
-    {
-      id: "4",
-      title: "Knowledge Seeker",
-      description: "Answer 100 questions correctly",
-      icon: "🧠",
-      unlocked: true,
-    },
-  ]
-
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case "Easy":
-        return "bg-green-500"
-      case "Medium":
-        return "bg-yellow-500"
-      case "Hard":
-        return "bg-red-500"
-      default:
-        return "bg-gray-500"
+  useEffect(() => {
+    const loadStudySessions = async () => {
+      if (user) {
+        const sessions = await getUserStudySessions(user.uid)
+        setStudySessions(sessions)
+      }
+      setLoading(false)
     }
+
+    loadStudySessions()
+  }, [user])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    )
   }
 
-  const formatTime = (minutes: number) => {
-    const hours = Math.floor(minutes / 60)
-    const mins = minutes % 60
-    return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`
+  const userStats = {
+    totalSessions: studySessions.length,
+    totalQuestions: studySessions.reduce((acc, session) => acc + (session.questions?.length || 0), 0),
+    dailyGenerations: userProfile?.dailyGenerations || 0,
+    totalGenerations: userProfile?.totalGenerations || 0,
+    plan: userProfile?.plan || "free",
+    remainingGenerations:
+      userProfile?.plan === "paid" ? "Unlimited" : Math.max(0, 1 - (userProfile?.dailyGenerations || 0)),
+  }
+
+  const formatDate = (date: Date) => {
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }).format(date)
+  }
+
+  const getPlanBadgeColor = (plan: string) => {
+    return plan === "paid"
+      ? "bg-yellow-500/10 text-yellow-500 border-yellow-500/20"
+      : "bg-blue-500/10 text-blue-500 border-blue-500/20"
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
-      <div className="space-y-4">
-        <h1 className="text-4xl font-bold text-foreground">Dashboard</h1>
-        <p className="text-xl text-muted-foreground">Track your learning progress and achievements</p>
-      </div>
-
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="glass-card smooth-transition hover:shadow-lg">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Accuracy</p>
-                <p className="text-3xl font-bold text-accent">{userStats.accuracy}%</p>
-              </div>
-              <Target className="h-8 w-8 text-accent" />
+    <AuthGuard requireAuth>
+      <div className="max-w-7xl mx-auto space-y-8">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold text-foreground">Dashboard</h1>
+              <p className="text-xl text-muted-foreground">Welcome back, {user?.displayName || "Learner"}!</p>
             </div>
-            <Progress value={userStats.accuracy} className="mt-3" />
-          </CardContent>
-        </Card>
+            <Badge variant="outline" className={getPlanBadgeColor(userStats.plan)}>
+              {userStats.plan === "paid" ? (
+                <>
+                  <Crown className="h-3 w-3 mr-1" />
+                  Paid Plan
+                </>
+              ) : (
+                "Free Plan"
+              )}
+            </Badge>
+          </div>
+        </div>
 
-        <Card className="glass-card smooth-transition hover:shadow-lg">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Study Streak</p>
-                <p className="text-3xl font-bold text-orange-500">{userStats.streak}</p>
-              </div>
-              <Zap className="h-8 w-8 text-orange-500" />
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">days in a row</p>
-          </CardContent>
-        </Card>
-
-        <Card className="glass-card smooth-transition hover:shadow-lg">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Questions Answered</p>
-                <p className="text-3xl font-bold text-green-500">{userStats.totalQuestions}</p>
-              </div>
-              <Brain className="h-8 w-8 text-green-500" />
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">{userStats.correctAnswers} correct</p>
-          </CardContent>
-        </Card>
-
-        <Card className="glass-card smooth-transition hover:shadow-lg">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Study Time</p>
-                <p className="text-3xl font-bold text-blue-500">{formatTime(userStats.totalStudyTime)}</p>
-              </div>
-              <Clock className="h-8 w-8 text-blue-500" />
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">total time</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Progress & Level */}
-        <div className="lg:col-span-2 space-y-6">
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-accent" />
-                Learning Progress
-              </CardTitle>
-              <CardDescription>Your current level and experience points</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="glass-card smooth-transition hover:shadow-lg">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center">
-                    <span className="text-2xl font-bold text-accent-foreground">{userStats.level}</span>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold">Level {userStats.level}</h3>
-                    <p className="text-muted-foreground">Knowledge Seeker</p>
-                  </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Plan Status</p>
+                  <p className="text-3xl font-bold text-accent capitalize">{userStats.plan}</p>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm text-muted-foreground">XP</p>
-                  <p className="text-2xl font-bold text-accent">{userStats.xp}</p>
-                </div>
+                {userStats.plan === "paid" ? (
+                  <Crown className="h-8 w-8 text-yellow-500" />
+                ) : (
+                  <Target className="h-8 w-8 text-accent" />
+                )}
               </div>
-
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Progress to Level {userStats.level + 1}</span>
-                  <span>
-                    {userStats.xp}/{userStats.xp + userStats.xpToNext}
-                  </span>
-                </div>
-                <Progress value={(userStats.xp / (userStats.xp + userStats.xpToNext)) * 100} />
-                <p className="text-xs text-muted-foreground">{userStats.xpToNext} XP needed for next level</p>
-              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                {userStats.plan === "paid" ? "Unlimited access" : "Limited features"}
+              </p>
             </CardContent>
           </Card>
 
-          {/* Recent Sessions */}
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-accent" />
-                Recent Study Sessions
-              </CardTitle>
-              <CardDescription>Your latest learning activities</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {recentSessions.map((session) => (
-                  <div
-                    key={session.id}
-                    className="flex items-center justify-between p-4 rounded-lg bg-muted/20 smooth-transition hover:bg-muted/30"
-                  >
-                    <div className="flex items-center gap-4">
-                      <BookOpen className="h-8 w-8 text-accent" />
-                      <div>
-                        <h4 className="font-semibold text-pretty">{session.topic}</h4>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="outline" className={getDifficultyColor(session.difficulty)}>
-                            {session.difficulty}
-                          </Badge>
-                          <span className="text-sm text-muted-foreground">
-                            {session.questionsAnswered} questions • {formatTime(session.timeSpent)}
-                          </span>
+          <Card className="glass-card smooth-transition hover:shadow-lg">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">
+                    {userStats.plan === "paid" ? "Total Generations" : "Today's Generations"}
+                  </p>
+                  <p className="text-3xl font-bold text-orange-500">
+                    {userStats.plan === "paid" ? userStats.totalGenerations : userStats.dailyGenerations}
+                  </p>
+                </div>
+                <Zap className="h-8 w-8 text-orange-500" />
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                {userStats.plan === "paid"
+                  ? "questions generated"
+                  : `${userStats.remainingGenerations} remaining today`}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-card smooth-transition hover:shadow-lg">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Study Sessions</p>
+                  <p className="text-3xl font-bold text-green-500">{userStats.totalSessions}</p>
+                </div>
+                <Brain className="h-8 w-8 text-green-500" />
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">{userStats.totalQuestions} questions total</p>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-card smooth-transition hover:shadow-lg">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Account Since</p>
+                  <p className="text-lg font-bold text-blue-500">
+                    {userProfile?.createdAt ? formatDate(userProfile.createdAt) : "Recently"}
+                  </p>
+                </div>
+                <Calendar className="h-8 w-8 text-blue-500" />
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">member since</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-6">
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-accent" />
+                  Study Sessions
+                </CardTitle>
+                <CardDescription>Your saved learning sessions</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {studySessions.length === 0 ? (
+                  <div className="text-center py-8">
+                    <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground mb-4">No study sessions yet</p>
+                    <p className="text-sm text-muted-foreground">
+                      Generate your first set of questions to create a study session!
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {studySessions.slice(0, 5).map((session) => (
+                      <div
+                        key={session.id}
+                        className="flex items-center justify-between p-4 rounded-lg bg-muted/20 smooth-transition hover:bg-muted/30"
+                      >
+                        <div className="flex items-center gap-4">
+                          <BookOpen className="h-8 w-8 text-accent" />
+                          <div>
+                            <h4 className="font-semibold text-pretty">{session.title}</h4>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-sm text-muted-foreground">
+                                {session.questions?.length || 0} questions
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm font-medium">{formatDate(session.createdAt)}</div>
+                          <Button variant="ghost" size="sm" className="mt-1">
+                            Review
+                          </Button>
                         </div>
                       </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-accent">{session.score}%</div>
-                      <div className="text-xs text-muted-foreground">{session.date}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Achievements */}
-        <div className="space-y-6">
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Trophy className="h-5 w-5 text-yellow-500" />
-                Achievements
-              </CardTitle>
-              <CardDescription>Your learning milestones</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {achievements.map((achievement) => (
-                  <div
-                    key={achievement.id}
-                    className={`p-4 rounded-lg border smooth-transition ${
-                      achievement.unlocked ? "bg-accent/10 border-accent/20" : "bg-muted/10 border-muted/20"
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="text-2xl">{achievement.icon}</div>
-                      <div className="flex-1">
-                        <h4
-                          className={`font-semibold ${achievement.unlocked ? "text-foreground" : "text-muted-foreground"}`}
-                        >
-                          {achievement.title}
-                        </h4>
-                        <p className="text-sm text-muted-foreground text-pretty">{achievement.description}</p>
-
-                        {!achievement.unlocked && achievement.progress && achievement.maxProgress && (
-                          <div className="mt-2 space-y-1">
-                            <Progress value={(achievement.progress / achievement.maxProgress) * 100} />
-                            <p className="text-xs text-muted-foreground">
-                              {achievement.progress}/{achievement.maxProgress}
-                            </p>
-                          </div>
-                        )}
-
-                        {achievement.unlocked && (
-                          <Badge variant="outline" className="mt-2 bg-green-500/10 text-green-500 border-green-500/20">
-                            <Award className="h-3 w-3 mr-1" />
-                            Unlocked
-                          </Badge>
-                        )}
+                    ))}
+                    {studySessions.length > 5 && (
+                      <div className="text-center pt-4">
+                        <Button variant="outline" size="sm">
+                          View All Sessions ({studySessions.length})
+                        </Button>
                       </div>
-                    </div>
+                    )}
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                )}
+              </CardContent>
+            </Card>
+          </div>
 
-          {/* Quick Actions */}
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button className="w-full justify-start bg-transparent" variant="outline">
-                <Brain className="h-4 w-4 mr-2" />
-                Start New Quiz
-              </Button>
-              <Button className="w-full justify-start bg-transparent" variant="outline">
-                <BookOpen className="h-4 w-4 mr-2" />
-                Review Mistakes
-              </Button>
-              <Button className="w-full justify-start bg-transparent" variant="outline">
-                <Target className="h-4 w-4 mr-2" />
-                Set Study Goal
-              </Button>
-            </CardContent>
-          </Card>
+          <div className="space-y-6">
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5 text-accent" />
+                  Plan Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Current Plan</span>
+                    <Badge variant="outline" className={getPlanBadgeColor(userStats.plan)}>
+                      {userStats.plan === "paid" ? "Paid" : "Free"}
+                    </Badge>
+                  </div>
+
+                  {userStats.plan === "free" && (
+                    <>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Daily Generations</span>
+                        <span className="text-sm font-medium">{userStats.dailyGenerations}/1</span>
+                      </div>
+                      <Progress value={(userStats.dailyGenerations / 1) * 100} />
+                      <p className="text-xs text-muted-foreground">
+                        {userStats.remainingGenerations} generations remaining today
+                      </p>
+                    </>
+                  )}
+
+                  {userStats.plan === "paid" && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Total Generations</span>
+                        <span className="text-sm font-medium">{userStats.totalGenerations}</span>
+                      </div>
+                      <p className="text-xs text-green-600">✓ Unlimited generations</p>
+                      <p className="text-xs text-green-600">✓ Unlimited file uploads</p>
+                      <p className="text-xs text-green-600">✓ Link input support</p>
+                    </div>
+                  )}
+                </div>
+
+                {userStats.plan === "free" && (
+                  <Button className="w-full" variant="default" onClick={() => setShowUpgradeModal(true)}>
+                    <Crown className="h-4 w-4 mr-2" />
+                    Upgrade to Paid Plan
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+
+            <BillingPortal />
+
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle>Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button className="w-full justify-start bg-transparent" variant="outline">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Generate Questions
+                </Button>
+                <Button className="w-full justify-start bg-transparent" variant="outline">
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  View All Sessions
+                </Button>
+                <Button className="w-full justify-start bg-transparent" variant="outline">
+                  <Target className="h-4 w-4 mr-2" />
+                  Account Settings
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
-    </div>
+
+      <UpgradeModal isOpen={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} />
+    </AuthGuard>
   )
 }

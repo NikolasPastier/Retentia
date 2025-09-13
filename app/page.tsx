@@ -6,6 +6,7 @@ import TranscriptInput from "@/components/transcript-input"
 import QuestionDisplay from "@/components/question-display"
 import UserDashboard from "@/components/user-dashboard"
 import Footer from "@/components/footer"
+import AuthModal from "@/components/auth/auth-modal"
 
 export default function LearningApp() {
   const [activeSection, setActiveSection] = useState("input")
@@ -45,6 +46,8 @@ export default function LearningApp() {
       </main>
 
       <Footer />
+
+      <AuthModal />
     </div>
   )
 }
