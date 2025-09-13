@@ -1,15 +1,12 @@
 "use client"
 
 import type React from "react"
-import MediaUpload from "@/components/media-upload"
 
 import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
-import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Upload, FileText, Video, Mic, ArrowRight, File, Link, Loader2, X, CheckCircle } from "lucide-react"
+import { Plus, Settings, Loader2, X, CheckCircle, File, Link } from "lucide-react"
 
 interface TranscriptInputProps {
   transcript: string
@@ -18,7 +15,6 @@ interface TranscriptInputProps {
 }
 
 export default function TranscriptInput({ transcript, setTranscript, onQuestionsGenerated }: TranscriptInputProps) {
-  const [uploadType, setUploadType] = useState<"text" | "video" | "audio" | "file" | "link">("text")
   const [difficulty, setDifficulty] = useState("medium")
   const [questionCount, setQuestionCount] = useState("5")
   const [questionType, setQuestionType] = useState("mixed")
@@ -30,6 +26,8 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
   const [isProcessingYoutube, setIsProcessingYoutube] = useState(false)
   const [youtubeError, setYoutubeError] = useState<string | null>(null)
   const [workerUrl, setWorkerUrl] = useState(process.env.NEXT_PUBLIC_YOUTUBE_WORKER_URL || "")
+  const [showUploadOptions, setShowUploadOptions] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,6 +35,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
     if (file) {
       setSelectedFile(file)
       setUploadError(null)
+      setShowUploadOptions(false)
     }
   }
 
@@ -273,6 +272,16 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
     onQuestionsGenerated(questions)
   }
 
+  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value
+    setTranscript(value)
+
+    if (isValidYouTubeUrl(value.trim())) {
+      setYoutubeUrl(value.trim())
+      setYoutubeError(null)
+    }
+  }
+
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div className="text-center space-y-4">
@@ -282,225 +291,96 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
         </p>
       </div>
 
-      <Card className="glass-card smooth-transition hover:shadow-lg">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Upload className="h-5 w-5 text-accent" />
-            Upload Learning Material
-          </CardTitle>
-          <CardDescription>Choose how you'd like to input your learning content</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex gap-4 justify-center flex-wrap">
-            <Button
-              variant={uploadType === "text" ? "default" : "outline"}
-              onClick={() => setUploadType("text")}
-              className="flex items-center gap-2"
-            >
-              <FileText className="h-4 w-4" />
-              Text
-            </Button>
-            <Button
-              variant={uploadType === "file" ? "default" : "outline"}
-              onClick={() => setUploadType("file")}
-              className="flex items-center gap-2"
-            >
-              <File className="h-4 w-4" />
-              File
-            </Button>
-            <Button
-              variant={uploadType === "link" ? "default" : "outline"}
-              onClick={() => setUploadType("link")}
-              className="flex items-center gap-2"
-            >
-              <Link className="h-4 w-4" />
-              Link
-            </Button>
-            <Button
-              variant={uploadType === "video" ? "default" : "outline"}
-              onClick={() => setUploadType("video")}
-              className="flex items-center gap-2"
-            >
-              <Video className="h-4 w-4" />
-              Video
-            </Button>
-            <Button
-              variant={uploadType === "audio" ? "default" : "outline"}
-              onClick={() => setUploadType("audio")}
-              className="flex items-center gap-2"
-            >
-              <Mic className="h-4 w-4" />
-              Audio
-            </Button>
-          </div>
+      <div className="relative">
+        <div className="bg-background/60 backdrop-blur-sm border border-border/50 rounded-3xl p-6 shadow-lg">
+          <div className="relative">
+            <Textarea
+              placeholder="Paste your transcript, notes, YouTube link, or any text you want to study from..."
+              value={transcript}
+              onChange={handleTextareaChange}
+              className="min-h-[200px] bg-transparent border-none resize-none text-lg placeholder:text-muted-foreground/70 focus-visible:ring-0 focus-visible:ring-offset-0"
+              maxLength={10000}
+            />
 
-          {uploadType === "text" && (
-            <div className="space-y-4">
-              <div className="relative">
-                <Textarea
-                  placeholder="Paste your transcript, notes, or any text you want to study from..."
-                  value={transcript}
-                  onChange={(e) => setTranscript(e.target.value)}
-                  className="min-h-[300px] pr-20"
-                  maxLength={10000}
-                />
-                <div className="absolute bottom-3 right-3 text-xs text-muted-foreground bg-background/80 px-2 py-1 rounded border">
-                  {transcript.length}/10,000
-                </div>
-              </div>
-            </div>
-          )}
-
-          {uploadType === "file" && (
-            <div className="space-y-4">
-              <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
-                <File className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground mb-2">Upload text files</p>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Supported formats: TXT, MD (PDF and DOCX support coming soon)
-                </p>
-
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".txt,.md"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                />
-                <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
-                  Choose File
-                </Button>
-              </div>
-
-              {selectedFile && (
-                <div className="flex items-center justify-between p-4 bg-accent/10 rounded-lg border">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                    <div>
-                      <p className="font-medium text-foreground">{selectedFile.name}</p>
-                      <p className="text-sm text-muted-foreground">{(selectedFile.size / 1024).toFixed(1)} KB</p>
-                    </div>
-                  </div>
+            <div className="flex items-center justify-between mt-4">
+              <div className="flex items-center gap-3">
+                <div className="relative">
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={handleRemoveFile}
-                    className="text-muted-foreground hover:text-foreground"
+                    className="h-10 w-10 rounded-full bg-muted/50 hover:bg-muted border border-border/50"
+                    onClick={() => setShowUploadOptions(!showUploadOptions)}
                   >
-                    <X className="h-4 w-4" />
+                    <Plus className="h-5 w-5" />
                   </Button>
-                </div>
-              )}
 
-              {uploadError && (
-                <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
-                  <p className="text-sm text-destructive">{uploadError}</p>
+                  {showUploadOptions && (
+                    <div className="absolute bottom-12 left-0 bg-background/95 backdrop-blur-sm border border-border rounded-xl p-2 shadow-lg z-10 min-w-[200px]">
+                      <div className="space-y-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full justify-start gap-2 text-sm"
+                          onClick={() => {
+                            fileInputRef.current?.click()
+                            setShowUploadOptions(false)
+                          }}
+                        >
+                          <File className="h-4 w-4" />
+                          Upload File
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full justify-start gap-2 text-sm"
+                          onClick={() => {
+                            const textarea = document.querySelector("textarea")
+                            textarea?.focus()
+                            setShowUploadOptions(false)
+                          }}
+                        >
+                          <Link className="h-4 w-4" />
+                          Paste YouTube Link
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
 
-              {selectedFile && (
-                <div className="flex justify-center">
-                  <Button onClick={handleFileUpload} disabled={isUploading} className="flex items-center gap-2">
-                    {isUploading ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-10 px-4 rounded-full bg-muted/50 hover:bg-muted border border-border/50 flex items-center gap-2"
+                  onClick={() => setShowSettings(!showSettings)}
+                >
+                  <Settings className="h-4 w-4" />
+                  <span className="text-sm">Settings</span>
+                </Button>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <span className="text-xs text-muted-foreground">{transcript.length}/10,000</span>
+
+                {transcript.trim() && (
+                  <Button onClick={handleGenerateQuestions} disabled={isGenerating} className="rounded-full" size="sm">
+                    {isGenerating ? (
                       <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Processing File...
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        Generating...
                       </>
                     ) : (
-                      <>
-                        Upload File
-                        <ArrowRight className="h-4 w-4" />
-                      </>
+                      "Generate Questions"
                     )}
                   </Button>
-                </div>
-              )}
-            </div>
-          )}
-
-          {uploadType === "link" && (
-            <div className="space-y-4">
-              <div className="border border-border rounded-lg p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Link className="h-5 w-5 text-accent" />
-                  <h3 className="font-semibold">YouTube Video Link</h3>
-                </div>
-                <div className="space-y-4">
-                  {!process.env.NEXT_PUBLIC_YOUTUBE_WORKER_URL && (
-                    <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                      <p className="text-sm text-amber-800 mb-2">
-                        <strong>Worker Service Configuration Required</strong>
-                      </p>
-                      <p className="text-xs text-amber-700 mb-3">
-                        Enter your deployed YouTube worker service URL to enable YouTube processing.
-                      </p>
-                      <Input
-                        placeholder="https://your-worker.execute-api.region.amazonaws.com/dev"
-                        value={workerUrl}
-                        onChange={(e) => setWorkerUrl(e.target.value)}
-                        className="text-sm"
-                      />
-                    </div>
-                  )}
-
-                  <Input
-                    placeholder="Paste YouTube video URL here (e.g., https://youtube.com/watch?v=...)"
-                    value={youtubeUrl}
-                    onChange={(e) => {
-                      setYoutubeUrl(e.target.value)
-                      setYoutubeError(null)
-                    }}
-                    className={youtubeError ? "border-destructive" : ""}
-                  />
-
-                  {youtubeError && (
-                    <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-                      <p className="text-sm text-destructive">{youtubeError}</p>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Try using the "Text" tab to paste a transcript manually, or upload an audio/video file instead.
-                      </p>
-                    </div>
-                  )}
-
-                  <div className="flex justify-center">
-                    <Button
-                      onClick={handleYouTubeProcess}
-                      disabled={
-                        !youtubeUrl.trim() ||
-                        isProcessingYoutube ||
-                        (!workerUrl && !process.env.NEXT_PUBLIC_YOUTUBE_WORKER_URL)
-                      }
-                      className="flex items-center gap-2"
-                    >
-                      {isProcessingYoutube ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Processing Video...
-                        </>
-                      ) : (
-                        <>
-                          Process YouTube Video
-                          <ArrowRight className="h-4 w-4" />
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </div>
-
-                <p className="text-sm text-muted-foreground mt-4">
-                  We'll download the video's audio using our worker service, then transcribe it to generate study
-                  questions. This works with any public YouTube video.
-                </p>
+                )}
               </div>
             </div>
-          )}
+          </div>
+        </div>
 
-          {(uploadType === "video" || uploadType === "audio") && (
-            <MediaUpload onQuestionsGenerated={handleMediaQuestionsGenerated} />
-          )}
-
-          <div className="border-t border-border pt-6 space-y-4">
-            <h3 className="font-semibold text-foreground">Question Settings</h3>
+        {showSettings && (
+          <div className="mt-4 bg-background/60 backdrop-blur-sm border border-border/50 rounded-2xl p-6 shadow-lg">
+            <h3 className="font-semibold text-foreground mb-4">Question Settings</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Difficulty Level</label>
@@ -546,28 +426,85 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
               </div>
             </div>
           </div>
+        )}
 
-          <div className="flex justify-end">
-            <Button
-              onClick={handleGenerateQuestions}
-              disabled={!transcript.trim() || isGenerating}
-              className="flex items-center gap-2"
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Generating Questions...
-                </>
-              ) : (
-                <>
-                  Generate Questions
-                  <ArrowRight className="h-4 w-4" />
-                </>
-              )}
-            </Button>
+        {selectedFile && (
+          <div className="mt-4 bg-background/60 backdrop-blur-sm border border-border/50 rounded-2xl p-4 shadow-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <CheckCircle className="h-5 w-5 text-green-500" />
+                <div>
+                  <p className="font-medium text-foreground">{selectedFile.name}</p>
+                  <p className="text-sm text-muted-foreground">{(selectedFile.size / 1024).toFixed(1)} KB</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button onClick={handleFileUpload} disabled={isUploading} size="sm" className="rounded-full">
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Processing...
+                    </>
+                  ) : (
+                    "Upload"
+                  )}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleRemoveFile}
+                  className="text-muted-foreground hover:text-foreground rounded-full"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
           </div>
-        </CardContent>
-      </Card>
+        )}
+
+        {youtubeUrl && isValidYouTubeUrl(youtubeUrl) && (
+          <div className="mt-4 bg-background/60 backdrop-blur-sm border border-border/50 rounded-2xl p-4 shadow-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Link className="h-5 w-5 text-accent" />
+                <div>
+                  <p className="font-medium text-foreground">YouTube Video Detected</p>
+                  <p className="text-sm text-muted-foreground truncate max-w-[300px]">{youtubeUrl}</p>
+                </div>
+              </div>
+              <Button
+                onClick={handleYouTubeProcess}
+                disabled={isProcessingYoutube || (!workerUrl && !process.env.NEXT_PUBLIC_YOUTUBE_WORKER_URL)}
+                size="sm"
+                className="rounded-full"
+              >
+                {isProcessingYoutube ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Processing...
+                  </>
+                ) : (
+                  "Process Video"
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {(uploadError || youtubeError) && (
+          <div className="mt-4 bg-destructive/10 backdrop-blur-sm border border-destructive/20 rounded-2xl p-4 shadow-lg">
+            <p className="text-sm text-destructive">{uploadError || youtubeError}</p>
+          </div>
+        )}
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".txt,.md,audio/*,video/*"
+          onChange={handleFileSelect}
+          className="hidden"
+        />
+      </div>
     </div>
   )
 }
