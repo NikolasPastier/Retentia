@@ -16,6 +16,16 @@ export default function I18nProvider({ children, locale }: I18nProviderProps) {
 
   useEffect(() => {
     const initializeLanguage = async () => {
+      if (!i18n.isInitialized) {
+        await new Promise((resolve) => {
+          if (i18n.isInitialized) {
+            resolve(undefined)
+          } else {
+            i18n.on("initialized", resolve)
+          }
+        })
+      }
+
       // Get the best language choice based on URL, stored preference, and browser
       const bestLanguage = LanguagePersistence.getBestLanguageChoice(locale)
 

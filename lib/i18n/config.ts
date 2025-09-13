@@ -28,31 +28,48 @@ export const supportedLanguages = Object.keys(languages)
 export const supportedLocales = supportedLanguages
 export const defaultLocale = defaultLanguage
 
-i18n
-  .use(LanguageDetector)
-  .use(initReactI18next)
-  .use(resourcesToBackend((language: string, namespace: string) => import(`./locales/${language}/${namespace}.json`)))
-  .init({
+if (typeof window !== "undefined") {
+  i18n
+    .use(LanguageDetector)
+    .use(initReactI18next)
+    .use(resourcesToBackend((language: string, namespace: string) => import(`./locales/${language}/${namespace}.json`)))
+    .init({
+      lng: defaultLanguage,
+      fallbackLng: defaultLanguage,
+      supportedLngs: supportedLanguages,
+
+      detection: {
+        order: ["localStorage", "navigator", "htmlTag"],
+        caches: ["localStorage"],
+        lookupLocalStorage: "i18nextLng",
+      },
+
+      interpolation: {
+        escapeValue: false,
+      },
+
+      react: {
+        useSuspense: false,
+      },
+
+      ns: ["common", "navigation", "forms", "dashboard"],
+      defaultNS: "common",
+    })
+} else {
+  i18n.use(initReactI18next).init({
     lng: defaultLanguage,
     fallbackLng: defaultLanguage,
     supportedLngs: supportedLanguages,
-
-    detection: {
-      order: ["localStorage", "navigator", "htmlTag"],
-      caches: ["localStorage"],
-      lookupLocalStorage: "i18nextLng",
-    },
-
     interpolation: {
       escapeValue: false,
     },
-
     react: {
       useSuspense: false,
     },
-
     ns: ["common", "navigation", "forms", "dashboard"],
     defaultNS: "common",
+    resources: {}, // Empty resources for SSR
   })
+}
 
 export default i18n
