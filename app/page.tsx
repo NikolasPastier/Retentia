@@ -7,6 +7,7 @@ import QuestionDisplay from "@/components/question-display"
 import UserDashboard from "@/components/user-dashboard"
 import Footer from "@/components/footer"
 import AuthModal from "@/components/auth/auth-modal"
+import BlueShaderBackground from "@/components/blue-shader-background"
 
 export default function LearningApp() {
   const [activeSection, setActiveSection] = useState("input")
@@ -22,7 +23,9 @@ export default function LearningApp() {
   }
 
   return (
-    <div className="min-h-screen gradient-bg">
+    <div className="min-h-screen relative">
+      <BlueShaderBackground />
+
       <Navigation activeSection={activeSection} setActiveSection={setActiveSection} />
 
       <main className="container mx-auto px-4 py-8">
