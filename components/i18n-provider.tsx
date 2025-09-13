@@ -17,11 +17,11 @@ export default function I18nProvider({ children, locale }: I18nProviderProps) {
   useEffect(() => {
     const initializeLanguage = async () => {
       if (!i18n.isInitialized) {
-        await new Promise((resolve) => {
+        await new Promise<void>((resolve) => {
           if (i18n.isInitialized) {
-            resolve(undefined)
+            resolve()
           } else {
-            i18n.on("initialized", resolve)
+            i18n.on("initialized", () => resolve())
           }
         })
       }
