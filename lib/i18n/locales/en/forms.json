@@ -1,0 +1,15 @@
+{
+  "transcriptPlaceholder": "Paste your transcript, upload a file, or enter a YouTube URL to generate personalized practice questions...",
+  "generateQuestions": "Generate Questions",
+  "uploadFile": "Upload File",
+  "pasteYouTubeLink": "Paste YouTube Link",
+  "difficulty": "Difficulty",
+  "numberOfQuestions": "Number of Questions",
+  "questionType": "Question Type",
+  "easy": "Easy",
+  "medium": "Medium",
+  "hard": "Hard",
+  "multipleChoice": "Multiple Choice",
+  "shortAnswer": "Short Answer",
+  "essay": "Essay"
+}

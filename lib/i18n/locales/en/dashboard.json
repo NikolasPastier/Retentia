@@ -1,0 +1,14 @@
+{
+  "welcomeBack": "Welcome back",
+  "currentLevel": "Your current level and experience points",
+  "learningMilestones": "Your learning milestones",
+  "progressToNextLevel": "Progress to Level {{level}}",
+  "xpNeeded": "{{xp}} XP needed for next level",
+  "level": "Level {{level}}",
+  "knowledgeSeeker": "Knowledge Seeker",
+  "firstSteps": "First Steps",
+  "completeFirstQuiz": "Complete your first quiz",
+  "streakMaster": "Streak Master",
+  "maintainStreak": "Maintain a 7-day study streak",
+  "unlocked": "Unlocked"
+}

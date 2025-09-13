@@ -3,8 +3,9 @@ import type { Metadata } from "next"
 import { Figtree } from "next/font/google"
 import { GeistMono } from "geist/font/mono"
 import { Instrument_Serif } from "next/font/google"
-import "./globals.css"
+import "../globals.css"
 import I18nProvider from "@/components/i18n-provider"
+import { supportedLanguages } from "@/lib/i18n/config"
 
 const figtree = Figtree({
   subsets: ["latin"],
@@ -31,13 +32,18 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<{
+interface LocaleLayoutProps {
   children: React.ReactNode
-}>) {
+  params: { locale: string }
+}
+
+export async function generateStaticParams() {
+  return supportedLanguages.map((locale) => ({ locale }))
+}
+
+export default function LocaleLayout({ children, params: { locale } }: LocaleLayoutProps) {
   return (
-    <html lang="en">
+    <html lang={locale}>
       <head>
         <style>{`
 html {
@@ -49,7 +55,7 @@ html {
         `}</style>
       </head>
       <body className={`${figtree.variable} ${instrumentSerif.variable}`}>
-        <I18nProvider>{children}</I18nProvider>
+        <I18nProvider locale={locale}>{children}</I18nProvider>
       </body>
     </html>
   )

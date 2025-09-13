@@ -1,0 +1,28 @@
+{
+  "title": "Retentia - AI-Powered Learning Platform",
+  "description": "Transform your content into interactive learning experiences with AI-generated questions",
+  "loading": "Loading...",
+  "error": "An error occurred",
+  "success": "Success",
+  "cancel": "Cancel",
+  "save": "Save",
+  "delete": "Delete",
+  "edit": "Edit",
+  "close": "Close",
+  "back": "Back",
+  "next": "Next",
+  "previous": "Previous",
+  "submit": "Submit",
+  "generate": "Generate",
+  "upload": "Upload",
+  "clear": "Clear",
+  "settings": "Settings",
+  "footer": {
+    "howItWorks": "How it Works",
+    "pricing": "Pricing",
+    "helpCenter": "Help Center",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "contact": "Contact"
+  }
+}
