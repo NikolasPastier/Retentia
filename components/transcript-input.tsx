@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Plus, Settings, Loader2, X, File, Link, ChevronRight } from "lucide-react"
@@ -31,8 +31,22 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
   const [showCountDropdown, setShowCountDropdown] = useState(false)
   const [showTypeDropdown, setShowTypeDropdown] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   const [detectedYoutubeUrl, setDetectedYoutubeUrl] = useState("")
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        closeAllDropdowns()
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [])
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -439,6 +453,28 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
     setShowUploadOptions(false)
   }
 
+  const openDropdown = (dropdownType: string) => {
+    closeAllDropdowns()
+
+    switch (dropdownType) {
+      case "settings":
+        setShowSettingsDropdown(true)
+        break
+      case "upload":
+        setShowUploadOptions(true)
+        break
+      case "difficulty":
+        setShowDifficultyDropdown(true)
+        break
+      case "count":
+        setShowCountDropdown(true)
+        break
+      case "type":
+        setShowTypeDropdown(true)
+        break
+    }
+  }
+
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div className="text-center space-y-4">
@@ -501,13 +537,13 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
             />
 
             <div className="flex items-center justify-between mt-4">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3" ref={dropdownRef}>
                 <div className="relative">
                   <Button
                     variant="ghost"
                     size="sm"
                     className="h-10 w-10 rounded-full bg-muted/50 hover:bg-muted border border-border/50"
-                    onClick={() => setShowUploadOptions(!showUploadOptions)}
+                    onClick={() => openDropdown("upload")}
                   >
                     <Plus className="h-5 w-5" />
                   </Button>
@@ -550,7 +586,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                     variant="ghost"
                     size="sm"
                     className="h-10 px-4 rounded-full bg-muted/50 hover:bg-muted border border-border/50 flex items-center gap-2"
-                    onClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
+                    onClick={() => openDropdown("settings")}
                   >
                     <Settings className="h-4 w-4" />
                     <span className="text-sm">Settings</span>
@@ -565,7 +601,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                             variant="ghost"
                             size="sm"
                             className="w-full justify-between gap-2 text-sm"
-                            onClick={() => setShowDifficultyDropdown(!showDifficultyDropdown)}
+                            onClick={() => openDropdown("difficulty")}
                           >
                             <span>Difficulty: {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}</span>
                             <ChevronRight className="h-4 w-4" />
@@ -580,7 +616,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                                   className="w-full justify-start text-sm"
                                   onClick={() => {
                                     setDifficulty("easy")
-                                    setShowDifficultyDropdown(false)
+                                    closeAllDropdowns()
                                   }}
                                 >
                                   Easy
@@ -591,7 +627,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                                   className="w-full justify-start text-sm"
                                   onClick={() => {
                                     setDifficulty("medium")
-                                    setShowDifficultyDropdown(false)
+                                    closeAllDropdowns()
                                   }}
                                 >
                                   Medium
@@ -602,7 +638,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                                   className="w-full justify-start text-sm"
                                   onClick={() => {
                                     setDifficulty("hard")
-                                    setShowDifficultyDropdown(false)
+                                    closeAllDropdowns()
                                   }}
                                 >
                                   Hard
@@ -618,7 +654,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                             variant="ghost"
                             size="sm"
                             className="w-full justify-between gap-2 text-sm"
-                            onClick={() => setShowCountDropdown(!showCountDropdown)}
+                            onClick={() => openDropdown("count")}
                           >
                             <span>Questions: {questionCount}</span>
                             <ChevronRight className="h-4 w-4" />
@@ -633,7 +669,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                                   className="w-full justify-start text-sm"
                                   onClick={() => {
                                     setQuestionCount("3")
-                                    setShowCountDropdown(false)
+                                    closeAllDropdowns()
                                   }}
                                 >
                                   3 Questions
@@ -644,7 +680,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                                   className="w-full justify-start text-sm"
                                   onClick={() => {
                                     setQuestionCount("5")
-                                    setShowCountDropdown(false)
+                                    closeAllDropdowns()
                                   }}
                                 >
                                   5 Questions
@@ -655,7 +691,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                                   className="w-full justify-start text-sm"
                                   onClick={() => {
                                     setQuestionCount("10")
-                                    setShowCountDropdown(false)
+                                    closeAllDropdowns()
                                   }}
                                 >
                                   10 Questions
@@ -666,7 +702,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                                   className="w-full justify-start text-sm"
                                   onClick={() => {
                                     setQuestionCount("15")
-                                    setShowCountDropdown(false)
+                                    closeAllDropdowns()
                                   }}
                                 >
                                   15 Questions
@@ -682,7 +718,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                             variant="ghost"
                             size="sm"
                             className="w-full justify-between gap-2 text-sm"
-                            onClick={() => setShowTypeDropdown(!showTypeDropdown)}
+                            onClick={() => openDropdown("type")}
                           >
                             <span>
                               Type:{" "}
@@ -705,7 +741,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                                   className="w-full justify-start text-sm"
                                   onClick={() => {
                                     setQuestionType("mixed")
-                                    setShowTypeDropdown(false)
+                                    closeAllDropdowns()
                                   }}
                                 >
                                   Mixed Types
@@ -716,7 +752,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                                   className="w-full justify-start text-sm"
                                   onClick={() => {
                                     setQuestionType("multiple-choice")
-                                    setShowTypeDropdown(false)
+                                    closeAllDropdowns()
                                   }}
                                 >
                                   Multiple Choice
@@ -727,7 +763,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                                   className="w-full justify-start text-sm"
                                   onClick={() => {
                                     setQuestionType("true-false")
-                                    setShowTypeDropdown(false)
+                                    closeAllDropdowns()
                                   }}
                                 >
                                   True/False
@@ -738,7 +774,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                                   className="w-full justify-start text-sm"
                                   onClick={() => {
                                     setQuestionType("open-ended")
-                                    setShowTypeDropdown(false)
+                                    closeAllDropdowns()
                                   }}
                                 >
                                   Open Ended
@@ -749,7 +785,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                                   className="w-full justify-start text-sm"
                                   onClick={() => {
                                     setQuestionType("fill-blank")
-                                    setShowTypeDropdown(false)
+                                    closeAllDropdowns()
                                   }}
                                 >
                                   Fill in the Blank

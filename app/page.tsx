@@ -14,11 +14,9 @@ export default function LearningApp() {
 
   const handleQuestionsGenerated = (generatedQuestions: any[]) => {
     setQuestions(generatedQuestions)
-    setActiveSection("questions")
   }
 
   const handleBackToInput = () => {
-    setActiveSection("input")
     setQuestions([])
   }
 
@@ -28,15 +26,19 @@ export default function LearningApp() {
 
       <main className="container mx-auto px-4 py-8">
         {activeSection === "input" && (
-          <TranscriptInput
-            transcript={transcript}
-            setTranscript={setTranscript}
-            onQuestionsGenerated={handleQuestionsGenerated}
-          />
-        )}
+          <div className="space-y-8">
+            <TranscriptInput
+              transcript={transcript}
+              setTranscript={setTranscript}
+              onQuestionsGenerated={handleQuestionsGenerated}
+            />
 
-        {activeSection === "questions" && questions.length > 0 && (
-          <QuestionDisplay questions={questions} onBack={handleBackToInput} />
+            {questions.length > 0 && (
+              <div className="border-t border-border/20 pt-8">
+                <QuestionDisplay questions={questions} onBack={handleBackToInput} />
+              </div>
+            )}
+          </div>
         )}
 
         {activeSection === "dashboard" && <UserDashboard />}

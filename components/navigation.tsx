@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Brain, BarChart3, Upload } from "lucide-react"
+import { BarChart3, Upload } from "lucide-react"
 import Image from "next/image"
 
 interface NavigationProps {
@@ -12,7 +12,6 @@ interface NavigationProps {
 export default function Navigation({ activeSection, setActiveSection }: NavigationProps) {
   const navItems = [
     { id: "input", label: "Input", icon: Upload },
-    { id: "questions", label: "Study", icon: Brain },
     { id: "dashboard", label: "Dashboard", icon: BarChart3 },
   ]
 

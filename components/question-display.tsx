@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
-import { CheckCircle, XCircle, RotateCcw, ArrowLeft, Eye, EyeOff, Bookmark, BookmarkCheck } from "lucide-react"
+import { CheckCircle, XCircle, RotateCcw, Eye, EyeOff, Bookmark, BookmarkCheck, X } from "lucide-react"
 
 interface Question {
   question: string
@@ -175,8 +175,8 @@ export default function QuestionDisplay({ questions, onBack }: QuestionDisplayPr
                 Retake Quiz
               </Button>
               <Button onClick={onBack} className="flex items-center gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                New Material
+                <X className="h-4 w-4" />
+                Clear Questions
               </Button>
             </div>
           </CardContent>
@@ -328,8 +328,8 @@ export default function QuestionDisplay({ questions, onBack }: QuestionDisplayPr
             )}
           </div>
           <Button onClick={onBack} variant="ghost" size="sm" className="flex items-center gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Upload
+            <X className="h-4 w-4" />
+            Clear Questions
           </Button>
         </div>
         <Progress value={progress} className="w-full" />
