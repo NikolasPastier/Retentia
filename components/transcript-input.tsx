@@ -29,6 +29,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
   const [youtubeUrl, setYoutubeUrl] = useState("")
   const [isProcessingYoutube, setIsProcessingYoutube] = useState(false)
   const [youtubeError, setYoutubeError] = useState<string | null>(null)
+  const [workerUrl, setWorkerUrl] = useState(process.env.NEXT_PUBLIC_YOUTUBE_WORKER_URL || "")
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -165,11 +166,45 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
       return
     }
 
+    if (!workerUrl) {
+      setYoutubeError("YouTube worker service is not configured. Please contact support.")
+      return
+    }
+
     setIsProcessingYoutube(true)
     setYoutubeError(null)
 
     try {
-      console.log("[v0] Processing YouTube URL:", youtubeUrl)
+      console.log("[v0] Processing YouTube URL with worker:", youtubeUrl)
+
+      console.log("[v0] Calling worker service to download audio")
+      const workerResponse = await fetch(`${workerUrl}/api/download-audio`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          youtubeUrl: youtubeUrl.trim(),
+        }),
+      })
+
+      console.log("[v0] Worker response:", workerResponse.status, workerResponse.statusText)
+
+      const workerData = await workerResponse.json()
+
+      if (!workerResponse.ok) {
+        let errorMessage = "Failed to download YouTube audio"
+        if (workerData.error) {
+          errorMessage = workerData.error
+        }
+        throw new Error(errorMessage)
+      }
+
+      if (!workerData.success || !workerData.fileUrl) {
+        throw new Error("Worker did not return a valid audio file URL")
+      }
+
+      console.log("[v0] Audio downloaded successfully, processing with Vercel API")
 
       const response = await fetch("/api/youtube-to-questions", {
         method: "POST",
@@ -177,34 +212,38 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          youtubeUrl: youtubeUrl.trim(),
+          fileUrl: workerData.fileUrl,
           difficulty,
           questionCount: Number.parseInt(questionCount),
           questionType,
         }),
       })
 
-      console.log("[v0] YouTube API response:", response.status, response.statusText)
+      console.log("[v0] Vercel API response:", response.status, response.statusText)
+
+      const data = await response.json()
 
       if (!response.ok) {
         let errorMessage = "Failed to process YouTube video"
         try {
-          const errorData = await response.json()
-          errorMessage = errorData.error || errorMessage
+          errorMessage = data.error || errorMessage
         } catch {
           errorMessage = response.statusText || errorMessage
         }
         throw new Error(errorMessage)
       }
 
-      const data = await response.json()
+      if (data.success === false) {
+        setYoutubeError(data.error || "Failed to process the audio file.")
+        return
+      }
+
       console.log("[v0] YouTube processing successful")
 
       if (data.questions && data.questions.length > 0) {
-        // If questions were generated, show them directly
         onQuestionsGenerated(data.questions)
+        setYoutubeUrl("")
       } else if (data.transcript) {
-        // If only transcript was extracted, set it for manual question generation
         setTranscript(data.transcript)
         setYoutubeUrl("")
       } else {
@@ -212,7 +251,17 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
       }
     } catch (error) {
       console.error("[v0] YouTube processing error:", error)
-      setYoutubeError(error instanceof Error ? error.message : "Failed to process YouTube video")
+      let errorMessage = error instanceof Error ? error.message : "Failed to process YouTube video"
+
+      if (errorMessage.includes("Failed to download audio")) {
+        errorMessage += ". The video may be private, age-restricted, or unavailable."
+      } else if (errorMessage.includes("Audio file too large")) {
+        errorMessage += ". Please try a shorter video (under 100MB audio)."
+      } else if (errorMessage.includes("worker service is not configured")) {
+        errorMessage += " Please check your environment configuration."
+      }
+
+      setYoutubeError(errorMessage)
     } finally {
       setIsProcessingYoutube(false)
     }
@@ -377,6 +426,23 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                   <h3 className="font-semibold">YouTube Video Link</h3>
                 </div>
                 <div className="space-y-4">
+                  {!process.env.NEXT_PUBLIC_YOUTUBE_WORKER_URL && (
+                    <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                      <p className="text-sm text-amber-800 mb-2">
+                        <strong>Worker Service Configuration Required</strong>
+                      </p>
+                      <p className="text-xs text-amber-700 mb-3">
+                        Enter your deployed YouTube worker service URL to enable YouTube processing.
+                      </p>
+                      <Input
+                        placeholder="https://your-worker.execute-api.region.amazonaws.com/dev"
+                        value={workerUrl}
+                        onChange={(e) => setWorkerUrl(e.target.value)}
+                        className="text-sm"
+                      />
+                    </div>
+                  )}
+
                   <Input
                     placeholder="Paste YouTube video URL here (e.g., https://youtube.com/watch?v=...)"
                     value={youtubeUrl}
@@ -390,13 +456,20 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                   {youtubeError && (
                     <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
                       <p className="text-sm text-destructive">{youtubeError}</p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Try using the "Text" tab to paste a transcript manually, or upload an audio/video file instead.
+                      </p>
                     </div>
                   )}
 
                   <div className="flex justify-center">
                     <Button
                       onClick={handleYouTubeProcess}
-                      disabled={!youtubeUrl.trim() || isProcessingYoutube}
+                      disabled={
+                        !youtubeUrl.trim() ||
+                        isProcessingYoutube ||
+                        (!workerUrl && !process.env.NEXT_PUBLIC_YOUTUBE_WORKER_URL)
+                      }
                       className="flex items-center gap-2"
                     >
                       {isProcessingYoutube ? (
@@ -415,7 +488,8 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                 </div>
 
                 <p className="text-sm text-muted-foreground mt-4">
-                  We'll automatically extract captions or transcribe the audio to generate study questions
+                  We'll download the video's audio using our worker service, then transcribe it to generate study
+                  questions. This works with any public YouTube video.
                 </p>
               </div>
             </div>

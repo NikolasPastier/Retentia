@@ -1,0 +1,12 @@
+{
+  "name": "youtube-audio-worker",
+  "version": "1.0.0",
+  "description": "AWS Lambda worker for downloading YouTube audio",
+  "main": "lambda-youtube-worker.js",
+  "dependencies": {
+    "aws-sdk": "^2.1691.0"
+  },
+  "scripts": {
+    "deploy": "zip -r youtube-worker.zip . && aws lambda update-function-code --function-name youtube-audio-worker --zip-file fileb://youtube-worker.zip"
+  }
+}
