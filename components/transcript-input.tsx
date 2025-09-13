@@ -558,7 +558,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
 
           <div className="relative">
             <Textarea
-              placeholder="Paste your transcript, notes, YouTube link, or any text you want to study from..."
+              placeholder="Paste your transcript, notes, or any text you want to study from..."
               value={transcript}
               onChange={handleTextareaChange}
               className="min-h-[200px] bg-transparent border-none resize-none text-lg text-white placeholder:text-muted-foreground/70 focus-visible:ring-0 focus-visible:ring-offset-0 caret-white"
@@ -591,19 +591,6 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                         >
                           <File className="h-4 w-4" />
                           Upload File
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full justify-start gap-2 text-sm"
-                          onClick={() => {
-                            const textarea = document.querySelector("textarea")
-                            textarea?.focus()
-                            setShowUploadOptions(false)
-                          }}
-                        >
-                          <Link className="h-4 w-4" />
-                          Paste YouTube Link
                         </Button>
                       </div>
                     </div>
@@ -645,7 +632,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                                   className="w-full justify-start text-sm"
                                   onClick={() => {
                                     setDifficulty("easy")
-                                    closeAllDropdowns()
+                                    setShowDifficultyDropdown(false)
                                   }}
                                 >
                                   Easy
@@ -656,7 +643,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                                   className="w-full justify-start text-sm"
                                   onClick={() => {
                                     setDifficulty("medium")
-                                    closeAllDropdowns()
+                                    setShowDifficultyDropdown(false)
                                   }}
                                 >
                                   Medium
@@ -667,7 +654,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                                   className="w-full justify-start text-sm"
                                   onClick={() => {
                                     setDifficulty("hard")
-                                    closeAllDropdowns()
+                                    setShowDifficultyDropdown(false)
                                   }}
                                 >
                                   Hard
@@ -698,7 +685,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                                   className="w-full justify-start text-sm"
                                   onClick={() => {
                                     setQuestionCount("3")
-                                    closeAllDropdowns()
+                                    setShowCountDropdown(false)
                                   }}
                                 >
                                   3 Questions
@@ -709,7 +696,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                                   className="w-full justify-start text-sm"
                                   onClick={() => {
                                     setQuestionCount("5")
-                                    closeAllDropdowns()
+                                    setShowCountDropdown(false)
                                   }}
                                 >
                                   5 Questions
@@ -720,7 +707,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                                   className="w-full justify-start text-sm"
                                   onClick={() => {
                                     setQuestionCount("10")
-                                    closeAllDropdowns()
+                                    setShowCountDropdown(false)
                                   }}
                                 >
                                   10 Questions
@@ -731,7 +718,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                                   className="w-full justify-start text-sm"
                                   onClick={() => {
                                     setQuestionCount("15")
-                                    closeAllDropdowns()
+                                    setShowCountDropdown(false)
                                   }}
                                 >
                                   15 Questions
@@ -770,7 +757,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                                   className="w-full justify-start text-sm"
                                   onClick={() => {
                                     setQuestionType("mixed")
-                                    closeAllDropdowns()
+                                    setShowTypeDropdown(false)
                                   }}
                                 >
                                   Mixed Types
@@ -781,7 +768,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                                   className="w-full justify-start text-sm"
                                   onClick={() => {
                                     setQuestionType("multiple-choice")
-                                    closeAllDropdowns()
+                                    setShowTypeDropdown(false)
                                   }}
                                 >
                                   Multiple Choice
@@ -792,7 +779,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                                   className="w-full justify-start text-sm"
                                   onClick={() => {
                                     setQuestionType("true-false")
-                                    closeAllDropdowns()
+                                    setShowTypeDropdown(false)
                                   }}
                                 >
                                   True/False
@@ -803,7 +790,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                                   className="w-full justify-start text-sm"
                                   onClick={() => {
                                     setQuestionType("open-ended")
-                                    closeAllDropdowns()
+                                    setShowTypeDropdown(false)
                                   }}
                                 >
                                   Open Ended
@@ -814,7 +801,7 @@ export default function TranscriptInput({ transcript, setTranscript, onQuestions
                                   className="w-full justify-start text-sm"
                                   onClick={() => {
                                     setQuestionType("fill-blank")
-                                    closeAllDropdowns()
+                                    setShowTypeDropdown(false)
                                   }}
                                 >
                                   Fill in the Blank
