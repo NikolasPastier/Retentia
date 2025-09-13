@@ -176,7 +176,7 @@ exports.handler = async (event) => {
     }
   }
 }
-
+/*
 // Handle OPTIONS requests for CORS
 exports.handler.options = async (event) => {
   return {

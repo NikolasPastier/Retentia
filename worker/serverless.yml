@@ -21,10 +21,7 @@ functions:
           path: api/download-audio
           method: post
           cors: true
-      - http:
-          path: api/download-audio
-          method: options
-          cors: true
+     
 
 plugins:
   - serverless-offline
