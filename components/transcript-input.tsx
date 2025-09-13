@@ -21,6 +21,7 @@ interface TranscriptInputProps {
   setTranscript: (transcript: string) => void
   onQuestionsGenerated: (questions: any[]) => void
   mode: StudyMode // Added mode prop
+  setting?: string
 }
 
 export default function TranscriptInput({
@@ -28,6 +29,7 @@ export default function TranscriptInput({
   setTranscript,
   onQuestionsGenerated,
   mode,
+  setting = "medium",
 }: TranscriptInputProps) {
   const [difficulty, setDifficulty] = useState("medium")
   const [questionCount, setQuestionCount] = useState("5")
@@ -177,6 +179,7 @@ export default function TranscriptInput({
       let requestBody: any = {
         text: text,
         userId: user.uid,
+        setting: setting,
       }
 
       if (mode === "study") {
@@ -188,7 +191,6 @@ export default function TranscriptInput({
         }
       } else if (mode === "explain") {
         apiEndpoint = "/api/explain-feedback"
-        // For explain mode, we'll handle this in the ExplainMode component
         return
       } else if (mode === "summarise") {
         apiEndpoint = "/api/summarise"
@@ -216,7 +218,8 @@ export default function TranscriptInput({
         title: sessionTitle,
         createdAt: new Date(),
         transcript: text,
-        mode: mode, // Added mode to session data
+        mode: mode,
+        setting: setting,
       }
 
       if (mode === "study") {
@@ -424,12 +427,10 @@ export default function TranscriptInput({
   }
 
   const openSubMenu = (subMenuType: string) => {
-    // Close all sub-menus first
     setShowDifficultyDropdown(false)
     setShowCountDropdown(false)
     setShowTypeDropdown(false)
 
-    // Open the requested sub-menu
     switch (subMenuType) {
       case "difficulty":
         setShowDifficultyDropdown(true)
@@ -443,6 +444,17 @@ export default function TranscriptInput({
     }
   }
 
+  const getPlaceholderText = () => {
+    switch (mode) {
+      case "explain":
+        return "Write your explanation of the material here. The AI will provide feedback based on your selected audience level..."
+      case "summarise":
+        return "Paste your content here to generate a summary. The AI will create a summary based on your selected style..."
+      default:
+        return "Paste your transcript, notes, or any text you want to study from..."
+    }
+  }
+
   if (mode === "explain") {
     return (
       <ExplainMode
@@ -453,6 +465,7 @@ export default function TranscriptInput({
         fileInputRef={fileInputRef}
         onResult={setExplainResult}
         result={explainResult}
+        setting={setting}
       />
     )
   }
@@ -467,6 +480,7 @@ export default function TranscriptInput({
         fileInputRef={fileInputRef}
         onResult={setSummariseResult}
         result={summariseResult}
+        setting={setting}
       />
     )
   }
@@ -533,7 +547,7 @@ export default function TranscriptInput({
 
           <div className="relative">
             <Textarea
-              placeholder="Paste your transcript, notes, or any text you want to study from..."
+              placeholder={getPlaceholderText()}
               value={transcript}
               onChange={handleTextareaChange}
               className="min-h-[200px] bg-transparent border-none resize-none text-lg text-white placeholder:text-muted-foreground/70 focus-visible:ring-0 focus-visible:ring-offset-0 caret-white"

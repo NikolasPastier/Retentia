@@ -5,7 +5,6 @@ import Navigation from "@/components/navigation"
 import TranscriptInput from "@/components/transcript-input"
 import QuestionDisplay from "@/components/question-display"
 import UserDashboard from "@/components/user-dashboard"
-import ModeSelector from "@/components/mode-selector"
 
 export type StudyMode = "study" | "explain" | "summarise"
 
@@ -14,6 +13,7 @@ export default function LocalePageClient() {
   const [transcript, setTranscript] = useState("")
   const [questions, setQuestions] = useState([])
   const [currentMode, setCurrentMode] = useState<StudyMode>("study")
+  const [currentSetting, setCurrentSetting] = useState("adult")
 
   const handleQuestionsGenerated = (generatedQuestions: any[]) => {
     setQuestions(generatedQuestions)
@@ -23,20 +23,42 @@ export default function LocalePageClient() {
     setQuestions([])
   }
 
+  const handleModeChange = (mode: StudyMode) => {
+    setCurrentMode(mode)
+    // Set appropriate default setting for each mode
+    switch (mode) {
+      case "explain":
+        setCurrentSetting("adult")
+        break
+      case "summarise":
+        setCurrentSetting("briefly")
+        break
+      default:
+        setCurrentSetting("medium")
+        break
+    }
+  }
+
   return (
     <>
-      <Navigation activeSection={activeSection} setActiveSection={setActiveSection} />
+      <Navigation
+        activeSection={activeSection}
+        setActiveSection={setActiveSection}
+        currentMode={currentMode}
+        onModeChange={handleModeChange}
+        currentSetting={currentSetting}
+        onSettingChange={setCurrentSetting}
+      />
 
       <main className="container mx-auto px-4 py-8">
         {activeSection === "input" && (
           <div className="space-y-8">
-            <ModeSelector currentMode={currentMode} onModeChange={setCurrentMode} />
-
             <TranscriptInput
               transcript={transcript}
               setTranscript={setTranscript}
               onQuestionsGenerated={handleQuestionsGenerated}
               mode={currentMode}
+              setting={currentSetting}
             />
 
             {questions.length > 0 && (
