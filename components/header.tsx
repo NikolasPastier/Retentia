@@ -2,7 +2,7 @@
 
 export default function Header() {
   return (
-    <header className="relative z-20 flex items-center justify-between p-6">
+    <header className="relative z-20 flex items-center justify-between px-6 py-4 bg-black/90 backdrop-blur-sm border-b border-white/10">
       {/* Logo */}
       <div className="flex items-center">
         <svg
@@ -17,38 +17,58 @@ export default function Header() {
         </svg>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex items-center space-x-2">
-        <a
-          href="#"
-          className="text-white/80 hover:text-white text-xs font-light px-3 py-2 rounded-full hover:bg-white/10 transition-all duration-200"
-        >
+      <nav className="flex items-center space-x-8">
+        <a href="#" className="text-white/80 hover:text-white text-sm font-medium transition-colors duration-200">
           Features
         </a>
-        <a
-          href="#"
-          className="text-white/80 hover:text-white text-xs font-light px-3 py-2 rounded-full hover:bg-white/10 transition-all duration-200"
-        >
+        <a href="#" className="text-white/80 hover:text-white text-sm font-medium transition-colors duration-200">
           Pricing
         </a>
-        <a
-          href="#"
-          className="text-white/80 hover:text-white text-xs font-light px-3 py-2 rounded-full hover:bg-white/10 transition-all duration-200"
-        >
+        <a href="#" className="text-white/80 hover:text-white text-sm font-medium transition-colors duration-200">
           Docs
         </a>
       </nav>
 
-      {/* Login Button Group with Arrow */}
-      <div id="gooey-btn" className="relative flex items-center group" style={{ filter: "url(#gooey-filter)" }}>
-        <button className="absolute right-0 px-2.5 py-2 rounded-full bg-white text-black font-normal text-xs transition-all duration-300 hover:bg-white/90 cursor-pointer h-8 flex items-center justify-center -translate-x-10 group-hover:-translate-x-19 z-0">
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 17L17 7M17 7H7M17 7V17" />
-          </svg>
+      <div className="flex items-center space-x-3">
+        <button className="px-4 py-2 rounded-lg bg-transparent border border-white/20 text-white text-sm font-medium hover:bg-white/10 transition-all duration-200">
+          Sign In
         </button>
-        <button className="px-6 py-2 rounded-full bg-white text-black font-normal text-xs transition-all duration-300 hover:bg-white/90 cursor-pointer h-8 flex items-center z-10">
-          Login
+        <button className="px-4 py-2 rounded-lg bg-white text-black text-sm font-medium hover:bg-white/90 transition-all duration-200">
+          Sign Up
         </button>
+
+        <div className="flex items-center space-x-2 ml-4">
+          <button className="p-2 rounded-lg hover:bg-white/10 transition-colors duration-200">
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              />
+            </svg>
+          </button>
+
+          <button className="relative p-2 rounded-lg hover:bg-white/10 transition-colors duration-200">
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h8m-8 0a2 2 0 100 4 2 2 0 000-4zm8 0a2 2 0 100 4 2 2 0 000-4z"
+              />
+            </svg>
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              2
+            </span>
+          </button>
+
+          <button className="p-2 rounded-lg hover:bg-white/10 transition-colors duration-200 md:hidden">
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
       </div>
     </header>
   )
