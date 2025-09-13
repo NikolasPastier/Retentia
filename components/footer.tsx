@@ -72,7 +72,7 @@ export default function Footer() {
     { label: t.howItWorks, href: "#how-it-works" },
     { label: t.pricing, href: "#pricing" },
     { label: t.helpCenter, href: "#help" },
-    { label: t.privacyPolicy, href: "#privacy" },
+    { label: t.privacyPolicy, href: "/privacy" },
     { label: t.termsOfService, href: "#terms" },
     { label: t.contact, href: "#contact" },
   ]
