@@ -2,23 +2,79 @@
 
 import { ChevronDown, Globe } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
-import { useTranslation } from "react-i18next"
 import { useRouter, usePathname } from "next/navigation"
-import { useLocale } from "@/lib/i18n/hooks"
+
+const translations = {
+  en: {
+    howItWorks: "How It Works",
+    pricing: "Pricing",
+    helpCenter: "Help Center",
+    privacyPolicy: "Privacy Policy",
+    termsOfService: "Terms of Service",
+    contact: "Contact",
+  },
+  es: {
+    howItWorks: "Cómo Funciona",
+    pricing: "Precios",
+    helpCenter: "Centro de Ayuda",
+    privacyPolicy: "Política de Privacidad",
+    termsOfService: "Términos de Servicio",
+    contact: "Contacto",
+  },
+  fr: {
+    howItWorks: "Comment Ça Marche",
+    pricing: "Tarifs",
+    helpCenter: "Centre d'Aide",
+    privacyPolicy: "Politique de Confidentialité",
+    termsOfService: "Conditions d'Utilisation",
+    contact: "Contact",
+  },
+  de: {
+    howItWorks: "Wie Es Funktioniert",
+    pricing: "Preise",
+    helpCenter: "Hilfezentrum",
+    privacyPolicy: "Datenschutzrichtlinie",
+    termsOfService: "Nutzungsbedingungen",
+    contact: "Kontakt",
+  },
+  it: {
+    howItWorks: "Come Funziona",
+    pricing: "Prezzi",
+    helpCenter: "Centro Assistenza",
+    privacyPolicy: "Informativa sulla Privacy",
+    termsOfService: "Termini di Servizio",
+    contact: "Contatto",
+  },
+  pt: {
+    howItWorks: "Como Funciona",
+    pricing: "Preços",
+    helpCenter: "Central de Ajuda",
+    privacyPolicy: "Política de Privacidade",
+    termsOfService: "Termos de Serviço",
+    contact: "Contato",
+  },
+}
 
 export default function Footer() {
-  const { t } = useTranslation("common")
   const router = useRouter()
   const pathname = usePathname()
-  const locale = useLocale()
+
+  const getLocaleFromPath = () => {
+    const segments = pathname.split("/").filter(Boolean)
+    const firstSegment = segments[0]
+    return Object.keys(translations).includes(firstSegment) ? firstSegment : "en"
+  }
+
+  const locale = getLocaleFromPath()
+  const t = translations[locale as keyof typeof translations] || translations.en
 
   const footerLinks = [
-    { label: t("footer.howItWorks"), href: "#how-it-works" },
-    { label: t("footer.pricing"), href: "#pricing" },
-    { label: t("footer.helpCenter"), href: "#help" },
-    { label: t("footer.privacyPolicy"), href: "#privacy" },
-    { label: t("footer.termsOfService"), href: "#terms" },
-    { label: t("footer.contact"), href: "#contact" },
+    { label: t.howItWorks, href: "#how-it-works" },
+    { label: t.pricing, href: "#pricing" },
+    { label: t.helpCenter, href: "#help" },
+    { label: t.privacyPolicy, href: "#privacy" },
+    { label: t.termsOfService, href: "#terms" },
+    { label: t.contact, href: "#contact" },
   ]
 
   const [isLanguageOpen, setIsLanguageOpen] = useState(false)
