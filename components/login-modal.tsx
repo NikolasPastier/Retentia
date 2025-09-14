@@ -3,6 +3,8 @@ import { useState } from "react"
 import type React from "react"
 
 import { X } from "lucide-react"
+import { signInWithEmail } from "@/lib/firebase/auth"
+import { useToast } from "@/hooks/use-toast"
 
 interface LoginModalProps {
   isOpen: boolean
@@ -13,14 +15,40 @@ interface LoginModalProps {
 export default function LoginModal({ isOpen, onClose, onSwitchToSignup }: LoginModalProps) {
   const [emailOrUsername, setEmailOrUsername] = useState("")
   const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+  const { toast } = useToast()
 
   if (!isOpen) return null
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle login logic here
-    console.log("Login attempt:", { emailOrUsername, password })
-    onClose()
+
+    setLoading(true)
+    try {
+      const result = await signInWithEmail(emailOrUsername, password)
+
+      if (result.error) {
+        toast({
+          title: "Login Error",
+          description: result.error,
+          variant: "destructive",
+        })
+      } else {
+        toast({
+          title: "Welcome Back",
+          description: "You've been signed in successfully!",
+        })
+        onClose()
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -35,13 +63,13 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }: LoginM
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Email or Username</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
             <input
-              type="text"
+              type="email"
               value={emailOrUsername}
               onChange={(e) => setEmailOrUsername(e.target.value)}
               className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter your email or username"
+              placeholder="Enter your email"
               required
             />
           </div>
@@ -60,9 +88,10 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }: LoginM
 
           <button
             type="submit"
-            className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+            disabled={loading}
+            className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
           >
-            Log In
+            {loading ? "Signing In..." : "Log In"}
           </button>
         </form>
 

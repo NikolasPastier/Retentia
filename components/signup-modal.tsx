@@ -3,6 +3,8 @@ import { useState } from "react"
 import type React from "react"
 
 import { X } from "lucide-react"
+import { signUpWithEmail } from "@/lib/firebase/auth"
+import { useToast } from "@/hooks/use-toast"
 
 interface SignupModalProps {
   isOpen: boolean
@@ -15,18 +17,48 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }: Signup
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+  const { toast } = useToast()
 
   if (!isOpen) return null
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (password !== confirmPassword) {
-      alert("Passwords don't match")
+      toast({
+        title: "Password Mismatch",
+        description: "Passwords don't match",
+        variant: "destructive",
+      })
       return
     }
-    // Handle signup logic here
-    console.log("Signup attempt:", { username, email, password })
-    onClose()
+
+    setLoading(true)
+    try {
+      const result = await signUpWithEmail(email, password)
+
+      if (result.error) {
+        toast({
+          title: "Signup Error",
+          description: result.error,
+          variant: "destructive",
+        })
+      } else {
+        toast({
+          title: "Account Created",
+          description: "Your account has been created successfully!",
+        })
+        onClose()
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -73,6 +105,7 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }: Signup
               className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Create a password"
               required
+              minLength={6}
             />
           </div>
 
@@ -85,14 +118,16 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }: Signup
               className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Confirm your password"
               required
+              minLength={6}
             />
           </div>
 
           <button
             type="submit"
-            className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+            disabled={loading}
+            className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
           >
-            Get Started
+            {loading ? "Creating Account..." : "Get Started"}
           </button>
         </form>
 
