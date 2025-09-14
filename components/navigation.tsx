@@ -37,7 +37,7 @@ export default function Navigation({
   return (
     <>
       <header className="relative z-20 mx-6 mt-6">
-        <div className="bg-gray-900/95 backdrop-blur-sm rounded-2xl border border-gray-800/50 px-6 py-4 flex items-center justify-between">
+        <div className="px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
               <Image src="/logo.png" alt="Retentia Logo" width={32} height={32} className="rounded-lg" />

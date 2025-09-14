@@ -3,7 +3,7 @@
 export default function Header() {
   return (
     <header className="relative z-20 mx-6 mt-6">
-      <div className="bg-gray-900/95 backdrop-blur-sm rounded-2xl border border-gray-800/50 px-6 py-4 flex items-center justify-between">
+      <div className="px-6 py-4 flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center">
           <svg

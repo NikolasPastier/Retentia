@@ -257,22 +257,16 @@ export default function Footer() {
     <footer className={`${hasContent ? "relative mt-8" : "fixed bottom-0 left-0 right-0"} z-10`}>
       <div className="container mx-auto px-4 py-3">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-1 text-xs sm:text-sm text-muted-foreground overflow-x-auto scrollbar-hide">
+          <div className="flex items-center justify-center gap-1 text-xs sm:text-sm text-muted-foreground overflow-x-auto scrollbar-hide w-full sm:w-auto">
             <div className="flex items-center gap-1 whitespace-nowrap">
               {footerLinks.map((link, index) => (
                 <div key={link.label} className="flex items-center">
                   {link.isRoute ? (
-                    <Link
-                      href={link.href}
-                      className="hover:text-foreground hover:underline transition-all duration-200 px-1"
-                    >
+                    <Link href={link.href} className="hover:text-gray-400 transition-colors duration-200 px-1">
                       {link.label}
                     </Link>
                   ) : (
-                    <a
-                      href={link.href}
-                      className="hover:text-foreground hover:underline transition-all duration-200 px-1"
-                    >
+                    <a href={link.href} className="hover:text-gray-400 transition-colors duration-200 px-1">
                       {link.label}
                     </a>
                   )}
