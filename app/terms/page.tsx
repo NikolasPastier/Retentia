@@ -1,6 +1,16 @@
+import Link from "next/link"
+
 export default function TermsOfServicePage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <div className="border-b border-border/20">
+        <div className="container mx-auto px-4 py-4">
+          <Link href="/" className="text-xl font-semibold text-foreground hover:text-accent transition-colors">
+            ← Back to Home
+          </Link>
+        </div>
+      </div>
+
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="prose prose-invert max-w-none">
           <h1 className="text-4xl font-bold mb-8 text-center">📜 Retentia Terms of Service</h1>
