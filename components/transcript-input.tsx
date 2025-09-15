@@ -748,6 +748,52 @@ export default function TranscriptInput({
     }
   }
 
+  const getRenderModeOptions = () => {
+    switch (mode) {
+      case 'study':
+        return (
+          <>
+            <Button variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => {}}>
+              Study with Flashcards
+            </Button>
+            <Button variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => {}}>
+              Create Quiz
+            </Button>
+            <Button variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => {}}>
+              Generate Notes
+            </Button>
+          </>
+        )
+      case 'summarise':
+        return (
+          <>
+            <Button variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => {}}>
+              Brief Summary
+            </Button>
+            <Button variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => {}}>
+              Detailed Summary
+            </Button>
+            <Button variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => {}}>
+              Key Points
+            </Button>
+          </>
+        )
+      case 'explain':
+        return (
+          <>
+            <Button variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => {}}>
+              Explain to a Child
+            </Button>
+            <Button variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => {}}>
+              Explain to a Senior
+            </Button>
+          </>
+        )
+      default:
+        return null
+    }
+  }
+
   useEffect(() => {
     setResult(null)
   }, [mode])
@@ -1084,5 +1130,5 @@ export default function TranscriptInput({
 
       <UsageLimitModal isOpen={showLimitModal} onClose={() => setShowLimitModal(false)} message={limitMessage} />
     </div>
-  )
+  )\
 }
