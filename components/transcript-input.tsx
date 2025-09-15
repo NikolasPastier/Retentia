@@ -1151,5 +1151,5 @@ export default function TranscriptInput({
 
       <UsageLimitModal isOpen={showLimitModal} onClose={() => setShowLimitModal(false)} message={limitMessage} />
     </div>
-  )\
+  )
 }
