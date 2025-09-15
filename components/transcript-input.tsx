@@ -78,6 +78,9 @@ export default function TranscriptInput({
   const [showLimitModal, setShowLimitModal] = useState(false)
   const [limitMessage, setLimitMessage] = useState("")
 
+  const [summarizeSetting, setSummarizeSetting] = useState("brief")
+  const [explainSetting, setExplainSetting] = useState("adult")
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -480,7 +483,7 @@ export default function TranscriptInput({
       return
     }
 
-    if ((mode === "study" || mode === "summarise") && !transcript.trim()) {
+    if ((mode === "study" || mode === "summarize") && !transcript.trim()) {
       toast({
         title: "Missing Content",
         description: `Please provide material to ${mode}.`,
@@ -528,8 +531,8 @@ export default function TranscriptInput({
           explanation: userExplanation,
           userId: user.uid,
         }
-      } else if (mode === "summarise") {
-        apiEndpoint = "/api/summarise"
+      } else if (mode === "summarize") {
+        apiEndpoint = "/api/summarize"
       }
 
       const response = await fetch(apiEndpoint, {
@@ -541,7 +544,7 @@ export default function TranscriptInput({
       })
 
       if (!response.ok) {
-        throw new Error(`Failed to ${mode === "summarise" ? "generate summary" : mode === "explain" ? "get feedback" : "generate questions"}`)
+        throw new Error(`Failed to ${mode === "summarize" ? "generate summary" : mode === "explain" ? "get feedback" : "generate questions"}`)
       }
 
       const data = await response.json()
@@ -565,7 +568,7 @@ export default function TranscriptInput({
         sessionData.explanation = userExplanation
         sessionData.feedback = data
         setResult(data)
-      } else if (mode === "summarise") {
+      } else if (mode === "summarize") {
         sessionData.summary = data
         setResult(data)
       }
@@ -712,16 +715,43 @@ export default function TranscriptInput({
             </div>
           </>
         )
-      case "summarise":
+      case "summarize":
         return (
           <>
-            <Button variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => {}}>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="w-full justify-start text-sm" 
+              onClick={() => {
+                setResult(null)
+                setSummarizeSetting("brief")
+                onModeChange("summarize")
+              }}
+            >
               Briefly
             </Button>
-            <Button variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => {}}>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="w-full justify-start text-sm" 
+              onClick={() => {
+                setResult(null)
+                setSummarizeSetting("in-depth")
+                onModeChange("summarize")
+              }}
+            >
               In Depth
             </Button>
-            <Button variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => {}}>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="w-full justify-start text-sm" 
+              onClick={() => {
+                setResult(null)
+                setSummarizeSetting("key-points")
+                onModeChange("summarize")
+              }}
+            >
               Key Points
             </Button>
           </>
@@ -729,16 +759,52 @@ export default function TranscriptInput({
       case "explain":
         return (
           <>
-            <Button variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => {}}>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="w-full justify-start text-sm" 
+              onClick={() => {
+                setResult(null)
+                setExplainSetting("child")
+                onModeChange("explain")
+              }}
+            >
               Explain to a Child
             </Button>
-            <Button variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => {}}>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="w-full justify-start text-sm" 
+              onClick={() => {
+                setResult(null)
+                setExplainSetting("teen")
+                onModeChange("explain")
+              }}
+            >
               Explain to a Teenager
             </Button>
-            <Button variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => {}}>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="w-full justify-start text-sm" 
+              onClick={() => {
+                setResult(null)
+                setExplainSetting("adult")
+                onModeChange("explain")
+              }}
+            >
               Explain to an Adult
             </Button>
-            <Button variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => {}}>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="w-full justify-start text-sm" 
+              onClick={() => {
+                setResult(null)
+                setExplainSetting("senior")
+                onModeChange("explain")
+              }}
+            >
               Explain to a Senior
             </Button>
           </>
@@ -748,51 +814,6 @@ export default function TranscriptInput({
     }
   }
 
-  const getRenderModeOptions = () => {
-    switch (mode) {
-      case 'study':
-        return (
-          <>
-            <Button variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => {}}>
-              Study with Flashcards
-            </Button>
-            <Button variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => {}}>
-              Create Quiz
-            </Button>
-            <Button variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => {}}>
-              Generate Notes
-            </Button>
-          </>
-        )
-      case 'summarise':
-        return (
-          <>
-            <Button variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => {}}>
-              Brief Summary
-            </Button>
-            <Button variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => {}}>
-              Detailed Summary
-            </Button>
-            <Button variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => {}}>
-              Key Points
-            </Button>
-          </>
-        )
-      case 'explain':
-        return (
-          <>
-            <Button variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => {}}>
-              Explain to a Child
-            </Button>
-            <Button variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => {}}>
-              Explain to a Senior
-            </Button>
-          </>
-        )
-      default:
-        return null
-    }
-  }
 
   useEffect(() => {
     setResult(null)
@@ -954,7 +975,7 @@ export default function TranscriptInput({
                           size="sm"
                           className="w-full justify-start text-sm"
                           onClick={() => {
-                            onModeChange("summarise")
+                            onModeChange("summarize")
                             setShowModeSelector(false)
                           }}
                         >
