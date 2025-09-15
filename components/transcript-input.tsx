@@ -5,26 +5,36 @@ import type React from "react"
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, Settings, Loader2, X, File, Link, ChevronRight, Grid3X3 } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
+import { Badge } from "@/components/ui/badge"
+import { Plus, Settings, Loader2, X, File, Link, ChevronRight, Grid3X3, CheckCircle } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth"
 import { saveStudySession } from "@/lib/firebase/firestore"
 import { checkGenerationLimit, recordGeneration, checkInputLimits } from "@/lib/plans/plan-limits"
 import { useToast } from "@/hooks/use-toast"
 import AuthModal from "@/components/auth/auth-modal"
 import UsageLimitModal from "@/components/plans/usage-limit-modal"
-import ExplainMode from "@/components/explain-mode"
-import SummariseMode from "@/components/summarise-mode"
 import type { StudyMode } from "./locale-page-client"
 
-const getPlaceholderText = () => {
-  return "Enter your transcript or paste a YouTube link here"
+const getPlaceholderText = (mode: StudyMode) => {
+  switch (mode) {
+    case "study":
+      return "Enter your transcript or paste a YouTube link here"
+    case "explain":
+      return "Paste your study material here..."
+    case "summarise":
+      return "Paste your material here..."
+    default:
+      return "Enter your transcript or paste a YouTube link here"
+  }
 }
 
 interface TranscriptInputProps {
   transcript: string
   setTranscript: (transcript: string) => void
   onQuestionsGenerated: (questions: any[]) => void
-  mode: StudyMode // Added mode prop
+  mode: StudyMode
   setting?: string
   onModeChange: (mode: StudyMode) => void
 }
@@ -40,6 +50,9 @@ export default function TranscriptInput({
   const [difficulty, setDifficulty] = useState("medium")
   const [questionCount, setQuestionCount] = useState("5")
   const [questionType, setQuestionType] = useState("mixed")
+  const [userExplanation, setUserExplanation] = useState("")
+  const [result, setResult] = useState<any>(null)
+  
   const [isGenerating, setIsGenerating] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
@@ -64,9 +77,6 @@ export default function TranscriptInput({
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [showLimitModal, setShowLimitModal] = useState(false)
   const [limitMessage, setLimitMessage] = useState("")
-
-  const [explainResult, setExplainResult] = useState<any>(null)
-  const [summariseResult, setSummariseResult] = useState<any>(null)
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -234,7 +244,7 @@ export default function TranscriptInput({
         onQuestionsGenerated(data.questions)
       } else if (mode === "summarise") {
         sessionData.summary = data.summary
-        setSummariseResult(data)
+        setResult(data)
       }
 
       const sessionId = await saveStudySession(sessionData)
@@ -454,45 +464,307 @@ export default function TranscriptInput({
     }
   }
 
-  if (mode === "explain") {
-    return (
-      <ExplainMode
-        transcript={transcript}
-        setTranscript={setTranscript}
-        selectedFile={selectedFile}
-        setSelectedFile={setSelectedFile}
-        fileInputRef={fileInputRef}
-        onResult={setExplainResult}
-        result={explainResult}
-        setting={setting}
-      />
-    )
+  const handleSubmit = async () => {
+    if (!user) {
+      setShowAuthModal(true)
+      return
+    }
+
+    // Mode-specific validation
+    if (mode === "explain" && (!transcript.trim() || !userExplanation.trim())) {
+      toast({
+        title: "Missing Content",
+        description: "Please provide both material to study and your explanation.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if ((mode === "study" || mode === "summarise") && !transcript.trim()) {
+      toast({
+        title: "Missing Content",
+        description: `Please provide material to ${mode}.`,
+        variant: "destructive",
+      })
+      return
+    }
+
+    // Check plan limits
+    const planLimits = checkInputLimits(userProfile?.plan || "free", transcript, selectedFile ? 1 : 0)
+    if (!planLimits.valid) {
+      setLimitMessage(planLimits.reason || "Plan limit exceeded")
+      setShowLimitModal(true)
+      return
+    }
+
+    // Check generation limits
+    const canGenerate = await checkGenerationLimit(user.uid)
+    if (!canGenerate.allowed) {
+      setLimitMessage(canGenerate.reason || "Generation limit reached")
+      setShowLimitModal(true)
+      return
+    }
+
+    setIsGenerating(true)
+    try {
+      let apiEndpoint = "/api/generate-questions"
+      let requestBody: any = {
+        text: transcript,
+        userId: user.uid,
+        setting: setting,
+      }
+
+      if (mode === "study") {
+        requestBody = {
+          ...requestBody,
+          difficulty,
+          questionCount: Number.parseInt(questionCount),
+          questionType,
+        }
+      } else if (mode === "explain") {
+        apiEndpoint = "/api/explain-feedback"
+        requestBody = {
+          material: transcript,
+          explanation: userExplanation,
+          userId: user.uid,
+        }
+      } else if (mode === "summarise") {
+        apiEndpoint = "/api/summarise"
+      }
+
+      const response = await fetch(apiEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to ${mode === "summarise" ? "generate summary" : mode === "explain" ? "get feedback" : "generate questions"}`)
+      }
+
+      const data = await response.json()
+
+      await recordGeneration(user.uid)
+
+      const sessionTitle = `${mode.charAt(0).toUpperCase() + mode.slice(1)} Session - ${new Date().toLocaleDateString()}`
+      const sessionData: any = {
+        userId: user.uid,
+        title: sessionTitle,
+        createdAt: new Date(),
+        transcript: transcript,
+        mode: mode,
+        setting: setting,
+      }
+
+      if (mode === "study") {
+        sessionData.questions = data.questions
+        onQuestionsGenerated(data.questions)
+      } else if (mode === "explain") {
+        sessionData.explanation = userExplanation
+        sessionData.feedback = data
+        setResult(data)
+      } else if (mode === "summarise") {
+        sessionData.summary = data
+        setResult(data)
+      }
+
+      const sessionId = await saveStudySession(sessionData)
+
+      if (sessionId) {
+        toast({
+          title: `${mode.charAt(0).toUpperCase() + mode.slice(1)} Session Saved`,
+          description: `Your ${mode} session has been saved to your dashboard`,
+        })
+      }
+    } catch (error) {
+      console.error(`Error in ${mode} mode:`, error)
+      toast({
+        title: `${mode.charAt(0).toUpperCase() + mode.slice(1)} Failed`,
+        description: `There was an error processing your ${mode} request. Please try again.`,
+        variant: "destructive",
+      })
+    } finally {
+      setIsGenerating(false)
+    }
   }
 
-  if (mode === "summarise") {
-    return (
-      <SummariseMode
-        transcript={transcript}
-        setTranscript={setTranscript}
-        selectedFile={selectedFile}
-        setSelectedFile={setSelectedFile}
-        fileInputRef={fileInputRef}
-        onResult={setSummariseResult}
-        result={summariseResult}
-        setting={setting}
-      />
-    )
+  const getSettingsOptions = () => {
+    switch (mode) {
+      case "study":
+        return (
+          <>
+            {/* Difficulty Setting */}
+            <div className="relative">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-between gap-2 text-sm"
+                onClick={() => openDropdown("difficulty")}
+              >
+                <span>Difficulty: {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}</span>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+
+              {showDifficultyDropdown && (
+                <div className="absolute left-full top-0 ml-1 bg-background/95 backdrop-blur-sm border border-border rounded-xl p-2 shadow-lg z-30 min-w-[120px]">
+                  <div className="space-y-1">
+                    {["easy", "medium", "hard"].map((diff) => (
+                      <Button
+                        key={diff}
+                        variant="ghost"
+                        size="sm"
+                        className="w-full justify-start text-sm"
+                        onClick={() => {
+                          setDifficulty(diff)
+                          setShowDifficultyDropdown(false)
+                        }}
+                      >
+                        {diff.charAt(0).toUpperCase() + diff.slice(1)}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Question Count Setting */}
+            <div className="relative">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-between gap-2 text-sm"
+                onClick={() => openDropdown("count")}
+              >
+                <span>Questions: {questionCount}</span>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+
+              {showCountDropdown && (
+                <div className="absolute left-full top-0 ml-1 bg-background/95 backdrop-blur-sm border border-border rounded-xl p-2 shadow-lg z-30 min-w-[140px]">
+                  <div className="space-y-1">
+                    {["3", "5", "10", "15"].map((count) => (
+                      <Button
+                        key={count}
+                        variant="ghost"
+                        size="sm"
+                        className="w-full justify-start text-sm"
+                        onClick={() => {
+                          setQuestionCount(count)
+                          setShowCountDropdown(false)
+                        }}
+                      >
+                        {count} Questions
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Question Type Setting */}
+            <div className="relative">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-between gap-2 text-sm"
+                onClick={() => openDropdown("type")}
+              >
+                <span>
+                  Type:{" "}
+                  {questionType === "mixed"
+                    ? "Mixed Types"
+                    : questionType
+                        .split("-")
+                        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                        .join(" ")}
+                </span>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+
+              {showTypeDropdown && (
+                <div className="absolute left-full top-0 ml-1 bg-background/95 backdrop-blur-sm border border-border rounded-xl p-2 shadow-lg z-30 min-w-[160px]">
+                  <div className="space-y-1">
+                    {[
+                      { value: "mixed", label: "Mixed Types" },
+                      { value: "multiple-choice", label: "Multiple Choice" },
+                      { value: "true-false", label: "True/False" },
+                      { value: "open-ended", label: "Open Ended" },
+                      { value: "fill-blank", label: "Fill in the Blank" },
+                    ].map((type) => (
+                      <Button
+                        key={type.value}
+                        variant="ghost"
+                        size="sm"
+                        className="w-full justify-start text-sm"
+                        onClick={() => {
+                          setQuestionType(type.value)
+                          setShowTypeDropdown(false)
+                        }}
+                      >
+                        {type.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        )
+      case "summarise":
+        return (
+          <>
+            <Button variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => {}}>
+              Briefly
+            </Button>
+            <Button variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => {}}>
+              In Depth
+            </Button>
+            <Button variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => {}}>
+              Key Points
+            </Button>
+          </>
+        )
+      case "explain":
+        return (
+          <>
+            <Button variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => {}}>
+              Explain to a Child
+            </Button>
+            <Button variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => {}}>
+              Explain to a Teenager
+            </Button>
+            <Button variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => {}}>
+              Explain to an Adult
+            </Button>
+            <Button variant="ghost" size="sm" className="w-full justify-start text-sm" onClick={() => {}}>
+              Explain to a Senior
+            </Button>
+          </>
+        )
+      default:
+        return null
+    }
   }
+
+  useEffect(() => {
+    setResult(null)
+  }, [mode])
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div className="text-center space-y-4">
         <h1 className="text-5xl md:text-6xl font-bold text-white text-balance tracking-tight">
           Change The Way You{" "}
-          <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Study</span>
+          <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            {mode === "study" ? "Study" : mode === "explain" ? "Explain" : "Learn"}
+          </span>
         </h1>
         <p className="text-xl text-white/80 text-pretty max-w-2xl mx-auto">
-          Test yourself, explain topics, generate AI-powered summaries.
+          {mode === "study" && "Test yourself, explain topics, generate AI-powered summaries."}
+          {mode === "explain" && "Upload your study material and write your explanation to get AI feedback"}
+          {mode === "summarise" && "Upload or paste your material to get a concise summary with key points"}
         </p>
       </div>
 
@@ -541,12 +813,27 @@ export default function TranscriptInput({
 
           <div className="relative">
             <Textarea
-              placeholder={getPlaceholderText()}
+              placeholder={getPlaceholderText(mode)}
               value={transcript}
               onChange={handleTextareaChange}
               className="min-h-[200px] bg-transparent border-none resize-none text-lg text-white placeholder:text-muted-foreground/70 focus-visible:ring-0 focus-visible:ring-offset-0 caret-white"
-              maxLength={10000}
+              maxLength={mode === "summarise" ? 15000 : 10000}
             />
+
+            {mode === "explain" && (
+              <div className="mt-4">
+                <Textarea
+                  placeholder="Write your explanation here as if explaining to a 10-year-old..."
+                  value={userExplanation}
+                  onChange={(e) => setUserExplanation(e.target.value)}
+                  className="min-h-[150px] bg-transparent border border-border/50 rounded-xl resize-none text-lg text-white placeholder:text-muted-foreground/70 focus-visible:ring-1 focus-visible:ring-ring caret-white"
+                  maxLength={5000}
+                />
+                <div className="flex justify-end mt-2">
+                  <span className="text-xs text-muted-foreground">{userExplanation.length}/5,000</span>
+                </div>
+              </div>
+            )}
 
             <div className="flex items-center justify-between mt-4">
               <div className="flex items-center gap-3" ref={dropdownRef}>
@@ -646,205 +933,7 @@ export default function TranscriptInput({
                   {showSettingsDropdown && (
                     <div className="absolute bottom-12 left-0 bg-background/95 backdrop-blur-sm border border-border rounded-xl p-2 shadow-lg z-20 min-w-[280px]">
                       <div className="space-y-1">
-                        {/* Difficulty Setting */}
-                        <div className="relative">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="w-full justify-between gap-2 text-sm"
-                            onClick={() => openDropdown("difficulty")}
-                          >
-                            <span>Difficulty: {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}</span>
-                            <ChevronRight className="h-4 w-4" />
-                          </Button>
-
-                          {showDifficultyDropdown && (
-                            <div className="absolute left-full top-0 ml-1 bg-background/95 backdrop-blur-sm border border-border rounded-xl p-2 shadow-lg z-30 min-w-[120px]">
-                              <div className="space-y-1">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="w-full justify-start text-sm"
-                                  onClick={() => {
-                                    setDifficulty("easy")
-                                    setShowDifficultyDropdown(false)
-                                  }}
-                                >
-                                  Easy
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="w-full justify-start text-sm"
-                                  onClick={() => {
-                                    setDifficulty("medium")
-                                    setShowDifficultyDropdown(false)
-                                  }}
-                                >
-                                  Medium
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="w-full justify-start text-sm"
-                                  onClick={() => {
-                                    setDifficulty("hard")
-                                    setShowDifficultyDropdown(false)
-                                  }}
-                                >
-                                  Hard
-                                </Button>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Question Count Setting */}
-                        <div className="relative">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="w-full justify-between gap-2 text-sm"
-                            onClick={() => openDropdown("count")}
-                          >
-                            <span>Questions: {questionCount}</span>
-                            <ChevronRight className="h-4 w-4" />
-                          </Button>
-
-                          {showCountDropdown && (
-                            <div className="absolute left-full top-0 ml-1 bg-background/95 backdrop-blur-sm border border-border rounded-xl p-2 shadow-lg z-30 min-w-[140px]">
-                              <div className="space-y-1">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="w-full justify-start text-sm"
-                                  onClick={() => {
-                                    setQuestionCount("3")
-                                    setShowCountDropdown(false)
-                                  }}
-                                >
-                                  3 Questions
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="w-full justify-start text-sm"
-                                  onClick={() => {
-                                    setQuestionCount("5")
-                                    setShowCountDropdown(false)
-                                  }}
-                                >
-                                  5 Questions
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="w-full justify-start text-sm"
-                                  onClick={() => {
-                                    setQuestionCount("10")
-                                    setShowCountDropdown(false)
-                                  }}
-                                >
-                                  10 Questions
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="w-full justify-start text-sm"
-                                  onClick={() => {
-                                    setQuestionCount("15")
-                                    setShowCountDropdown(false)
-                                  }}
-                                >
-                                  15 Questions
-                                </Button>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Question Type Setting */}
-                        <div className="relative">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="w-full justify-between gap-2 text-sm"
-                            onClick={() => openDropdown("type")}
-                          >
-                            <span>
-                              Type:{" "}
-                              {questionType === "mixed"
-                                ? "Mixed Types"
-                                : questionType
-                                    .split("-")
-                                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                                    .join(" ")}
-                            </span>
-                            <ChevronRight className="h-4 w-4" />
-                          </Button>
-
-                          {showTypeDropdown && (
-                            <div className="absolute left-full top-0 ml-1 bg-background/95 backdrop-blur-sm border border-border rounded-xl p-2 shadow-lg z-30 min-w-[160px]">
-                              <div className="space-y-1">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="w-full justify-start text-sm"
-                                  onClick={() => {
-                                    setQuestionType("mixed")
-                                    setShowTypeDropdown(false)
-                                  }}
-                                >
-                                  Mixed Types
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="w-full justify-start text-sm"
-                                  onClick={() => {
-                                    setQuestionType("multiple-choice")
-                                    setShowTypeDropdown(false)
-                                  }}
-                                >
-                                  Multiple Choice
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="w-full justify-start text-sm"
-                                  onClick={() => {
-                                    setQuestionType("true-false")
-                                    setShowTypeDropdown(false)
-                                  }}
-                                >
-                                  True/False
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="w-full justify-start text-sm"
-                                  onClick={() => {
-                                    setQuestionType("open-ended")
-                                    setShowTypeDropdown(false)
-                                  }}
-                                >
-                                  Open Ended
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="w-full justify-start text-sm"
-                                  onClick={() => {
-                                    setQuestionType("fill-blank")
-                                    setShowTypeDropdown(false)
-                                  }}
-                                >
-                                  Fill in the Blank
-                                </Button>
-                              </div>
-                            </div>
-                          )}
-                        </div>
+                        {getSettingsOptions()}
                       </div>
                     </div>
                   )}
@@ -852,31 +941,29 @@ export default function TranscriptInput({
               </div>
 
               <div className="flex items-center gap-4">
-                <span className="text-xs text-muted-foreground">{transcript.length}/10,000</span>
+                <span className="text-xs text-muted-foreground">
+                  {transcript.length}/{mode === "summarise" ? "15,000" : "10,000"}
+                </span>
 
                 <Button
-                  onClick={handleYouTubeProcess}
-                  disabled={isProcessing || !detectedYoutubeUrl}
-                  className="h-10 w-10 rounded-full bg-muted/50 hover:bg-muted border border-border/50 p-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={handleSubmit}
+                  disabled={isProcessing || !transcript.trim() || (mode === "explain" && !userExplanation.trim())}
+                  className="h-10 px-6 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground"
                   size="sm"
                 >
                   {isProcessing ? (
-                    <Loader2 className="h-5 w-5 animate-spin text-white" />
+                    <Loader2 className="h-5 w-5 animate-spin" />
                   ) : (
-                    <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 10l7-7m0 0l7 7m-7-7v18"
-                      />
-                    </svg>
+                    <>
+                      {mode === "study" && "Generate Questions"}
+                      {mode === "explain" && "Get Feedback"}
+                      {mode === "summarise" && "Generate Summary"}
+                    </>
                   )}
                 </Button>
               </div>
             </div>
           </div>
-        </div>
 
         {(uploadError || youtubeError) && (
           <div className="mt-4 bg-destructive/10 backdrop-blur-sm border border-destructive/20 rounded-2xl p-4 shadow-lg">
@@ -892,6 +979,97 @@ export default function TranscriptInput({
           className="hidden"
         />
       </div>
+
+      {result && (mode === "explain" || mode === "summarise") && (
+        <Card className="glass-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-500" />
+              {mode === "explain" ? "AI Feedback" : "Summary"}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {mode === "explain" && (
+              <>
+                {/* Rating */}
+                <div className="text-center space-y-4">
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-semibold">Understanding Rating</h3>
+                    <div className={`text-6xl font-bold ${result.rating >= 80 ? "text-green-500" : result.rating >= 60 ? "text-yellow-500" : "text-red-500"}`}>
+                      {result.rating}%
+                    </div>
+                    <Progress value={result.rating} className="w-full max-w-md mx-auto h-3" />
+                    <p className="text-sm text-muted-foreground">
+                      How well a 10-year-old would understand your explanation
+                    </p>
+                  </div>
+                </div>
+
+                {/* Feedback */}
+                <div className="space-y-4">
+                  <h4 className="text-lg font-semibold">Detailed Feedback</h4>
+                  <div className="bg-muted/20 rounded-lg p-4">
+                    <p className="text-muted-foreground whitespace-pre-wrap">{result.feedback}</p>
+                  </div>
+                </div>
+
+                {/* Improvements */}
+                {result.improvements && (
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-semibold">Suggested Improvements</h4>
+                    <div className="bg-blue-50 dark:bg-blue-950/20 rounded-lg p-4">
+                      <p className="text-blue-800 dark:text-blue-200 text-sm">{result.improvements}</p>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {mode === "summarise" && (
+              <>
+                {/* Main Summary */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Overview</h3>
+                  <div className="bg-muted/20 rounded-lg p-4">
+                    <p className="text-muted-foreground whitespace-pre-wrap">{result.summary}</p>
+                  </div>
+                </div>
+
+                {/* Key Points */}
+                {result.keyPoints && result.keyPoints.length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Key Points</h3>
+                    <div className="space-y-2">
+                      {result.keyPoints.map((point: string, index: number) => (
+                        <div key={index} className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                          <Badge variant="outline" className="mt-0.5 text-xs">
+                            {index + 1}
+                          </Badge>
+                          <p className="text-blue-800 dark:text-blue-200 text-sm">{point}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Important Concepts */}
+                {result.concepts && result.concepts.length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Important Concepts</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {result.concepts.map((concept: string, index: number) => (
+                        <Badge key={index} variant="secondary" className="text-xs">
+                          {concept}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <AuthModal
         isOpen={showAuthModal}

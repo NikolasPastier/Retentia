@@ -8,11 +8,14 @@ import Footer from "@/components/footer"
 import AuthModal from "@/components/auth/auth-modal"
 import ShaderBackground from "@/components/shader-background"
 import PulsingCircle from "@/components/pulsing-circle"
+import type { StudyMode } from "@/components/locale-page-client"
 
 export default function LearningApp() {
   const [activeSection, setActiveSection] = useState("input")
   const [transcript, setTranscript] = useState("")
   const [questions, setQuestions] = useState([])
+  const [currentMode, setCurrentMode] = useState<StudyMode>("study")
+  const [currentSetting, setCurrentSetting] = useState("medium")
 
   const handleQuestionsGenerated = (generatedQuestions: any[]) => {
     setQuestions(generatedQuestions)
@@ -25,7 +28,14 @@ export default function LearningApp() {
   return (
     <ShaderBackground>
       <div className="min-h-screen relative">
-        <Navigation activeSection={activeSection} setActiveSection={setActiveSection} />
+        <Navigation
+          activeSection={activeSection}
+          setActiveSection={setActiveSection}
+          currentMode={currentMode}
+          onModeChange={setCurrentMode}
+          currentSetting={currentSetting}
+          onSettingChange={setCurrentSetting}
+        />
 
         <main className="container mx-auto px-4 py-8">
           <div className="space-y-8">
@@ -33,6 +43,9 @@ export default function LearningApp() {
               transcript={transcript}
               setTranscript={setTranscript}
               onQuestionsGenerated={handleQuestionsGenerated}
+              mode={currentMode}
+              setting={currentSetting}
+              onModeChange={setCurrentMode}
             />
 
             {questions.length > 0 && (

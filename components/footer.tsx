@@ -77,10 +77,10 @@ export default function Footer() {
 
   const footerLinks = [
     { label: t.howItWorks, href: "#how-it-works" },
-    { label: t.pricing, href: "/pricing", isRoute: true }, // Updated pricing link to route to dedicated pricing page
-    { label: t.privacyPolicy, href: "/privacy", isRoute: true },
-    { label: t.termsOfService, href: "/terms", isRoute: true },
-    { label: t.cookies, href: "/cookies", isRoute: true },
+    { label: t.pricing, href: `/${locale}/pricing`, isRoute: true }, // Updated pricing link to route to dedicated pricing page
+    { label: t.privacyPolicy, href: `/${locale}/privacy`, isRoute: true },
+    { label: t.termsOfService, href: `/${locale}/terms`, isRoute: true },
+    { label: t.cookies, href: `/${locale}/cookies`, isRoute: true },
   ]
 
   const [isLanguageOpen, setIsLanguageOpen] = useState(false)
