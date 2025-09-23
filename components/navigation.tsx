@@ -25,13 +25,25 @@ export default function Navigation({
   const [showSignupModal, setShowSignupModal] = useState(false)
 
   const switchToSignup = () => {
+    console.log("[v0] Switching to signup modal")
     setShowLoginModal(false)
     setShowSignupModal(true)
   }
 
   const switchToLogin = () => {
+    console.log("[v0] Switching to login modal")
     setShowSignupModal(false)
     setShowLoginModal(true)
+  }
+
+  const handleLoginClick = () => {
+    console.log("[v0] Login button clicked in navigation")
+    switchToLogin()
+  }
+
+  const handleSignupClick = () => {
+    console.log("[v0] Get Started button clicked in navigation")
+    switchToSignup()
   }
 
   return (
@@ -47,13 +59,13 @@ export default function Navigation({
 
           <div className="flex items-center gap-3">
             <button
-              onClick={switchToLogin}
+              onClick={handleLoginClick}
               className="px-4 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200 text-sm font-medium"
             >
               Log In
             </button>
             <button
-              onClick={switchToSignup}
+              onClick={handleSignupClick}
               className="px-4 py-2 rounded-lg bg-white text-gray-900 hover:bg-gray-100 transition-all duration-200 text-sm font-medium"
             >
               Get Started
@@ -62,8 +74,22 @@ export default function Navigation({
         </div>
       </header>
 
-      <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} onSwitchToSignup={switchToSignup} />
-      <SignupModal isOpen={showSignupModal} onClose={() => setShowSignupModal(false)} onSwitchToLogin={switchToLogin} />
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => {
+          console.log("[v0] Closing login modal")
+          setShowLoginModal(false)
+        }}
+        onSwitchToSignup={switchToSignup}
+      />
+      <SignupModal
+        isOpen={showSignupModal}
+        onClose={() => {
+          console.log("[v0] Closing signup modal")
+          setShowSignupModal(false)
+        }}
+        onSwitchToLogin={switchToLogin}
+      />
     </>
   )
 }

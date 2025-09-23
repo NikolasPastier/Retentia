@@ -563,7 +563,7 @@ export default function TranscriptInput({
                         size="sm"
                         className={`w-full justify-start text-sm ${
                           difficulty === diff
-                            ? "bg-primary/20 text-primary border border-primary/30"
+                            ? "bg-cyan-500/30 text-cyan-300 border border-cyan-400/50 shadow-lg shadow-cyan-500/20"
                             : "hover:bg-muted/50"
                         }`}
                         onClick={() => {
@@ -601,7 +601,7 @@ export default function TranscriptInput({
                         size="sm"
                         className={`w-full justify-start text-sm ${
                           questionCount === count
-                            ? "bg-primary/20 text-primary border border-primary/30"
+                            ? "bg-cyan-500/30 text-cyan-300 border border-cyan-400/50 shadow-lg shadow-cyan-500/20"
                             : "hover:bg-muted/50"
                         }`}
                         onClick={() => {
@@ -653,7 +653,7 @@ export default function TranscriptInput({
                         size="sm"
                         className={`w-full justify-start text-sm ${
                           questionType === type.value
-                            ? "bg-primary/20 text-primary border border-primary/30"
+                            ? "bg-cyan-500/30 text-cyan-300 border border-cyan-400/50 shadow-lg shadow-cyan-500/20"
                             : "hover:bg-muted/50"
                         }`}
                         onClick={() => {
@@ -678,13 +678,14 @@ export default function TranscriptInput({
               size="sm"
               className={`w-full justify-start text-sm ${
                 summarizeSetting === "brief"
-                  ? "bg-primary/20 text-primary border border-primary/30"
+                  ? "bg-emerald-500/30 text-emerald-300 border border-emerald-400/50 shadow-lg shadow-emerald-500/20"
                   : "hover:bg-muted/50"
               }`}
               onClick={() => {
                 setResult(null)
                 setSummarizeSetting("brief")
                 onModeChange("summarize")
+                setShowSettingsDropdown(false)
               }}
             >
               Briefly
@@ -694,13 +695,14 @@ export default function TranscriptInput({
               size="sm"
               className={`w-full justify-start text-sm ${
                 summarizeSetting === "in-depth"
-                  ? "bg-primary/20 text-primary border border-primary/30"
+                  ? "bg-emerald-500/30 text-emerald-300 border border-emerald-400/50 shadow-lg shadow-emerald-500/20"
                   : "hover:bg-muted/50"
               }`}
               onClick={() => {
                 setResult(null)
                 setSummarizeSetting("in-depth")
                 onModeChange("summarize")
+                setShowSettingsDropdown(false)
               }}
             >
               In Depth
@@ -710,13 +712,14 @@ export default function TranscriptInput({
               size="sm"
               className={`w-full justify-start text-sm ${
                 summarizeSetting === "key-points"
-                  ? "bg-primary/20 text-primary border border-primary/30"
+                  ? "bg-emerald-500/30 text-emerald-300 border border-emerald-400/50 shadow-lg shadow-emerald-500/20"
                   : "hover:bg-muted/50"
               }`}
               onClick={() => {
                 setResult(null)
                 setSummarizeSetting("key-points")
                 onModeChange("summarize")
+                setShowSettingsDropdown(false)
               }}
             >
               Key Points
@@ -730,12 +733,15 @@ export default function TranscriptInput({
               variant="ghost"
               size="sm"
               className={`w-full justify-start text-sm ${
-                explainSetting === "child" ? "bg-primary/20 text-primary border border-primary/30" : "hover:bg-muted/50"
+                explainSetting === "child"
+                  ? "bg-purple-500/30 text-purple-300 border border-purple-400/50 shadow-lg shadow-purple-500/20"
+                  : "hover:bg-muted/50"
               }`}
               onClick={() => {
                 setResult(null)
                 setExplainSetting("child")
                 onModeChange("explain")
+                setShowSettingsDropdown(false)
               }}
             >
               Explain to a Child
@@ -744,12 +750,15 @@ export default function TranscriptInput({
               variant="ghost"
               size="sm"
               className={`w-full justify-start text-sm ${
-                explainSetting === "teen" ? "bg-primary/20 text-primary border border-primary/30" : "hover:bg-muted/50"
+                explainSetting === "teen"
+                  ? "bg-purple-500/30 text-purple-300 border border-purple-400/50 shadow-lg shadow-purple-500/20"
+                  : "hover:bg-muted/50"
               }`}
               onClick={() => {
                 setResult(null)
                 setExplainSetting("teen")
                 onModeChange("explain")
+                setShowSettingsDropdown(false)
               }}
             >
               Explain to a Teenager
@@ -758,12 +767,15 @@ export default function TranscriptInput({
               variant="ghost"
               size="sm"
               className={`w-full justify-start text-sm ${
-                explainSetting === "adult" ? "bg-primary/20 text-primary border border-primary/30" : "hover:bg-muted/50"
+                explainSetting === "adult"
+                  ? "bg-purple-500/30 text-purple-300 border border-purple-400/50 shadow-lg shadow-purple-500/20"
+                  : "hover:bg-muted/50"
               }`}
               onClick={() => {
                 setResult(null)
                 setExplainSetting("adult")
                 onModeChange("explain")
+                setShowSettingsDropdown(false)
               }}
             >
               Explain to an Adult
@@ -773,13 +785,14 @@ export default function TranscriptInput({
               size="sm"
               className={`w-full justify-start text-sm ${
                 explainSetting === "senior"
-                  ? "bg-primary/20 text-primary border border-primary/30"
+                  ? "bg-purple-500/30 text-purple-300 border border-purple-400/50 shadow-lg shadow-purple-500/20"
                   : "hover:bg-muted/50"
               }`}
               onClick={() => {
                 setResult(null)
                 setExplainSetting("senior")
                 onModeChange("explain")
+                setShowSettingsDropdown(false)
               }}
             >
               Explain to a Senior
