@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -559,7 +561,11 @@ export default function TranscriptInput({
                         key={diff}
                         variant="ghost"
                         size="sm"
-                        className="w-full justify-start text-sm"
+                        className={`w-full justify-start text-sm ${
+                          difficulty === diff
+                            ? "bg-primary/20 text-primary border border-primary/30"
+                            : "hover:bg-muted/50"
+                        }`}
                         onClick={() => {
                           setDifficulty(diff)
                           setShowDifficultyDropdown(false)
@@ -593,7 +599,11 @@ export default function TranscriptInput({
                         key={count}
                         variant="ghost"
                         size="sm"
-                        className="w-full justify-start text-sm"
+                        className={`w-full justify-start text-sm ${
+                          questionCount === count
+                            ? "bg-primary/20 text-primary border border-primary/30"
+                            : "hover:bg-muted/50"
+                        }`}
                         onClick={() => {
                           setQuestionCount(count)
                           setShowCountDropdown(false)
@@ -641,7 +651,11 @@ export default function TranscriptInput({
                         key={type.value}
                         variant="ghost"
                         size="sm"
-                        className="w-full justify-start text-sm"
+                        className={`w-full justify-start text-sm ${
+                          questionType === type.value
+                            ? "bg-primary/20 text-primary border border-primary/30"
+                            : "hover:bg-muted/50"
+                        }`}
                         onClick={() => {
                           setQuestionType(type.value)
                           setShowTypeDropdown(false)
@@ -662,7 +676,11 @@ export default function TranscriptInput({
             <Button
               variant="ghost"
               size="sm"
-              className="w-full justify-start text-sm"
+              className={`w-full justify-start text-sm ${
+                summarizeSetting === "brief"
+                  ? "bg-primary/20 text-primary border border-primary/30"
+                  : "hover:bg-muted/50"
+              }`}
               onClick={() => {
                 setResult(null)
                 setSummarizeSetting("brief")
@@ -674,7 +692,11 @@ export default function TranscriptInput({
             <Button
               variant="ghost"
               size="sm"
-              className="w-full justify-start text-sm"
+              className={`w-full justify-start text-sm ${
+                summarizeSetting === "in-depth"
+                  ? "bg-primary/20 text-primary border border-primary/30"
+                  : "hover:bg-muted/50"
+              }`}
               onClick={() => {
                 setResult(null)
                 setSummarizeSetting("in-depth")
@@ -686,7 +708,11 @@ export default function TranscriptInput({
             <Button
               variant="ghost"
               size="sm"
-              className="w-full justify-start text-sm"
+              className={`w-full justify-start text-sm ${
+                summarizeSetting === "key-points"
+                  ? "bg-primary/20 text-primary border border-primary/30"
+                  : "hover:bg-muted/50"
+              }`}
               onClick={() => {
                 setResult(null)
                 setSummarizeSetting("key-points")
@@ -703,7 +729,9 @@ export default function TranscriptInput({
             <Button
               variant="ghost"
               size="sm"
-              className="w-full justify-start text-sm"
+              className={`w-full justify-start text-sm ${
+                explainSetting === "child" ? "bg-primary/20 text-primary border border-primary/30" : "hover:bg-muted/50"
+              }`}
               onClick={() => {
                 setResult(null)
                 setExplainSetting("child")
@@ -715,7 +743,9 @@ export default function TranscriptInput({
             <Button
               variant="ghost"
               size="sm"
-              className="w-full justify-start text-sm"
+              className={`w-full justify-start text-sm ${
+                explainSetting === "teen" ? "bg-primary/20 text-primary border border-primary/30" : "hover:bg-muted/50"
+              }`}
               onClick={() => {
                 setResult(null)
                 setExplainSetting("teen")
@@ -727,7 +757,9 @@ export default function TranscriptInput({
             <Button
               variant="ghost"
               size="sm"
-              className="w-full justify-start text-sm"
+              className={`w-full justify-start text-sm ${
+                explainSetting === "adult" ? "bg-primary/20 text-primary border border-primary/30" : "hover:bg-muted/50"
+              }`}
               onClick={() => {
                 setResult(null)
                 setExplainSetting("adult")
@@ -739,7 +771,11 @@ export default function TranscriptInput({
             <Button
               variant="ghost"
               size="sm"
-              className="w-full justify-start text-sm"
+              className={`w-full justify-start text-sm ${
+                explainSetting === "senior"
+                  ? "bg-primary/20 text-primary border border-primary/30"
+                  : "hover:bg-muted/50"
+              }`}
               onClick={() => {
                 setResult(null)
                 setExplainSetting("senior")
@@ -1003,7 +1039,11 @@ export default function TranscriptInput({
                     <h3 className="text-lg font-semibold">Understanding Rating</h3>
                     <div
                       className={`text-6xl font-bold ${
-                        result.rating >= 80 ? "text-green-500" : result.rating >= 60 ? "text-yellow-500" : "text-red-500"
+                        result.rating >= 80
+                          ? "text-green-500"
+                          : result.rating >= 60
+                            ? "text-yellow-500"
+                            : "text-red-500"
                       }`}
                     >
                       {result.rating}%
@@ -1053,7 +1093,10 @@ export default function TranscriptInput({
                     <h3 className="text-lg font-semibold">Key Points</h3>
                     <div className="space-y-2">
                       {(result.keyPoints ?? result?.data?.keyPoints).map((point: string, index: number) => (
-                        <div key={index} className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                        <div
+                          key={index}
+                          className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg"
+                        >
                           <Badge variant="outline" className="mt-0.5 text-xs">
                             {index + 1}
                           </Badge>
