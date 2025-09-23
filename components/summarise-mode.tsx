@@ -188,6 +188,10 @@ export default function SummariseMode({
               <span className="text-xs text-muted-foreground">{transcript.length}/15,000</span>
             </div>
 
+            <p className="text-xs text-muted-foreground text-center">
+              Supported files: MP3, WAV, M4A, MP4, MOV, AVI, TXT, MD (max 100MB)
+            </p>
+
             <Button
               onClick={handleSummariseSubmit}
               disabled={isProcessing || !transcript.trim()}

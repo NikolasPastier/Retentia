@@ -221,7 +221,7 @@ export default function MediaUpload({ onQuestionsGenerated }: MediaUploadProps) 
             </div>
             <div className="space-y-2">
               <p className="text-sm font-medium">Drag and drop your file here, or click to browse</p>
-              <p className="text-xs text-muted-foreground">Supports: MP3, WAV, M4A, MP4, MOV (max 100MB)</p>
+              <p className="text-xs text-muted-foreground">Supports: MP3, WAV, M4A, MP4, MOV, TXT, MD (max 100MB)</p>
             </div>
             <Button onClick={handleFileSelect} variant="outline">
               Choose File
@@ -271,7 +271,7 @@ export default function MediaUpload({ onQuestionsGenerated }: MediaUploadProps) 
       <input
         ref={fileInputRef}
         type="file"
-        accept="audio/*,video/*"
+        accept="audio/*,video/*,.txt,.md"
         onChange={(e) => handleFiles(e.target.files)}
         className="hidden"
       />

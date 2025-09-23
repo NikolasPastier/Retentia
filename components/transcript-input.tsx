@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import StudySettingsModal from "@/components/study-settings-modal"
 
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
@@ -82,6 +83,8 @@ export default function TranscriptInput({
   const [summarizeSetting, setSummarizeSetting] = useState<"brief" | "in-depth" | "key-points">("brief")
   const [explainSetting, setExplainSetting] = useState<"child" | "teen" | "adult" | "senior">("adult")
 
+  const [showSettingsModal, setShowSettingsModal] = useState(false)
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -110,6 +113,11 @@ export default function TranscriptInput({
       return
     }
 
+    if (!user) {
+      setShowAuthModal(true)
+      return
+    }
+
     setIsUploading(true)
     setUploadError(null)
 
@@ -117,13 +125,24 @@ export default function TranscriptInput({
       const formData = new FormData()
       formData.append("file", selectedFile)
 
-      const response = await fetch("/api/upload-file", {
+      // Pass current user settings to the API
+      if (mode === "study") {
+        formData.append("difficulty", difficulty)
+        formData.append("questionCount", questionCount)
+        formData.append("questionType", questionType)
+      } else {
+        formData.append("difficulty", "medium")
+        formData.append("questionCount", "5")
+        formData.append("questionType", "mixed")
+      }
+
+      const response = await fetch("/api/media-to-questions", {
         method: "POST",
         body: formData,
       })
 
       if (!response.ok) {
-        let errorMessage = "Failed to upload file"
+        let errorMessage = "Failed to process file"
         try {
           const errorData = await response.json()
           errorMessage = errorData.error || errorMessage
@@ -133,122 +152,47 @@ export default function TranscriptInput({
         throw new Error(errorMessage)
       }
 
-      let data
-      try {
-        data = await response.json()
-      } catch {
-        throw new Error("Invalid response format from server")
+      const data = await response.json()
+
+      if (!data || !data.success) {
+        throw new Error(data?.error || "Invalid response from server")
       }
 
-      if (!data || !data.success || typeof data.text !== "string") {
-        throw new Error("Invalid response: missing text content")
+      // For study mode, generate questions directly
+      if (mode === "study" && data.questions) {
+        onQuestionsGenerated(data.questions)
+
+        // Save the session
+        await recordGeneration(user.uid)
+        const sessionTitle = `Study Session - ${new Date().toLocaleDateString()}`
+        const sessionData = {
+          userId: user.uid,
+          title: sessionTitle,
+          createdAt: new Date(),
+          transcript: data.transcript,
+          questions: data.questions,
+          mode: "study",
+          setting: difficulty,
+        }
+
+        const sessionId = await saveStudySession(sessionData)
+        if (sessionId) {
+          toast({
+            title: "Study Session Saved",
+            description: "Your study session has been saved to your dashboard",
+          })
+        }
+      } else {
+        // For other modes, just set the transcript
+        setTranscript(data.transcript)
       }
 
-      setTranscript(data.text)
       setSelectedFile(null)
       if (fileInputRef.current) fileInputRef.current.value = ""
     } catch (error) {
-      setUploadError(error instanceof Error ? error.message : "Failed to upload file")
+      setUploadError(error instanceof Error ? error.message : "Failed to process file")
     } finally {
       setIsUploading(false)
-    }
-  }
-
-  // kept for parity with your earlier code (not used directly in UI)
-  const generateQuestionsFromText = async (text: string) => {
-    if (!user) {
-      setShowAuthModal(true)
-      return
-    }
-
-    const planLimits = checkInputLimits(userProfile?.plan || "free", text, selectedFile ? 1 : 0)
-    if (!planLimits.valid) {
-      setLimitMessage(planLimits.reason || "Plan limit exceeded")
-      setShowLimitModal(true)
-      return
-    }
-
-    const canGenerate = await checkGenerationLimit(user!.uid)
-    if (!canGenerate.allowed) {
-      setLimitMessage(canGenerate.reason || "Generation limit reached")
-      setShowLimitModal(true)
-      return
-    }
-
-    setIsGenerating(true)
-    try {
-      let apiEndpoint = "/api/generate-questions"
-      let requestBody: any = {
-        text: text,
-        userId: user!.uid,
-        setting: setting,
-      }
-
-      if (mode === "study") {
-        requestBody = {
-          ...requestBody,
-          difficulty,
-          questionCount: Number.parseInt(questionCount),
-          questionType,
-        }
-      } else if (mode === "explain") {
-        apiEndpoint = "/api/explain-feedback"
-        return
-      } else if (mode === "summarize") {
-        apiEndpoint = "/api/summarize"
-        requestBody = {
-          text: text,
-          userId: user!.uid,
-          setting: summarizeSetting,
-        }
-      }
-
-      const response = await fetch(apiEndpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
-      })
-
-      if (!response.ok) {
-        throw new Error(`Failed to ${mode === "summarize" ? "generate summary" : "generate questions"}`)
-      }
-
-      const data = await response.json()
-      await recordGeneration(user!.uid)
-
-      const sessionTitle = `${mode.charAt(0).toUpperCase() + mode.slice(1)} Session - ${new Date().toLocaleDateString()}`
-      const sessionData: any = {
-        userId: user!.uid,
-        title: sessionTitle,
-        createdAt: new Date(),
-        transcript: text,
-        mode,
-        setting: mode === "summarize" ? summarizeSetting : setting,
-      }
-
-      if (mode === "study") {
-        sessionData.questions = data.questions
-        onQuestionsGenerated(data.questions)
-      } else if (mode === "summarize") {
-        sessionData.summary = data.summary
-        setResult(data)
-      }
-
-      const sessionId = await saveStudySession(sessionData)
-      if (sessionId) {
-        toast({
-          title: "Study Session Saved",
-          description: `Your ${mode} session has been saved to your dashboard`,
-        })
-      }
-    } catch (error) {
-      toast({
-        title: `${mode.charAt(0).toUpperCase() + mode.slice(1)} Failed`,
-        description: `There was an error processing your ${mode} request. Please try again.`,
-        variant: "destructive",
-      })
-    } finally {
-      setIsGenerating(false)
     }
   }
 
@@ -368,7 +312,7 @@ export default function TranscriptInput({
 
     switch (dropdownType) {
       case "settings":
-        setShowSettingsDropdown(true)
+        setShowSettingsModal(true)
         break
       case "upload":
         setShowUploadOptions(true)
@@ -918,6 +862,11 @@ export default function TranscriptInput({
                           <File className="h-4 w-4" />
                           Upload File
                         </Button>
+                        <div className="px-2 py-1">
+                          <p className="text-xs text-muted-foreground text-center">
+                            Supported: MP3, WAV, M4A, MP4, MOV, AVI, TXT, MD (max 100MB)
+                          </p>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -1151,6 +1100,22 @@ export default function TranscriptInput({
       />
 
       <UsageLimitModal isOpen={showLimitModal} onClose={() => setShowLimitModal(false)} message={limitMessage} />
+
+      <StudySettingsModal
+        isOpen={showSettingsModal}
+        onClose={() => setShowSettingsModal(false)}
+        mode={mode}
+        difficulty={difficulty}
+        questionCount={questionCount}
+        questionType={questionType}
+        onDifficultyChange={setDifficulty}
+        onQuestionCountChange={setQuestionCount}
+        onQuestionTypeChange={setQuestionType}
+        summarizeSetting={summarizeSetting}
+        onSummarizeSettingChange={setSummarizeSetting}
+        explainSetting={explainSetting}
+        onExplainSettingChange={setExplainSetting}
+      />
     </div>
   )
 }
