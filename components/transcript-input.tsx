@@ -1,7 +1,5 @@
 "use client"
 
-import type React from "react"
-
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -23,7 +21,7 @@ const getPlaceholderText = (mode: StudyMode) => {
       return "Enter your transcript or paste a YouTube link here"
     case "explain":
       return "Paste your study material here..."
-    case "summarise":
+    case "summarize":
       return "Paste your material here..."
     default:
       return "Enter your transcript or paste a YouTube link here"
@@ -52,7 +50,7 @@ export default function TranscriptInput({
   const [questionType, setQuestionType] = useState("mixed")
   const [userExplanation, setUserExplanation] = useState("")
   const [result, setResult] = useState<any>(null)
-  
+
   const [isGenerating, setIsGenerating] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
@@ -78,8 +76,9 @@ export default function TranscriptInput({
   const [showLimitModal, setShowLimitModal] = useState(false)
   const [limitMessage, setLimitMessage] = useState("")
 
-  const [summarizeSetting, setSummarizeSetting] = useState("brief")
-  const [explainSetting, setExplainSetting] = useState("adult")
+  // NEW: per-mode setting selections
+  const [summarizeSetting, setSummarizeSetting] = useState<"brief" | "in-depth" | "key-points">("brief")
+  const [explainSetting, setExplainSetting] = useState<"child" | "teen" | "adult" | "senior">("adult")
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -113,30 +112,20 @@ export default function TranscriptInput({
     setUploadError(null)
 
     try {
-      console.log("[v0] Starting file upload for:", selectedFile.name)
-
       const formData = new FormData()
       formData.append("file", selectedFile)
-
-      console.log("[v0] FormData created, making request to /api/upload-file")
 
       const response = await fetch("/api/upload-file", {
         method: "POST",
         body: formData,
       })
 
-      console.log("[v0] Response received:", response.status, response.statusText)
-      console.log("[v0] Response headers:", Object.fromEntries(response.headers.entries()))
-
       if (!response.ok) {
-        console.log("[v0] Response not OK, parsing error")
         let errorMessage = "Failed to upload file"
         try {
           const errorData = await response.json()
-          console.log("[v0] Error data:", errorData)
           errorMessage = errorData.error || errorMessage
-        } catch (parseError) {
-          console.log("[v0] Failed to parse error response:", parseError)
+        } catch {
           errorMessage = response.statusText || errorMessage
         }
         throw new Error(errorMessage)
@@ -145,39 +134,31 @@ export default function TranscriptInput({
       let data
       try {
         data = await response.json()
-        console.log("[v0] Success data received:", { ...data, text: `${data.text?.length || 0} chars` })
-      } catch (parseError) {
-        console.error("[v0] Failed to parse success response:", parseError)
+      } catch {
         throw new Error("Invalid response format from server")
       }
 
       if (!data || !data.success || typeof data.text !== "string") {
-        console.log("[v0] Invalid response structure:", data)
         throw new Error("Invalid response: missing text content")
       }
 
-      console.log("[v0] Setting transcript with extracted text")
       setTranscript(data.text)
       setSelectedFile(null)
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ""
-      }
-      console.log("[v0] File upload completed successfully")
+      if (fileInputRef.current) fileInputRef.current.value = ""
     } catch (error) {
-      console.error("[v0] File upload error:", error)
       setUploadError(error instanceof Error ? error.message : "Failed to upload file")
     } finally {
       setIsUploading(false)
     }
   }
 
+  // kept for parity with your earlier code (not used directly in UI)
   const generateQuestionsFromText = async (text: string) => {
     if (!user) {
       setShowAuthModal(true)
       return
     }
 
-    // Check plan limits
     const planLimits = checkInputLimits(userProfile?.plan || "free", text, selectedFile ? 1 : 0)
     if (!planLimits.valid) {
       setLimitMessage(planLimits.reason || "Plan limit exceeded")
@@ -185,8 +166,7 @@ export default function TranscriptInput({
       return
     }
 
-    // Check generation limits
-    const canGenerate = await checkGenerationLimit(user.uid)
+    const canGenerate = await checkGenerationLimit(user!.uid)
     if (!canGenerate.allowed) {
       setLimitMessage(canGenerate.reason || "Generation limit reached")
       setShowLimitModal(true)
@@ -198,7 +178,7 @@ export default function TranscriptInput({
       let apiEndpoint = "/api/generate-questions"
       let requestBody: any = {
         text: text,
-        userId: user.uid,
+        userId: user!.uid,
         setting: setting,
       }
 
@@ -212,46 +192,47 @@ export default function TranscriptInput({
       } else if (mode === "explain") {
         apiEndpoint = "/api/explain-feedback"
         return
-      } else if (mode === "summarise") {
-        apiEndpoint = "/api/summarise"
+      } else if (mode === "summarize") {
+        apiEndpoint = "/api/summarize"
+        requestBody = {
+          text: text,
+          userId: user!.uid,
+          setting: summarizeSetting,
+        }
       }
 
       const response = await fetch(apiEndpoint, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestBody),
       })
 
       if (!response.ok) {
-        throw new Error(`Failed to ${mode === "summarise" ? "generate summary" : "generate questions"}`)
+        throw new Error(`Failed to ${mode === "summarize" ? "generate summary" : "generate questions"}`)
       }
 
       const data = await response.json()
-
-      await recordGeneration(user.uid)
+      await recordGeneration(user!.uid)
 
       const sessionTitle = `${mode.charAt(0).toUpperCase() + mode.slice(1)} Session - ${new Date().toLocaleDateString()}`
       const sessionData: any = {
-        userId: user.uid,
+        userId: user!.uid,
         title: sessionTitle,
         createdAt: new Date(),
         transcript: text,
-        mode: mode,
-        setting: setting,
+        mode,
+        setting: mode === "summarize" ? summarizeSetting : setting,
       }
 
       if (mode === "study") {
         sessionData.questions = data.questions
         onQuestionsGenerated(data.questions)
-      } else if (mode === "summarise") {
+      } else if (mode === "summarize") {
         sessionData.summary = data.summary
         setResult(data)
       }
 
       const sessionId = await saveStudySession(sessionData)
-
       if (sessionId) {
         toast({
           title: "Study Session Saved",
@@ -259,7 +240,6 @@ export default function TranscriptInput({
         })
       }
     } catch (error) {
-      console.error(`Error in ${mode} mode:`, error)
       toast({
         title: `${mode.charAt(0).toUpperCase() + mode.slice(1)} Failed`,
         description: `There was an error processing your ${mode} request. Please try again.`,
@@ -291,42 +271,23 @@ export default function TranscriptInput({
     setYoutubeError(null)
 
     try {
-      console.log("[v0] Processing YouTube URL with worker:", youtubeUrl)
-
-      console.log("[v0] Calling worker service to download audio")
       const workerResponse = await fetch(`${workerUrl}/api/download-audio`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          youtubeUrl: youtubeUrl.trim(),
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ youtubeUrl: youtubeUrl.trim() }),
       })
 
-      console.log("[v0] Worker response:", workerResponse.status, workerResponse.statusText)
-
       const workerData = await workerResponse.json()
-
       if (!workerResponse.ok) {
-        let errorMessage = "Failed to download YouTube audio"
-        if (workerData.error) {
-          errorMessage = workerData.error
-        }
-        throw new Error(errorMessage)
+        throw new Error(workerData?.error || "Failed to download YouTube audio")
       }
-
       if (!workerData.success || !workerData.fileUrl) {
         throw new Error("Worker did not return a valid audio file URL")
       }
 
-      console.log("[v0] Audio downloaded successfully, processing with Vercel API")
-
       const response = await fetch("/api/youtube-to-questions", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           fileUrl: workerData.fileUrl,
           difficulty,
@@ -335,26 +296,10 @@ export default function TranscriptInput({
         }),
       })
 
-      console.log("[v0] Vercel API response:", response.status, response.statusText)
-
       const data = await response.json()
-
       if (!response.ok) {
-        let errorMessage = "Failed to process YouTube video"
-        try {
-          errorMessage = data.error || errorMessage
-        } catch {
-          errorMessage = response.statusText || errorMessage
-        }
-        throw new Error(errorMessage)
+        throw new Error(data?.error || response.statusText || "Failed to process YouTube video")
       }
-
-      if (data.success === false) {
-        setYoutubeError(data.error || "Failed to process the audio file.")
-        return
-      }
-
-      console.log("[v0] YouTube processing successful")
 
       if (data.questions && data.questions.length > 0) {
         onQuestionsGenerated(data.questions)
@@ -366,18 +311,15 @@ export default function TranscriptInput({
         throw new Error("No content received from YouTube video")
       }
     } catch (error) {
-      console.error("[v0] YouTube processing error:", error)
-      let errorMessage = error instanceof Error ? error.message : "Failed to process YouTube video"
-
-      if (errorMessage.includes("Failed to download audio")) {
-        errorMessage += ". The video may be private, age-restricted, or unavailable."
-      } else if (errorMessage.includes("Audio file too large")) {
-        errorMessage += ". Please try a shorter video (under 100MB audio)."
-      } else if (errorMessage.includes("worker service is not configured")) {
-        errorMessage += " Please check your environment configuration."
+      let err = error instanceof Error ? error.message : "Failed to process YouTube video"
+      if (err.includes("Failed to download audio")) {
+        err += ". The video may be private, age-restricted, or unavailable."
+      } else if (err.includes("Audio file too large")) {
+        err += ". Please try a shorter video (under 100MB audio)."
+      } else if (err.includes("worker service is not configured")) {
+        err += " Please check your environment configuration."
       }
-
-      setYoutubeError(errorMessage)
+      setYoutubeError(err)
     } finally {
       setIsProcessingYoutube(false)
     }
@@ -404,7 +346,6 @@ export default function TranscriptInput({
   }
 
   const hasContent = transcript.trim() || selectedFile || detectedYoutubeUrl
-
   const isProcessing = isGenerating || isUploading || isProcessingYoutube
 
   const closeAllDropdowns = () => {
@@ -417,18 +358,9 @@ export default function TranscriptInput({
   }
 
   const openDropdown = (dropdownType: string) => {
-    if (dropdownType === "settings" && showSettingsDropdown) {
-      closeAllDropdowns()
-      return
-    }
-    if (dropdownType === "upload" && showUploadOptions) {
-      closeAllDropdowns()
-      return
-    }
-    if (dropdownType === "mode" && showModeSelector) {
-      closeAllDropdowns()
-      return
-    }
+    if (dropdownType === "settings" && showSettingsDropdown) return closeAllDropdowns()
+    if (dropdownType === "upload" && showUploadOptions) return closeAllDropdowns()
+    if (dropdownType === "mode" && showModeSelector) return closeAllDropdowns()
 
     closeAllDropdowns()
 
@@ -454,14 +386,14 @@ export default function TranscriptInput({
     }
   }
 
-  const getModeDisplayName = (mode: StudyMode) => {
-    switch (mode) {
+  const getModeDisplayName = (m: StudyMode) => {
+    switch (m) {
       case "study":
         return "Study"
       case "explain":
         return "Explain"
-      case "summarise":
-        return "Summarise"
+      case "summarize":
+        return "Summarize"
       default:
         return "Study"
     }
@@ -530,9 +462,15 @@ export default function TranscriptInput({
           material: transcript,
           explanation: userExplanation,
           userId: user.uid,
+          audience: explainSetting, // pass chosen audience
         }
       } else if (mode === "summarize") {
         apiEndpoint = "/api/summarize"
+        requestBody = {
+          text: transcript,
+          userId: user.uid,
+          setting: summarizeSetting, // pass chosen summary style
+        }
       }
 
       const response = await fetch(apiEndpoint, {
@@ -544,7 +482,11 @@ export default function TranscriptInput({
       })
 
       if (!response.ok) {
-        throw new Error(`Failed to ${mode === "summarize" ? "generate summary" : mode === "explain" ? "get feedback" : "generate questions"}`)
+        throw new Error(
+          `Failed to ${
+            mode === "summarize" ? "generate summary" : mode === "explain" ? "get feedback" : "generate questions"
+          }`,
+        )
       }
 
       const data = await response.json()
@@ -558,7 +500,7 @@ export default function TranscriptInput({
         createdAt: new Date(),
         transcript: transcript,
         mode: mode,
-        setting: setting,
+        setting: mode === "summarize" ? summarizeSetting : mode === "explain" ? explainSetting : setting,
       }
 
       if (mode === "study") {
@@ -582,7 +524,6 @@ export default function TranscriptInput({
         })
       }
     } catch (error) {
-      console.error(`Error in ${mode} mode:`, error)
       toast({
         title: `${mode.charAt(0).toUpperCase() + mode.slice(1)} Failed`,
         description: `There was an error processing your ${mode} request. Please try again.`,
@@ -718,10 +659,10 @@ export default function TranscriptInput({
       case "summarize":
         return (
           <>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="w-full justify-start text-sm" 
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start text-sm"
               onClick={() => {
                 setResult(null)
                 setSummarizeSetting("brief")
@@ -730,10 +671,10 @@ export default function TranscriptInput({
             >
               Briefly
             </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="w-full justify-start text-sm" 
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start text-sm"
               onClick={() => {
                 setResult(null)
                 setSummarizeSetting("in-depth")
@@ -742,10 +683,10 @@ export default function TranscriptInput({
             >
               In Depth
             </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="w-full justify-start text-sm" 
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start text-sm"
               onClick={() => {
                 setResult(null)
                 setSummarizeSetting("key-points")
@@ -759,10 +700,10 @@ export default function TranscriptInput({
       case "explain":
         return (
           <>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="w-full justify-start text-sm" 
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start text-sm"
               onClick={() => {
                 setResult(null)
                 setExplainSetting("child")
@@ -771,10 +712,10 @@ export default function TranscriptInput({
             >
               Explain to a Child
             </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="w-full justify-start text-sm" 
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start text-sm"
               onClick={() => {
                 setResult(null)
                 setExplainSetting("teen")
@@ -783,10 +724,10 @@ export default function TranscriptInput({
             >
               Explain to a Teenager
             </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="w-full justify-start text-sm" 
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start text-sm"
               onClick={() => {
                 setResult(null)
                 setExplainSetting("adult")
@@ -795,10 +736,10 @@ export default function TranscriptInput({
             >
               Explain to an Adult
             </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="w-full justify-start text-sm" 
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start text-sm"
               onClick={() => {
                 setResult(null)
                 setExplainSetting("senior")
@@ -813,7 +754,6 @@ export default function TranscriptInput({
         return null
     }
   }
-
 
   useEffect(() => {
     setResult(null)
@@ -831,7 +771,7 @@ export default function TranscriptInput({
         <p className="text-xl text-white/80 text-pretty max-w-2xl mx-auto">
           {mode === "study" && "Test yourself, explain topics, generate AI-powered summaries."}
           {mode === "explain" && "Upload your study material and write your explanation to get AI feedback"}
-          {mode === "summarise" && "Upload or paste your material to get a concise summary with key points"}
+          {mode === "summarize" && "Upload or paste your material to get a concise summary with key points"}
         </p>
       </div>
 
@@ -884,7 +824,7 @@ export default function TranscriptInput({
               value={transcript}
               onChange={handleTextareaChange}
               className="min-h-[200px] bg-transparent border-none resize-none text-lg text-white placeholder:text-muted-foreground/70 focus-visible:ring-0 focus-visible:ring-offset-0 caret-white"
-              maxLength={mode === "summarise" ? 15000 : 10000}
+              maxLength={mode === "summarize" ? 15000 : 10000}
             />
 
             {mode === "explain" && (
@@ -979,7 +919,7 @@ export default function TranscriptInput({
                             setShowModeSelector(false)
                           }}
                         >
-                          Summarise
+                          Summarize
                         </Button>
                       </div>
                     </div>
@@ -999,9 +939,7 @@ export default function TranscriptInput({
 
                   {showSettingsDropdown && (
                     <div className="absolute bottom-12 left-0 bg-background/95 backdrop-blur-sm border border-border rounded-xl p-2 shadow-lg z-20 min-w-[280px]">
-                      <div className="space-y-1">
-                        {getSettingsOptions()}
-                      </div>
+                      <div className="space-y-1">{getSettingsOptions()}</div>
                     </div>
                   )}
                 </div>
@@ -1009,7 +947,7 @@ export default function TranscriptInput({
 
               <div className="flex items-center gap-4">
                 <span className="text-xs text-muted-foreground">
-                  {transcript.length}/{mode === "summarise" ? "15,000" : "10,000"}
+                  {transcript.length}/{mode === "summarize" ? "15,000" : "10,000"}
                 </span>
 
                 <Button
@@ -1024,7 +962,7 @@ export default function TranscriptInput({
                     <>
                       {mode === "study" && "Generate Questions"}
                       {mode === "explain" && "Get Feedback"}
-                      {mode === "summarise" && "Generate Summary"}
+                      {mode === "summarize" && "Generate Summary"}
                     </>
                   )}
                 </Button>
@@ -1032,22 +970,23 @@ export default function TranscriptInput({
             </div>
           </div>
 
-        {(uploadError || youtubeError) && (
-          <div className="mt-4 bg-destructive/10 backdrop-blur-sm border border-destructive/20 rounded-2xl p-4 shadow-lg">
-            <p className="text-sm text-destructive">{uploadError || youtubeError}</p>
-          </div>
-        )}
+          {(uploadError || youtubeError) && (
+            <div className="mt-4 bg-destructive/10 backdrop-blur-sm border border-destructive/20 rounded-2xl p-4 shadow-lg">
+              <p className="text-sm text-destructive">{uploadError || youtubeError}</p>
+            </div>
+          )}
 
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".txt,.md,audio/*,video/*"
-          onChange={handleFileSelect}
-          className="hidden"
-        />
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".txt,.md,audio/*,video/*"
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+        </div>
       </div>
 
-      {result && (mode === "explain" || mode === "summarise") && (
+      {result && (mode === "explain" || mode === "summarize") && (
         <Card className="glass-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -1062,12 +1001,16 @@ export default function TranscriptInput({
                 <div className="text-center space-y-4">
                   <div className="space-y-2">
                     <h3 className="text-lg font-semibold">Understanding Rating</h3>
-                    <div className={`text-6xl font-bold ${result.rating >= 80 ? "text-green-500" : result.rating >= 60 ? "text-yellow-500" : "text-red-500"}`}>
+                    <div
+                      className={`text-6xl font-bold ${
+                        result.rating >= 80 ? "text-green-500" : result.rating >= 60 ? "text-yellow-500" : "text-red-500"
+                      }`}
+                    >
                       {result.rating}%
                     </div>
                     <Progress value={result.rating} className="w-full max-w-md mx-auto h-3" />
                     <p className="text-sm text-muted-foreground">
-                      How well a 10-year-old would understand your explanation
+                      How well the selected audience would understand your explanation
                     </p>
                   </div>
                 </div>
@@ -1092,22 +1035,24 @@ export default function TranscriptInput({
               </>
             )}
 
-            {mode === "summarise" && (
+            {mode === "summarize" && (
               <>
                 {/* Main Summary */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Overview</h3>
                   <div className="bg-muted/20 rounded-lg p-4">
-                    <p className="text-muted-foreground whitespace-pre-wrap">{result.summary}</p>
+                    <p className="text-muted-foreground whitespace-pre-wrap">
+                      {result.summary || result?.data?.summary || ""}
+                    </p>
                   </div>
                 </div>
 
                 {/* Key Points */}
-                {result.keyPoints && result.keyPoints.length > 0 && (
+                {(result.keyPoints?.length ? result.keyPoints : result?.data?.keyPoints) && (
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold">Key Points</h3>
                     <div className="space-y-2">
-                      {result.keyPoints.map((point: string, index: number) => (
+                      {(result.keyPoints ?? result?.data?.keyPoints).map((point: string, index: number) => (
                         <div key={index} className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
                           <Badge variant="outline" className="mt-0.5 text-xs">
                             {index + 1}
@@ -1120,11 +1065,11 @@ export default function TranscriptInput({
                 )}
 
                 {/* Important Concepts */}
-                {result.concepts && result.concepts.length > 0 && (
+                {(result.concepts?.length ? result.concepts : result?.data?.concepts) && (
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold">Important Concepts</h3>
                     <div className="flex flex-wrap gap-2">
-                      {result.concepts.map((concept: string, index: number) => (
+                      {(result.concepts ?? result?.data?.concepts).map((concept: string, index: number) => (
                         <Badge key={index} variant="secondary" className="text-xs">
                           {concept}
                         </Badge>
