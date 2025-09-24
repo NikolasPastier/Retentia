@@ -38,25 +38,49 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const refreshProfile = async () => {
     if (user) {
-      const profile = await getUserProfile(user.uid)
-      setUserProfile(profile)
+      try {
+        const profile = await getUserProfile(user.uid)
+        setUserProfile(profile)
+        console.log("[v0] User profile refreshed:", profile)
+      } catch (error) {
+        console.error("[v0] Error refreshing user profile:", error)
+      }
     }
   }
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChange(async (user) => {
-      setUser(user)
-      if (user) {
-        const profile = await getUserProfile(user.uid)
-        setUserProfile(profile)
-      } else {
-        setUserProfile(null)
-      }
-      setLoading(false)
-    })
+    console.log("[v0] Setting up auth state listener")
 
-    return unsubscribe
+    try {
+      const unsubscribe = onAuthStateChange(async (user) => {
+        console.log("[v0] Auth state changed:", user ? "User logged in" : "User logged out")
+        setUser(user)
+
+        if (user) {
+          try {
+            const profile = await getUserProfile(user.uid)
+            setUserProfile(profile)
+            console.log("[v0] User profile loaded:", profile)
+          } catch (error) {
+            console.error("[v0] Error loading user profile:", error)
+            setUserProfile(null)
+          }
+        } else {
+          setUserProfile(null)
+        }
+
+        setLoading(false)
+      })
+
+      return unsubscribe
+    } catch (error) {
+      console.error("[v0] Error setting up auth listener:", error)
+      setLoading(false)
+      return () => {}
+    }
   }, [])
+
+  console.log("[v0] Auth state:", { user: !!user, userProfile: !!userProfile, loading })
 
   return <AuthContext.Provider value={{ user, userProfile, loading, refreshProfile }}>{children}</AuthContext.Provider>
 }
