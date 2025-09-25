@@ -1,0 +1,52 @@
+{
+  "title": "Retentia - Plataforma de Aprendizaje con IA",
+  "description": "Transforma tu contenido en experiencias de aprendizaje interactivas con preguntas generadas por IA",
+  "loading": "Cargando...",
+  "error": "Ocurrió un error",
+  "success": "Éxito",
+  "cancel": "Cancelar",
+  "save": "Guardar",
+  "delete": "Eliminar",
+  "edit": "Editar",
+  "close": "Cerrar",
+  "back": "Atrás",
+  "next": "Siguiente",
+  "previous": "Anterior",
+  "submit": "Enviar",
+  "generate": "Generar",
+  "upload": "Subir",
+  "clear": "Limpiar",
+  "settings": "Configuración",
+  "nav": {
+    "home": "Inicio",
+    "features": "Características",
+    "pricing": "Precios",
+    "docs": "Documentos",
+    "signIn": "Iniciar Sesión",
+    "signUp": "Registrarse",
+    "logIn": "Iniciar Sesión",
+    "getStarted": "Comenzar",
+    "dashboard": "Panel",
+    "profile": "Perfil",
+    "logout": "Cerrar Sesión"
+  },
+  "footer": {
+    "howItWorks": "Cómo Funciona",
+    "pricing": "Precios",
+    "helpCenter": "Centro de Ayuda",
+    "privacyPolicy": "Política de Privacidad",
+    "termsOfService": "Términos de Servicio",
+    "contact": "Contacto",
+    "cookies": "Cookies"
+  },
+  "auth": {
+    "login": "Iniciar Sesión",
+    "signup": "Registrarse",
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "createAccount": "Crear Cuenta",
+    "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+    "dontHaveAccount": "¿No tienes una cuenta?"
+  }
+}

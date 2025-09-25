@@ -17,12 +17,36 @@
   "upload": "Upload",
   "clear": "Clear",
   "settings": "Settings",
+  "nav": {
+    "home": "Home",
+    "features": "Features",
+    "pricing": "Pricing",
+    "docs": "Docs",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "logIn": "Log In",
+    "getStarted": "Get Started",
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "logout": "Logout"
+  },
   "footer": {
     "howItWorks": "How it Works",
     "pricing": "Pricing",
     "helpCenter": "Help Center",
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
-    "contact": "Contact"
+    "contact": "Contact",
+    "cookies": "Cookies"
+  },
+  "auth": {
+    "login": "Log In",
+    "signup": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot Password?",
+    "createAccount": "Create Account",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?"
   }
 }

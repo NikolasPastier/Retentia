@@ -22,21 +22,19 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const { toast } = useToast()
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setError(null)
 
     try {
       const result = isSignUp ? await signUpWithEmail(email, password) : await signInWithEmail(email, password)
 
       if (result.error) {
-        toast({
-          title: "Authentication Error",
-          description: result.error,
-          variant: "destructive",
-        })
+        setError(result.error)
       } else {
         toast({
           title: isSignUp ? "Account Created" : "Welcome Back",
@@ -44,13 +42,12 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
         })
         onSuccess?.()
         onClose()
+        setEmail("")
+        setPassword("")
+        setError(null)
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred",
-        variant: "destructive",
-      })
+      setError("An unexpected error occurred. Please try again.")
     } finally {
       setLoading(false)
     }
@@ -165,6 +162,10 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
 
           {/* Email Form */}
           <form onSubmit={handleEmailAuth} className="space-y-4">
+            {error && (
+              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">{error}</div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -196,7 +197,14 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
           </form>
 
           <div className="text-center text-sm">
-            <button type="button" onClick={() => setIsSignUp(!isSignUp)} className="text-primary hover:underline">
+            <button
+              type="button"
+              onClick={() => {
+                setIsSignUp(!isSignUp)
+                setError(null)
+              }}
+              className="text-primary hover:underline"
+            >
               {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
             </button>
           </div>

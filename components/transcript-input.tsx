@@ -125,16 +125,9 @@ export default function TranscriptInput({
       const formData = new FormData()
       formData.append("file", selectedFile)
 
-      // Pass current user settings to the API
-      if (mode === "study") {
-        formData.append("difficulty", difficulty)
-        formData.append("questionCount", questionCount)
-        formData.append("questionType", questionType)
-      } else {
-        formData.append("difficulty", "medium")
-        formData.append("questionCount", "5")
-        formData.append("questionType", "mixed")
-      }
+      formData.append("difficulty", difficulty)
+      formData.append("questionCount", questionCount)
+      formData.append("questionType", questionType)
 
       const response = await fetch("/api/media-to-questions", {
         method: "POST",
@@ -158,7 +151,6 @@ export default function TranscriptInput({
         throw new Error(data?.error || "Invalid response from server")
       }
 
-      // For study mode, generate questions directly
       if (mode === "study" && data.questions) {
         onQuestionsGenerated(data.questions)
 
@@ -183,8 +175,12 @@ export default function TranscriptInput({
           })
         }
       } else {
-        // For other modes, just set the transcript
+        // For explain and summarize modes, set the transcript
         setTranscript(data.transcript)
+        toast({
+          title: "File Processed",
+          description: "Your file has been processed. You can now generate questions, summary, or feedback.",
+        })
       }
 
       setSelectedFile(null)
@@ -304,16 +300,18 @@ export default function TranscriptInput({
   }
 
   const openDropdown = (dropdownType: string) => {
-    if (dropdownType === "settings" && showSettingsDropdown) return closeAllDropdowns()
+    if (dropdownType === "settings") {
+      // Always open the settings modal for better UX
+      setShowSettingsModal(true)
+      return
+    }
+
     if (dropdownType === "upload" && showUploadOptions) return closeAllDropdowns()
     if (dropdownType === "mode" && showModeSelector) return closeAllDropdowns()
 
     closeAllDropdowns()
 
     switch (dropdownType) {
-      case "settings":
-        setShowSettingsModal(true)
-        break
       case "upload":
         setShowUploadOptions(true)
         break
@@ -934,12 +932,6 @@ export default function TranscriptInput({
                     <Settings className="h-4 w-4" />
                     <span className="text-sm">Settings</span>
                   </Button>
-
-                  {showSettingsDropdown && (
-                    <div className="absolute bottom-12 left-0 bg-background/95 backdrop-blur-sm border border-border rounded-xl p-2 shadow-lg z-20 min-w-[280px]">
-                      <div className="space-y-1">{getSettingsOptions()}</div>
-                    </div>
-                  )}
                 </div>
               </div>
 

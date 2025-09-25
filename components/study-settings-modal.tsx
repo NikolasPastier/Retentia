@@ -61,6 +61,14 @@ export default function StudySettingsModal({
   }, [difficulty, questionCount, questionType, summarizeSetting, explainSetting])
 
   const handleSave = () => {
+    console.log("[v0] Saving settings:", {
+      difficulty: localDifficulty,
+      questionCount: localQuestionCount,
+      questionType: localQuestionType,
+      summarizeSetting: localSummarizeSetting,
+      explainSetting: localExplainSetting,
+    })
+
     // Apply all changes
     onDifficultyChange(localDifficulty)
     onQuestionCountChange(localQuestionCount)
@@ -159,26 +167,35 @@ export default function StudySettingsModal({
                 </CardHeader>
                 <CardContent>
                   <RadioGroup value={localDifficulty} onValueChange={setLocalDifficulty} className="space-y-3">
-                    {["easy", "medium", "hard"].map((diff) => (
-                      <div key={diff} className="flex items-start space-x-3">
-                        <RadioGroupItem value={diff} id={diff} className="mt-1" />
+                    {[
+                      { value: "easy", label: "Easy", badge: "Beginner", color: "green" },
+                      { value: "medium", label: "Medium", badge: "Intermediate", color: "yellow" },
+                      { value: "hard", label: "Hard", badge: "Advanced", color: "red" },
+                    ].map((diff) => (
+                      <div key={diff.value} className="flex items-start space-x-3">
+                        <RadioGroupItem
+                          value={diff.value}
+                          id={diff.value}
+                          className="mt-1"
+                          onClick={() => console.log("[v0] Difficulty selected:", diff.value)}
+                        />
                         <div className="flex-1">
-                          <Label htmlFor={diff} className="flex items-center gap-2 cursor-pointer">
-                            <span className="font-medium capitalize">{diff}</span>
+                          <Label htmlFor={diff.value} className="flex items-center gap-2 cursor-pointer">
+                            <span className="font-medium capitalize">{diff.label}</span>
                             <Badge
                               variant="outline"
                               className={
-                                diff === "easy"
+                                diff.color === "green"
                                   ? "border-green-500/50 text-green-600"
-                                  : diff === "medium"
+                                  : diff.color === "yellow"
                                     ? "border-yellow-500/50 text-yellow-600"
                                     : "border-red-500/50 text-red-600"
                               }
                             >
-                              {diff === "easy" ? "Beginner" : diff === "medium" ? "Intermediate" : "Advanced"}
+                              {diff.badge}
                             </Badge>
                           </Label>
-                          <p className="text-sm text-muted-foreground mt-1">{getDifficultyDescription(diff)}</p>
+                          <p className="text-sm text-muted-foreground mt-1">{getDifficultyDescription(diff.value)}</p>
                         </div>
                       </div>
                     ))}
@@ -193,7 +210,13 @@ export default function StudySettingsModal({
                   <CardDescription>How many questions would you like to generate?</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Select value={localQuestionCount} onValueChange={setLocalQuestionCount}>
+                  <Select
+                    value={localQuestionCount}
+                    onValueChange={(value) => {
+                      console.log("[v0] Question count selected:", value)
+                      setLocalQuestionCount(value)
+                    }}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -214,7 +237,14 @@ export default function StudySettingsModal({
                   <CardDescription>Select the format of questions you prefer</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <RadioGroup value={localQuestionType} onValueChange={setLocalQuestionType} className="space-y-3">
+                  <RadioGroup
+                    value={localQuestionType}
+                    onValueChange={(value) => {
+                      console.log("[v0] Question type selected:", value)
+                      setLocalQuestionType(value)
+                    }}
+                    className="space-y-3"
+                  >
                     {[
                       { value: "mixed", label: "Mixed Types", badge: "Recommended" },
                       { value: "multiple-choice", label: "Multiple Choice", badge: "Quick" },
@@ -251,7 +281,10 @@ export default function StudySettingsModal({
               <CardContent>
                 <RadioGroup
                   value={localSummarizeSetting}
-                  onValueChange={(value) => setLocalSummarizeSetting(value as "brief" | "in-depth" | "key-points")}
+                  onValueChange={(value) => {
+                    console.log("[v0] Summarize setting selected:", value)
+                    setLocalSummarizeSetting(value as "brief" | "in-depth" | "key-points")
+                  }}
                   className="space-y-3"
                 >
                   <div className="flex items-start space-x-3">
@@ -309,7 +342,10 @@ export default function StudySettingsModal({
               <CardContent>
                 <RadioGroup
                   value={localExplainSetting}
-                  onValueChange={(value) => setLocalExplainSetting(value as "child" | "teen" | "adult" | "senior")}
+                  onValueChange={(value) => {
+                    console.log("[v0] Explain setting selected:", value)
+                    setLocalExplainSetting(value as "child" | "teen" | "adult" | "senior")
+                  }}
                   className="space-y-3"
                 >
                   <div className="flex items-start space-x-3">

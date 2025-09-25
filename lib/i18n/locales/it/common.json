@@ -1,0 +1,52 @@
+{
+  "title": "Retentia - Piattaforma di Apprendimento AI",
+  "description": "Trasforma i tuoi contenuti in esperienze di apprendimento interattive con domande generate dall'AI",
+  "loading": "Caricamento...",
+  "error": "Si è verificato un errore",
+  "success": "Successo",
+  "cancel": "Annulla",
+  "save": "Salva",
+  "delete": "Elimina",
+  "edit": "Modifica",
+  "close": "Chiudi",
+  "back": "Indietro",
+  "next": "Avanti",
+  "previous": "Precedente",
+  "submit": "Invia",
+  "generate": "Genera",
+  "upload": "Carica",
+  "clear": "Cancella",
+  "settings": "Impostazioni",
+  "nav": {
+    "home": "Home",
+    "features": "Funzionalità",
+    "pricing": "Prezzi",
+    "docs": "Documentazione",
+    "signIn": "Accedi",
+    "signUp": "Registrati",
+    "logIn": "Accedi",
+    "getStarted": "Inizia",
+    "dashboard": "Dashboard",
+    "profile": "Profilo",
+    "logout": "Esci"
+  },
+  "footer": {
+    "howItWorks": "Come Funziona",
+    "pricing": "Prezzi",
+    "helpCenter": "Centro Assistenza",
+    "privacyPolicy": "Informativa sulla Privacy",
+    "termsOfService": "Termini di Servizio",
+    "contact": "Contatto",
+    "cookies": "Cookies"
+  },
+  "auth": {
+    "login": "Accedi",
+    "signup": "Registrati",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Password dimenticata?",
+    "createAccount": "Crea Account",
+    "alreadyHaveAccount": "Hai già un account?",
+    "dontHaveAccount": "Non hai un account?"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "title": "Retentia - KI-gestützte Lernplattform",
+  "description": "Verwandeln Sie Ihre Inhalte in interaktive Lernerfahrungen mit KI-generierten Fragen",
+  "loading": "Laden...",
+  "error": "Ein Fehler ist aufgetreten",
+  "success": "Erfolg",
+  "cancel": "Abbrechen",
+  "save": "Speichern",
+  "delete": "Löschen",
+  "edit": "Bearbeiten",
+  "close": "Schließen",
+  "back": "Zurück",
+  "next": "Weiter",
+  "previous": "Vorherige",
+  "submit": "Senden",
+  "generate": "Generieren",
+  "upload": "Hochladen",
+  "clear": "Löschen",
+  "settings": "Einstellungen",
+  "nav": {
+    "home": "Startseite",
+    "features": "Funktionen",
+    "pricing": "Preise",
+    "docs": "Dokumentation",
+    "signIn": "Anmelden",
+    "signUp": "Registrieren",
+    "logIn": "Anmelden",
+    "getStarted": "Loslegen",
+    "dashboard": "Dashboard",
+    "profile": "Profil",
+    "logout": "Abmelden"
+  },
+  "footer": {
+    "howItWorks": "Wie Es Funktioniert",
+    "pricing": "Preise",
+    "helpCenter": "Hilfezentrum",
+    "privacyPolicy": "Datenschutzrichtlinie",
+    "termsOfService": "Nutzungsbedingungen",
+    "contact": "Kontakt",
+    "cookies": "Cookies"
+  },
+  "auth": {
+    "login": "Anmelden",
+    "signup": "Registrieren",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "forgotPassword": "Passwort vergessen?",
+    "createAccount": "Konto Erstellen",
+    "alreadyHaveAccount": "Haben Sie bereits ein Konto?",
+    "dontHaveAccount": "Haben Sie noch kein Konto?"
+  }
+}

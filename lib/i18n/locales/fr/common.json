@@ -1,0 +1,52 @@
+{
+  "title": "Retentia - Plateforme d'Apprentissage IA",
+  "description": "Transformez votre contenu en expériences d'apprentissage interactives avec des questions générées par IA",
+  "loading": "Chargement...",
+  "error": "Une erreur s'est produite",
+  "success": "Succès",
+  "cancel": "Annuler",
+  "save": "Enregistrer",
+  "delete": "Supprimer",
+  "edit": "Modifier",
+  "close": "Fermer",
+  "back": "Retour",
+  "next": "Suivant",
+  "previous": "Précédent",
+  "submit": "Soumettre",
+  "generate": "Générer",
+  "upload": "Télécharger",
+  "clear": "Effacer",
+  "settings": "Paramètres",
+  "nav": {
+    "home": "Accueil",
+    "features": "Fonctionnalités",
+    "pricing": "Tarifs",
+    "docs": "Documentation",
+    "signIn": "Se Connecter",
+    "signUp": "S'inscrire",
+    "logIn": "Se Connecter",
+    "getStarted": "Commencer",
+    "dashboard": "Tableau de Bord",
+    "profile": "Profil",
+    "logout": "Déconnexion"
+  },
+  "footer": {
+    "howItWorks": "Comment Ça Marche",
+    "pricing": "Tarifs",
+    "helpCenter": "Centre d'Aide",
+    "privacyPolicy": "Politique de Confidentialité",
+    "termsOfService": "Conditions d'Utilisation",
+    "contact": "Contact",
+    "cookies": "Cookies"
+  },
+  "auth": {
+    "login": "Se Connecter",
+    "signup": "S'inscrire",
+    "email": "Email",
+    "password": "Mot de Passe",
+    "forgotPassword": "Mot de passe oublié?",
+    "createAccount": "Créer un Compte",
+    "alreadyHaveAccount": "Vous avez déjà un compte?",
+    "dontHaveAccount": "Vous n'avez pas de compte?"
+  }
+}

@@ -4,6 +4,7 @@ import { ChevronDown, Globe } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link" // Added Next.js Link import
+import { useTranslations } from "@/lib/i18n/context"
 
 const translations = {
   en: {
@@ -65,15 +66,7 @@ const translations = {
 export default function Footer() {
   const router = useRouter()
   const pathname = usePathname()
-
-  const getLocaleFromPath = () => {
-    const segments = pathname.split("/").filter(Boolean)
-    const firstSegment = segments[0]
-    return Object.keys(translations).includes(firstSegment) ? firstSegment : "en"
-  }
-
-  const locale = getLocaleFromPath()
-  const t = translations[locale as keyof typeof translations] || translations.en
+  const { t, locale, setLocale } = useTranslations()
 
   const buildLink = (path: string, requiresLocale = true) => {
     // Policy pages (privacy, terms, cookies) exist only at root level, not localized
@@ -92,11 +85,11 @@ export default function Footer() {
   }
 
   const footerLinks = [
-    { label: t.howItWorks, href: "#how-it-works" },
-    { label: t.pricing, href: buildLink("pricing"), isRoute: true },
-    { label: t.privacyPolicy, href: buildLink("privacy"), isRoute: true },
-    { label: t.termsOfService, href: buildLink("terms"), isRoute: true },
-    { label: t.cookies, href: buildLink("cookies"), isRoute: true },
+    { label: t("footer.howItWorks"), href: "#how-it-works" },
+    { label: t("footer.pricing"), href: buildLink("pricing"), isRoute: true },
+    { label: t("footer.privacyPolicy"), href: buildLink("privacy"), isRoute: true },
+    { label: t("footer.termsOfService"), href: buildLink("terms"), isRoute: true },
+    { label: t("footer.cookies"), href: buildLink("cookies"), isRoute: true },
   ]
 
   const [isLanguageOpen, setIsLanguageOpen] = useState(false)
@@ -257,16 +250,7 @@ export default function Footer() {
 
   const handleLanguageSelect = (language: (typeof languages)[0]) => {
     setIsLanguageOpen(false)
-
-    localStorage.setItem("preferred-language", language.code)
-
-    const segments = pathname.split("/").filter(Boolean)
-    if (segments[0] && languages.some((lang) => lang.code === segments[0])) {
-      segments.shift()
-    }
-
-    const newPath = `/${language.code}${segments.length > 0 ? "/" + segments.join("/") : ""}`
-    router.push(newPath)
+    setLocale(language.code)
   }
 
   return (

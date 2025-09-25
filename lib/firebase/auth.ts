@@ -51,6 +51,29 @@ const checkFirebaseAvailability = () => {
   return null
 }
 
+const getAuthErrorMessage = (errorCode: string, isSignUp = false): string => {
+  switch (errorCode) {
+    case "auth/user-not-found":
+      return "No account found with this email address. Please check your email or create a new account."
+    case "auth/wrong-password":
+      return "Incorrect password. Please try again."
+    case "auth/invalid-credential":
+      return "Invalid email or password. Please check your credentials and try again."
+    case "auth/email-already-in-use":
+      return "An account with this email already exists. Please sign in instead or use a different email."
+    case "auth/weak-password":
+      return "Password is too weak. Please use at least 6 characters."
+    case "auth/invalid-email":
+      return "Please enter a valid email address."
+    case "auth/too-many-requests":
+      return "Too many failed attempts. Please try again later."
+    case "auth/network-request-failed":
+      return "Network error. Please check your connection and try again."
+    default:
+      return isSignUp ? "Failed to create account. Please try again." : "Failed to sign in. Please try again."
+  }
+}
+
 // Sign up with email and password
 export const signUpWithEmail = async (email: string, password: string) => {
   const availabilityCheck = checkFirebaseAvailability()
@@ -61,7 +84,8 @@ export const signUpWithEmail = async (email: string, password: string) => {
     await createUserProfile(result.user)
     return { user: result.user, error: null }
   } catch (error: any) {
-    return { user: null, error: error.message }
+    const errorMessage = getAuthErrorMessage(error.code, true)
+    return { user: null, error: errorMessage }
   }
 }
 
@@ -74,7 +98,8 @@ export const signInWithEmail = async (email: string, password: string) => {
     const result = await signInWithEmailAndPassword(auth, email, password)
     return { user: result.user, error: null }
   } catch (error: any) {
-    return { user: null, error: error.message }
+    const errorMessage = getAuthErrorMessage(error.code, false)
+    return { user: null, error: errorMessage }
   }
 }
 
