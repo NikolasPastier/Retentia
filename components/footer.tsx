@@ -75,12 +75,28 @@ export default function Footer() {
   const locale = getLocaleFromPath()
   const t = translations[locale as keyof typeof translations] || translations.en
 
+  const buildLink = (path: string, requiresLocale = true) => {
+    // Policy pages (privacy, terms, cookies) exist only at root level, not localized
+    const rootOnlyPages = ["privacy", "terms", "cookies"]
+
+    if (rootOnlyPages.includes(path)) {
+      return `/${path}`
+    }
+
+    // For other pages that should be localized (like pricing)
+    if (requiresLocale) {
+      return `/${locale}/${path}`
+    }
+
+    return `/${path}`
+  }
+
   const footerLinks = [
     { label: t.howItWorks, href: "#how-it-works" },
-    { label: t.pricing, href: `/${locale}/pricing`, isRoute: true }, // Updated pricing link to route to dedicated pricing page
-    { label: t.privacyPolicy, href: `/${locale}/privacy`, isRoute: true },
-    { label: t.termsOfService, href: `/${locale}/terms`, isRoute: true },
-    { label: t.cookies, href: `/${locale}/cookies`, isRoute: true },
+    { label: t.pricing, href: buildLink("pricing"), isRoute: true },
+    { label: t.privacyPolicy, href: buildLink("privacy"), isRoute: true },
+    { label: t.termsOfService, href: buildLink("terms"), isRoute: true },
+    { label: t.cookies, href: buildLink("cookies"), isRoute: true },
   ]
 
   const [isLanguageOpen, setIsLanguageOpen] = useState(false)
