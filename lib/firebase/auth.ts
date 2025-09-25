@@ -44,8 +44,18 @@ export const createUserProfile = async (user: User): Promise<void> => {
   }
 }
 
+const checkFirebaseAvailability = () => {
+  if (!auth || !db) {
+    return { user: null, error: "Firebase is not properly configured. Please check your environment variables." }
+  }
+  return null
+}
+
 // Sign up with email and password
 export const signUpWithEmail = async (email: string, password: string) => {
+  const availabilityCheck = checkFirebaseAvailability()
+  if (availabilityCheck) return availabilityCheck
+
   try {
     const result = await createUserWithEmailAndPassword(auth, email, password)
     await createUserProfile(result.user)
@@ -57,6 +67,9 @@ export const signUpWithEmail = async (email: string, password: string) => {
 
 // Sign in with email and password
 export const signInWithEmail = async (email: string, password: string) => {
+  const availabilityCheck = checkFirebaseAvailability()
+  if (availabilityCheck) return availabilityCheck
+
   try {
     const result = await signInWithEmailAndPassword(auth, email, password)
     return { user: result.user, error: null }
@@ -67,6 +80,9 @@ export const signInWithEmail = async (email: string, password: string) => {
 
 // Sign in with Google
 export const signInWithGoogle = async () => {
+  const availabilityCheck = checkFirebaseAvailability()
+  if (availabilityCheck) return availabilityCheck
+
   try {
     const provider = new GoogleAuthProvider()
     const result = await signInWithPopup(auth, provider)
@@ -79,6 +95,9 @@ export const signInWithGoogle = async () => {
 
 // Sign in with Apple
 export const signInWithApple = async () => {
+  const availabilityCheck = checkFirebaseAvailability()
+  if (availabilityCheck) return availabilityCheck
+
   try {
     const provider = new OAuthProvider("apple.com")
     const result = await signInWithPopup(auth, provider)
@@ -91,6 +110,9 @@ export const signInWithApple = async () => {
 
 // Sign out
 export const signOutUser = async () => {
+  const availabilityCheck = checkFirebaseAvailability()
+  if (availabilityCheck) return availabilityCheck
+
   try {
     await signOut(auth)
     return { error: null }

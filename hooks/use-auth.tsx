@@ -41,7 +41,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       try {
         const profile = await getUserProfile(user.uid)
         setUserProfile(profile)
-        console.log("[v0] User profile refreshed:", profile)
       } catch (error) {
         console.error("[v0] Error refreshing user profile:", error)
       }
@@ -49,18 +48,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }
 
   useEffect(() => {
-    console.log("[v0] Setting up auth state listener")
-
     try {
       const unsubscribe = onAuthStateChange(async (user) => {
-        console.log("[v0] Auth state changed:", user ? "User logged in" : "User logged out")
         setUser(user)
 
         if (user) {
           try {
             const profile = await getUserProfile(user.uid)
             setUserProfile(profile)
-            console.log("[v0] User profile loaded:", profile)
           } catch (error) {
             console.error("[v0] Error loading user profile:", error)
             setUserProfile(null)
@@ -79,8 +74,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       return () => {}
     }
   }, [])
-
-  console.log("[v0] Auth state:", { user: !!user, userProfile: !!userProfile, loading })
 
   return <AuthContext.Provider value={{ user, userProfile, loading, refreshProfile }}>{children}</AuthContext.Provider>
 }
