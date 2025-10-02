@@ -15,10 +15,11 @@ interface AuthModalProps {
   isOpen: boolean
   onClose: () => void
   onSuccess?: () => void
+  initialMode?: "signin" | "signup"
 }
 
-export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
-  const [isSignUp, setIsSignUp] = useState(false)
+export function AuthModal({ isOpen, onClose, onSuccess, initialMode = "signin" }: AuthModalProps) {
+  const [isSignUp, setIsSignUp] = useState(initialMode === "signup")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
@@ -213,3 +214,5 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
     </Dialog>
   )
 }
+
+export default AuthModal
