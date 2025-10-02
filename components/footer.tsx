@@ -1,100 +1,27 @@
 "use client"
 
+import type React from "react"
+
 import { ChevronDown, Globe } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
-import { useRouter, usePathname } from "next/navigation"
-import Link from "next/link" // Added Next.js Link import
 import { useTranslations } from "@/lib/i18n/context"
-
-const translations = {
-  en: {
-    howItWorks: "How It Works",
-    pricing: "Pricing",
-    helpCenter: "Help Center",
-    privacyPolicy: "Privacy Policy",
-    termsOfService: "Terms of Service",
-    contact: "Contact",
-    cookies: "Cookies", // Added cookies translation
-  },
-  es: {
-    howItWorks: "Cómo Funciona",
-    pricing: "Precios",
-    helpCenter: "Centro de Ayuda",
-    privacyPolicy: "Política de Privacidad",
-    termsOfService: "Términos de Servicio",
-    contact: "Contacto",
-    cookies: "Cookies", // Added cookies translation
-  },
-  fr: {
-    howItWorks: "Comment Ça Marche",
-    pricing: "Tarifs",
-    helpCenter: "Centre d'Aide",
-    privacyPolicy: "Politique de Confidentialité",
-    termsOfService: "Conditions d'Utilisation",
-    contact: "Contact",
-    cookies: "Cookies", // Added cookies translation
-  },
-  de: {
-    howItWorks: "Wie Es Funktioniert",
-    pricing: "Preise",
-    helpCenter: "Hilfezentrum",
-    privacyPolicy: "Datenschutzrichtlinie",
-    termsOfService: "Nutzungsbedingungen",
-    contact: "Kontakt",
-    cookies: "Cookies", // Added cookies translation
-  },
-  it: {
-    howItWorks: "Come Funziona",
-    pricing: "Prezzi",
-    helpCenter: "Centro Assistenza",
-    privacyPolicy: "Informativa sulla Privacy",
-    termsOfService: "Termini di Servizio",
-    contact: "Contatto",
-    cookies: "Cookies", // Added cookies translation
-  },
-  pt: {
-    howItWorks: "Como Funciona",
-    pricing: "Preços",
-    helpCenter: "Central de Ajuda",
-    privacyPolicy: "Política de Privacidade",
-    termsOfService: "Termos de Serviço",
-    contact: "Contato",
-    cookies: "Cookies", // Added cookies translation
-  },
-}
+import FooterModal from "./footer-modal"
 
 export default function Footer() {
-  const router = useRouter()
-  const pathname = usePathname()
   const { t, locale, setLocale } = useTranslations()
 
-  const buildLink = (path: string, requiresLocale = true) => {
-    // Policy pages (privacy, terms, cookies) exist only at root level, not localized
-    const rootOnlyPages = ["privacy", "terms", "cookies"]
-
-    if (rootOnlyPages.includes(path)) {
-      return `/${path}`
-    }
-
-    // For other pages that should be localized (like pricing)
-    if (requiresLocale) {
-      return `/${locale}/${path}`
-    }
-
-    return `/${path}`
-  }
-
-  const footerLinks = [
-    { label: t("footer.howItWorks"), href: "#how-it-works" },
-    { label: t("footer.pricing"), href: buildLink("pricing"), isRoute: true },
-    { label: t("footer.privacyPolicy"), href: buildLink("privacy"), isRoute: true },
-    { label: t("footer.termsOfService"), href: buildLink("terms"), isRoute: true },
-    { label: t("footer.cookies"), href: buildLink("cookies"), isRoute: true },
-  ]
-
+  const [modalType, setModalType] = useState<"pricing" | "privacy" | "terms" | "cookies" | null>(null)
   const [isLanguageOpen, setIsLanguageOpen] = useState(false)
   const [hasContent, setHasContent] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+
+  const footerLinks = [
+    { label: t("footer.howItWorks"), href: "#how-it-works", type: null },
+    { label: t("footer.pricing"), type: "pricing" as const },
+    { label: t("footer.privacyPolicy"), type: "privacy" as const },
+    { label: t("footer.termsOfService"), type: "terms" as const },
+    { label: t("footer.cookies"), type: "cookies" as const },
+  ]
 
   const languages = [
     { code: "en", name: "English", display: "EN" },
@@ -215,7 +142,7 @@ export default function Footer() {
       if (main) {
         const mainHeight = main.scrollHeight
         const viewportHeight = window.innerHeight
-        const headerHeight = 80 // Approximate header height
+        const headerHeight = 80
 
         setHasContent(mainHeight > viewportHeight - headerHeight - 100)
       }
@@ -253,60 +180,74 @@ export default function Footer() {
     setLocale(language.code)
   }
 
+  const handleLinkClick = (e: React.MouseEvent, link: (typeof footerLinks)[0]) => {
+    if (link.type) {
+      e.preventDefault()
+      setModalType(link.type)
+    }
+  }
+
   return (
-    <footer className={`${hasContent ? "relative mt-8" : "fixed bottom-0 left-0 right-0"} z-10`}>
-      <div className="container mx-auto px-4 py-3">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center justify-center gap-1 text-xs sm:text-sm text-muted-foreground overflow-x-auto scrollbar-hide w-full sm:w-auto">
-            <div className="flex items-center gap-1 whitespace-nowrap">
-              {footerLinks.map((link, index) => (
-                <div key={link.label} className="flex items-center">
-                  {link.isRoute ? (
-                    <Link href={link.href} className="hover:text-gray-400 transition-colors duration-200 px-1">
-                      {link.label}
-                    </Link>
-                  ) : (
-                    <a href={link.href} className="hover:text-gray-400 transition-colors duration-200 px-1">
-                      {link.label}
-                    </a>
-                  )}
-                  {index < footerLinks.length - 1 && <span className="mx-2 text-muted-foreground/60">|</span>}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="relative" ref={dropdownRef}>
-            <button
-              onClick={() => setIsLanguageOpen(!isLanguageOpen)}
-              className="flex items-center gap-2 px-3 py-1.5 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-all duration-200 rounded-md hover:bg-background/20 hover:scale-105"
-            >
-              <Globe className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span>{currentLanguage.display}</span>
-              <ChevronDown className={`h-3 w-3 transition-transform ${isLanguageOpen ? "rotate-180" : ""}`} />
-            </button>
-
-            {isLanguageOpen && (
-              <div className="absolute bottom-full right-0 mb-2 bg-background/95 backdrop-blur-sm border border-border/20 rounded-md shadow-lg min-w-[200px] max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border/50">
-                {languages.map((language) => (
-                  <button
-                    key={language.code}
-                    onClick={() => handleLanguageSelect(language)}
-                    className={`w-full text-left px-3 py-2 text-xs sm:text-sm transition-all duration-200 first:rounded-t-md last:rounded-b-md hover:scale-[1.02] ${
-                      language.code === locale
-                        ? "text-foreground bg-background/50"
-                        : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-                    }`}
-                  >
-                    <span className="font-medium">{language.display}</span>
-                    <span className="ml-2 opacity-70">{language.name}</span>
-                  </button>
+    <>
+      <footer className={`${hasContent ? "relative mt-8" : "fixed bottom-0 left-0 right-0"} z-10`}>
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center justify-center gap-1 text-xs sm:text-sm text-muted-foreground overflow-x-auto scrollbar-hide w-full sm:w-auto">
+              <div className="flex items-center gap-1 whitespace-nowrap">
+                {footerLinks.map((link, index) => (
+                  <div key={link.label} className="flex items-center">
+                    {link.type ? (
+                      <button
+                        onClick={(e) => handleLinkClick(e, link)}
+                        className="hover:text-gray-400 transition-colors duration-200 px-1 cursor-pointer"
+                      >
+                        {link.label}
+                      </button>
+                    ) : (
+                      <a href={link.href} className="hover:text-gray-400 transition-colors duration-200 px-1">
+                        {link.label}
+                      </a>
+                    )}
+                    {index < footerLinks.length - 1 && <span className="mx-2 text-muted-foreground/60">|</span>}
+                  </div>
                 ))}
               </div>
-            )}
+            </div>
+
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setIsLanguageOpen(!isLanguageOpen)}
+                className="flex items-center gap-2 px-3 py-1.5 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-all duration-200 rounded-md hover:bg-background/20 hover:scale-105"
+              >
+                <Globe className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span>{currentLanguage.display}</span>
+                <ChevronDown className={`h-3 w-3 transition-transform ${isLanguageOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {isLanguageOpen && (
+                <div className="absolute bottom-full right-0 mb-2 bg-background/95 backdrop-blur-sm border border-border/20 rounded-md shadow-lg min-w-[200px] max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border/50">
+                  {languages.map((language) => (
+                    <button
+                      key={language.code}
+                      onClick={() => handleLanguageSelect(language)}
+                      className={`w-full text-left px-3 py-2 text-xs sm:text-sm transition-all duration-200 first:rounded-t-md last:rounded-b-md hover:scale-[1.02] ${
+                        language.code === locale
+                          ? "text-foreground bg-background/50"
+                          : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                      }`}
+                    >
+                      <span className="font-medium">{language.display}</span>
+                      <span className="ml-2 opacity-70">{language.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </footer>
+      </footer>
+
+      <FooterModal isOpen={modalType !== null} onClose={() => setModalType(null)} type={modalType || "pricing"} />
+    </>
   )
 }
