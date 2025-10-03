@@ -5,6 +5,7 @@ import type React from "react"
 import { X } from "lucide-react"
 import { signUpWithEmail } from "@/lib/firebase/auth"
 import { useToast } from "@/hooks/use-toast"
+import { useTranslations } from "@/lib/i18n/context"
 
 interface SignupModalProps {
   isOpen: boolean
@@ -19,6 +20,7 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }: Signup
   const [confirmPassword, setConfirmPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
+  const { t } = useTranslations()
 
   if (!isOpen) return null
 
@@ -26,8 +28,8 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }: Signup
     e.preventDefault()
     if (password !== confirmPassword) {
       toast({
-        title: "Password Mismatch",
-        description: "Passwords don't match",
+        title: t("auth.passwordMismatch"),
+        description: t("auth.passwordMismatchDesc"),
         variant: "destructive",
       })
       return
@@ -39,21 +41,21 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }: Signup
 
       if (result.error) {
         toast({
-          title: "Signup Error",
+          title: t("auth.signupError"),
           description: result.error,
           variant: "destructive",
         })
       } else {
         toast({
-          title: "Account Created",
-          description: "Your account has been created successfully!",
+          title: t("auth.accountCreated"),
+          description: t("auth.accountCreatedDesc"),
         })
         onClose()
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "An unexpected error occurred",
+        title: t("error"),
+        description: t("auth.unexpectedError"),
         variant: "destructive",
       })
     } finally {
@@ -69,54 +71,54 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }: Signup
           <X size={20} />
         </button>
 
-        <h2 className="text-2xl font-bold text-white mb-6">Get Started</h2>
+        <h2 className="text-2xl font-bold text-white mb-6">{t("auth.getStarted")}</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Username</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">{t("auth.username")}</label>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Choose a username"
+              placeholder={t("auth.chooseUsername")}
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">{t("auth.email")}</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter your email"
+              placeholder={t("auth.enterEmail")}
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">{t("auth.password")}</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Create a password"
+              placeholder={t("auth.createPassword")}
               required
               minLength={6}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">{t("auth.confirmPassword")}</label>
             <input
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Confirm your password"
+              placeholder={t("auth.confirmYourPassword")}
               required
               minLength={6}
             />
@@ -127,14 +129,14 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }: Signup
             disabled={loading}
             className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
           >
-            {loading ? "Creating Account..." : "Get Started"}
+            {loading ? t("auth.creatingAccount") : t("auth.getStarted")}
           </button>
         </form>
 
         <p className="text-center text-gray-400 mt-6">
-          Already have an account?{" "}
+          {t("auth.alreadyHaveAccount")}{" "}
           <button onClick={onSwitchToLogin} className="text-blue-400 hover:text-blue-300 font-medium">
-            Log in
+            {t("auth.login")}
           </button>
         </p>
       </div>

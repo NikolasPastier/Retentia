@@ -30,6 +30,129 @@
     "profile": "Profile",
     "logout": "Logout"
   },
+  "hero": {
+    "title": "Change The Way You",
+    "titleHighlight": "Study",
+    "subtitle": "Test yourself, explain topics, generate AI-powered summaries."
+  },
+  "transcript": {
+    "placeholder": {
+      "study": "Enter your transcript or paste a YouTube link here",
+      "explain": "Paste your study material here...",
+      "summarize": "Paste your material here..."
+    },
+    "explanationPlaceholder": "Write your explanation here as if explaining to a 10-year-old...",
+    "characterCount": "{{count}}/{{max}}",
+    "uploadFile": "Upload File",
+    "supportedFormats": "Supported: MP3, WAV, M4A, MP4, MOV, AVI, TXT, MD (max 100MB)",
+    "youtubeVideo": "YouTube Video",
+    "modes": {
+      "study": "Study",
+      "explain": "Explain",
+      "summarize": "Summarize"
+    },
+    "actions": {
+      "generateQuestions": "Generate Questions",
+      "getFeedback": "Get Feedback",
+      "generateSummary": "Generate Summary"
+    },
+    "settings": {
+      "difficulty": "Difficulty",
+      "questions": "Questions",
+      "type": "Type",
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard",
+      "mixedTypes": "Mixed Types",
+      "multipleChoice": "Multiple Choice",
+      "trueFalse": "True/False",
+      "openEnded": "Open Ended",
+      "fillBlank": "Fill in the Blank",
+      "briefly": "Briefly",
+      "inDepth": "In Depth",
+      "keyPoints": "Key Points",
+      "explainToChild": "Explain to a Child",
+      "explainToTeen": "Explain to a Teenager",
+      "explainToAdult": "Explain to an Adult",
+      "explainToSenior": "Explain to a Senior"
+    },
+    "errors": {
+      "missingContent": "Missing Content",
+      "missingContentDesc": "Please provide both material to study and your explanation.",
+      "missingMaterial": "Please provide material to {{mode}}.",
+      "uploadFailed": "Failed to process file",
+      "youtubeFailed": "Failed to process YouTube video"
+    },
+    "success": {
+      "fileProcessed": "File Processed",
+      "fileProcessedDesc": "Your file has been processed. You can now generate questions, summary, or feedback.",
+      "sessionSaved": "{{mode}} Session Saved",
+      "sessionSavedDesc": "Your {{mode}} session has been saved to your dashboard"
+    }
+  },
+  "questions": {
+    "title": "Quiz Results",
+    "score": "You scored {{score}} out of {{total}} ({{percentage}}%)",
+    "excellent": "Excellent!",
+    "goodJob": "Good Job!",
+    "keepPracticing": "Keep Practicing!",
+    "excellentDesc": "You have a strong understanding of the material!",
+    "goodJobDesc": "You're on the right track. Review the explanations below.",
+    "keepPracticingDesc": "Consider reviewing the material and trying again.",
+    "questionNumber": "Question {{number}} of {{total}}",
+    "yourAnswer": "Your answer:",
+    "correctAnswer": "Correct answer:",
+    "notAnswered": "Not answered",
+    "explanation": "Explanation:",
+    "showAnswer": "Show Answer",
+    "hideAnswer": "Hide Answer",
+    "save": "Save",
+    "saved": "Saved",
+    "retakeQuiz": "Retake Quiz",
+    "clearQuestions": "Clear Questions",
+    "finishQuiz": "Finish Quiz",
+    "sampleAnswer": "Sample answer:"
+  },
+  "results": {
+    "aiFeedback": "AI Feedback",
+    "summary": "Summary",
+    "understandingRating": "Understanding Rating",
+    "ratingDescription": "How well the selected audience would understand your explanation",
+    "detailedFeedback": "Detailed Feedback",
+    "suggestedImprovements": "Suggested Improvements",
+    "overview": "Overview",
+    "keyPoints": "Key Points",
+    "importantConcepts": "Important Concepts"
+  },
+  "auth": {
+    "login": "Log In",
+    "signup": "Sign Up",
+    "getStarted": "Get Started",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "username": "Username",
+    "forgotPassword": "Forgot Password?",
+    "createAccount": "Create Account",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?",
+    "enterEmail": "Enter your email",
+    "enterPassword": "Enter your password",
+    "chooseUsername": "Choose a username",
+    "createPassword": "Create a password",
+    "confirmYourPassword": "Confirm your password",
+    "signingIn": "Signing In...",
+    "creatingAccount": "Creating Account...",
+    "loginError": "Login Error",
+    "signupError": "Signup Error",
+    "welcomeBack": "Welcome Back",
+    "welcomeBackDesc": "You've been signed in successfully!",
+    "accountCreated": "Account Created",
+    "accountCreatedDesc": "Your account has been created successfully!",
+    "passwordMismatch": "Password Mismatch",
+    "passwordMismatchDesc": "Passwords don't match",
+    "unexpectedError": "An unexpected error occurred"
+  },
   "footer": {
     "howItWorks": "How it Works",
     "pricing": "Pricing",
@@ -38,15 +161,5 @@
     "termsOfService": "Terms of Service",
     "contact": "Contact",
     "cookies": "Cookies"
-  },
-  "auth": {
-    "login": "Log In",
-    "signup": "Sign Up",
-    "email": "Email",
-    "password": "Password",
-    "forgotPassword": "Forgot Password?",
-    "createAccount": "Create Account",
-    "alreadyHaveAccount": "Already have an account?",
-    "dontHaveAccount": "Don't have an account?"
   }
 }

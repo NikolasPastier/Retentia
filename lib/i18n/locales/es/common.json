@@ -30,6 +30,129 @@
     "profile": "Perfil",
     "logout": "Cerrar Sesión"
   },
+  "hero": {
+    "title": "Cambia La Forma En Que",
+    "titleHighlight": "Estudias",
+    "subtitle": "Ponte a prueba, explica temas, genera resúmenes con IA."
+  },
+  "transcript": {
+    "placeholder": {
+      "study": "Ingresa tu transcripción o pega un enlace de YouTube aquí",
+      "explain": "Pega tu material de estudio aquí...",
+      "summarize": "Pega tu material aquí..."
+    },
+    "explanationPlaceholder": "Escribe tu explicación aquí como si se la explicaras a un niño de 10 años...",
+    "characterCount": "{{count}}/{{max}}",
+    "uploadFile": "Subir Archivo",
+    "supportedFormats": "Soportado: MP3, WAV, M4A, MP4, MOV, AVI, TXT, MD (máx 100MB)",
+    "youtubeVideo": "Video de YouTube",
+    "modes": {
+      "study": "Estudiar",
+      "explain": "Explicar",
+      "summarize": "Resumir"
+    },
+    "actions": {
+      "generateQuestions": "Generar Preguntas",
+      "getFeedback": "Obtener Retroalimentación",
+      "generateSummary": "Generar Resumen"
+    },
+    "settings": {
+      "difficulty": "Dificultad",
+      "questions": "Preguntas",
+      "type": "Tipo",
+      "easy": "Fácil",
+      "medium": "Medio",
+      "hard": "Difícil",
+      "mixedTypes": "Tipos Mixtos",
+      "multipleChoice": "Opción Múltiple",
+      "trueFalse": "Verdadero/Falso",
+      "openEnded": "Respuesta Abierta",
+      "fillBlank": "Llenar el Espacio",
+      "briefly": "Brevemente",
+      "inDepth": "En Profundidad",
+      "keyPoints": "Puntos Clave",
+      "explainToChild": "Explicar a un Niño",
+      "explainToTeen": "Explicar a un Adolescente",
+      "explainToAdult": "Explicar a un Adulto",
+      "explainToSenior": "Explicar a un Adulto Mayor"
+    },
+    "errors": {
+      "missingContent": "Contenido Faltante",
+      "missingContentDesc": "Por favor proporciona tanto el material de estudio como tu explicación.",
+      "missingMaterial": "Por favor proporciona material para {{mode}}.",
+      "uploadFailed": "Error al procesar el archivo",
+      "youtubeFailed": "Error al procesar el video de YouTube"
+    },
+    "success": {
+      "fileProcessed": "Archivo Procesado",
+      "fileProcessedDesc": "Tu archivo ha sido procesado. Ahora puedes generar preguntas, resumen o retroalimentación.",
+      "sessionSaved": "Sesión de {{mode}} Guardada",
+      "sessionSavedDesc": "Tu sesión de {{mode}} ha sido guardada en tu panel"
+    }
+  },
+  "questions": {
+    "title": "Resultados del Cuestionario",
+    "score": "Obtuviste {{score}} de {{total}} ({{percentage}}%)",
+    "excellent": "¡Excelente!",
+    "goodJob": "¡Buen Trabajo!",
+    "keepPracticing": "¡Sigue Practicando!",
+    "excellentDesc": "¡Tienes una comprensión sólida del material!",
+    "goodJobDesc": "Vas por buen camino. Revisa las explicaciones a continuación.",
+    "keepPracticingDesc": "Considera revisar el material e intentarlo de nuevo.",
+    "questionNumber": "Pregunta {{number}} de {{total}}",
+    "yourAnswer": "Tu respuesta:",
+    "correctAnswer": "Respuesta correcta:",
+    "notAnswered": "Sin responder",
+    "explanation": "Explicación:",
+    "showAnswer": "Mostrar Respuesta",
+    "hideAnswer": "Ocultar Respuesta",
+    "save": "Guardar",
+    "saved": "Guardado",
+    "retakeQuiz": "Repetir Cuestionario",
+    "clearQuestions": "Limpiar Preguntas",
+    "finishQuiz": "Finalizar Cuestionario",
+    "sampleAnswer": "Respuesta de ejemplo:"
+  },
+  "results": {
+    "aiFeedback": "Retroalimentación de IA",
+    "summary": "Resumen",
+    "understandingRating": "Calificación de Comprensión",
+    "ratingDescription": "Qué tan bien la audiencia seleccionada entendería tu explicación",
+    "detailedFeedback": "Retroalimentación Detallada",
+    "suggestedImprovements": "Mejoras Sugeridas",
+    "overview": "Visión General",
+    "keyPoints": "Puntos Clave",
+    "importantConcepts": "Conceptos Importantes"
+  },
+  "auth": {
+    "login": "Iniciar Sesión",
+    "signup": "Registrarse",
+    "getStarted": "Comenzar",
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar Contraseña",
+    "username": "Nombre de Usuario",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "createAccount": "Crear Cuenta",
+    "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+    "dontHaveAccount": "¿No tienes una cuenta?",
+    "enterEmail": "Ingresa tu correo electrónico",
+    "enterPassword": "Ingresa tu contraseña",
+    "chooseUsername": "Elige un nombre de usuario",
+    "createPassword": "Crea una contraseña",
+    "confirmYourPassword": "Confirma tu contraseña",
+    "signingIn": "Iniciando Sesión...",
+    "creatingAccount": "Creando Cuenta...",
+    "loginError": "Error de Inicio de Sesión",
+    "signupError": "Error de Registro",
+    "welcomeBack": "Bienvenido de Nuevo",
+    "welcomeBackDesc": "¡Has iniciado sesión exitosamente!",
+    "accountCreated": "Cuenta Creada",
+    "accountCreatedDesc": "¡Tu cuenta ha sido creada exitosamente!",
+    "passwordMismatch": "Las Contraseñas No Coinciden",
+    "passwordMismatchDesc": "Las contraseñas no coinciden",
+    "unexpectedError": "Ocurrió un error inesperado"
+  },
   "footer": {
     "howItWorks": "Cómo Funciona",
     "pricing": "Precios",
@@ -38,15 +161,5 @@
     "termsOfService": "Términos de Servicio",
     "contact": "Contacto",
     "cookies": "Cookies"
-  },
-  "auth": {
-    "login": "Iniciar Sesión",
-    "signup": "Registrarse",
-    "email": "Correo Electrónico",
-    "password": "Contraseña",
-    "forgotPassword": "¿Olvidaste tu contraseña?",
-    "createAccount": "Crear Cuenta",
-    "alreadyHaveAccount": "¿Ya tienes una cuenta?",
-    "dontHaveAccount": "¿No tienes una cuenta?"
   }
 }
