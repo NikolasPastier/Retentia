@@ -752,20 +752,6 @@ export default function TranscriptInput({
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
-      <div className="text-center space-y-4">
-        <h1 className="text-5xl md:text-6xl font-bold text-white text-balance tracking-tight">
-          Change The Way You{" "}
-          <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-            {mode === "study" ? "Study" : mode === "explain" ? "Explain" : "Learn"}
-          </span>
-        </h1>
-        <p className="text-xl text-white/80 text-pretty max-w-2xl mx-auto">
-          {mode === "study" && "Test yourself, explain topics, generate AI-powered summaries."}
-          {mode === "explain" && "Upload your study material and write your explanation to get AI feedback"}
-          {mode === "summarize" && "Upload or paste your material to get a concise summary with key points"}
-        </p>
-      </div>
-
       <div
         className="relative"
         onClick={(e) => {

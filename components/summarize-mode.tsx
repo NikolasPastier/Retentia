@@ -7,13 +7,13 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Plus, File, X, Loader2, FileText, CheckCircle } from "lucide-react"
+import { Plus, File, X, Loader2, FileText, CheckCircle } from 'lucide-react'
 import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast"
 import { saveStudySession } from "@/lib/firebase/firestore"
 import { checkGenerationLimit, recordGeneration } from "@/lib/plans/plan-limits"
 
-interface SummariseModeProps {
+interface SummarizeModeProps {
   transcript: string
   setTranscript: (transcript: string) => void
   selectedFile: File | null
@@ -23,7 +23,7 @@ interface SummariseModeProps {
   result: any
 }
 
-export default function SummariseMode({
+export default function SummarizeMode({
   transcript,
   setTranscript,
   selectedFile,
@@ -31,7 +31,7 @@ export default function SummariseMode({
   fileInputRef,
   onResult,
   result,
-}: SummariseModeProps) {
+}: SummarizeModeProps) {
   const [isProcessing, setIsProcessing] = useState(false)
   const [showUploadOptions, setShowUploadOptions] = useState(false)
 
@@ -53,11 +53,11 @@ export default function SummariseMode({
     }
   }
 
-  const handleSummariseSubmit = async () => {
+  const handleSummarizeSubmit = async () => {
     if (!transcript.trim()) {
       toast({
         title: "Missing Content",
-        description: "Please provide material to summarise.",
+        description: "Please provide material to summarize.",
         variant: "destructive",
       })
       return
@@ -66,7 +66,7 @@ export default function SummariseMode({
     if (!user) {
       toast({
         title: "Authentication Required",
-        description: "Please sign in to use the summarise feature.",
+        description: "Please sign in to use the summarize feature.",
         variant: "destructive",
       })
       return
@@ -84,7 +84,7 @@ export default function SummariseMode({
 
     setIsProcessing(true)
     try {
-      const response = await fetch("/api/summarise", {
+      const response = await fetch("/api/summarize", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -110,7 +110,7 @@ export default function SummariseMode({
         title: sessionTitle,
         createdAt: new Date(),
         transcript: transcript,
-        mode: "summarise",
+        mode: "summarize",
         summary: data,
       })
 
@@ -135,7 +135,7 @@ export default function SummariseMode({
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold text-foreground text-balance">Summarise Mode</h1>
+        <h1 className="text-4xl font-bold text-foreground text-balance">Summarize Mode</h1>
         <p className="text-xl text-muted-foreground text-pretty">
           Upload or paste your material to get a concise summary with key points
         </p>
@@ -147,9 +147,9 @@ export default function SummariseMode({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <File className="h-5 w-5" />
-              Material to Summarise
+              Material to Summarize
             </CardTitle>
-            <CardDescription>Upload or paste the content you want summarised</CardDescription>
+            <CardDescription>Upload or paste the content you want summarized</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {selectedFile && (
@@ -193,7 +193,7 @@ export default function SummariseMode({
             </p>
 
             <Button
-              onClick={handleSummariseSubmit}
+              onClick={handleSummarizeSubmit}
               disabled={isProcessing || !transcript.trim()}
               className="w-full flex items-center gap-2"
               size="lg"

@@ -27,8 +27,8 @@ export default function ModeSelector({ currentMode, onModeChange }: ModeSelector
       color: "text-green-500",
     },
     {
-      id: "summarise" as StudyMode,
-      name: "Summarise",
+      id: "summarize" as StudyMode,
+      name: "Summarize",
       description: "Create concise summaries with key points",
       icon: FileText,
       color: "text-purple-500",

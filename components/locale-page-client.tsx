@@ -5,8 +5,9 @@ import Navigation from "@/components/navigation"
 import TranscriptInput from "@/components/transcript-input"
 import QuestionDisplay from "@/components/question-display"
 import UserDashboard from "@/components/user-dashboard"
+import Hero from "@/components/hero"
 
-export type StudyMode = "study" | "explain" | "summarise"
+export type StudyMode = "study" | "explain" | "summarize"
 
 export default function LocalePageClient() {
   const [activeSection, setActiveSection] = useState("input")
@@ -30,8 +31,8 @@ export default function LocalePageClient() {
       case "explain":
         setCurrentSetting("adult")
         break
-      case "summarise":
-        setCurrentSetting("briefly")
+      case "summarize":
+        setCurrentSetting("brief")
         break
       default:
         setCurrentSetting("medium")
@@ -53,6 +54,8 @@ export default function LocalePageClient() {
       <main className="container mx-auto px-4 py-8">
         {activeSection === "input" && (
           <div className="space-y-8">
+            <Hero />
+
             <TranscriptInput
               transcript={transcript}
               setTranscript={setTranscript}
