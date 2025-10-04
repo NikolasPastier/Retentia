@@ -19,6 +19,8 @@ const I18nContext = createContext<I18nContextType | undefined>(undefined)
 
 const translationFiles = {
   en: () => import("./locales/en/common.json"),
+  cs: () => import("./locales/cs/common.json"), // Added Czech (cs) translation loader
+  sk: () => import("./locales/sk/common.json"), // Added Slovak (sk) translation loader
   es: () => import("./locales/es/common.json"),
   fr: () => import("./locales/fr/common.json"),
   de: () => import("./locales/de/common.json"),

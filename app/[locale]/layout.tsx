@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Figtree } from "next/font/google"
 import { GeistMono } from "geist/font/mono"
 import { Instrument_Serif } from "next/font/google"
+import { supportedLanguages } from "@/lib/i18n/config"
 import "../globals.css"
 
 const figtree = Figtree({
@@ -34,8 +35,6 @@ interface LocaleLayoutProps {
   children: React.ReactNode
   params: { locale: string }
 }
-
-const supportedLanguages = ["en", "es", "fr", "de", "it", "pt"]
 
 export async function generateStaticParams() {
   return supportedLanguages.map((locale) => ({ locale }))
