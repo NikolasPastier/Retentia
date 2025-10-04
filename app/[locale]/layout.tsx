@@ -4,6 +4,7 @@ import { Figtree } from "next/font/google"
 import { GeistMono } from "geist/font/mono"
 import { Instrument_Serif } from "next/font/google"
 import { supportedLanguages } from "@/lib/i18n/config"
+import { I18nProvider } from "@/lib/i18n/context"
 import "../globals.css"
 
 const figtree = Figtree({
@@ -53,7 +54,9 @@ html {
 }
         `}</style>
       </head>
-      <body className={`${figtree.variable} ${instrumentSerif.variable}`}>{children}</body>
+      <body className={`${figtree.variable} ${instrumentSerif.variable}`}>
+        <I18nProvider>{children}</I18nProvider>
+      </body>
     </html>
   )
 }
