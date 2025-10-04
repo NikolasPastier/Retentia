@@ -738,22 +738,23 @@ export default function TranscriptInput({
                   </Button>
 
                   {showUploadOptions && (
-                    <div className="absolute bottom-12 left-0 bg-background/95 backdrop-blur-sm border border-border rounded-xl p-2 shadow-lg z-10 min-w-[200px]">
-                      <div className="space-y-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full justify-start gap-2 text-sm"
+                    <div className="absolute top-full mt-2 left-0 bg-[#0b1724]/95 backdrop-blur-sm border border-border/50 rounded-xl p-3 shadow-2xl z-10 min-w-[240px] animate-in fade-in slide-in-from-top-2 duration-200">
+                      {/* Caret arrow */}
+                      <div className="absolute -top-2 left-4 w-4 h-4 bg-[#0b1724]/95 rotate-45 border-l border-t border-border/50" />
+
+                      <div className="relative space-y-1">
+                        <button
                           onClick={() => {
                             fileInputRef.current?.click()
                             setShowUploadOptions(false)
                           }}
+                          className="w-full text-left px-3 py-2.5 rounded-lg text-sm text-[#d1d5db] hover:bg-white/5 hover:text-white transition-all duration-200 flex items-center gap-2"
                         >
                           <File className="h-4 w-4" />
                           Upload File
-                        </Button>
-                        <div className="px-2 py-1">
-                          <p className="text-xs text-muted-foreground text-center">
+                        </button>
+                        <div className="px-3 py-2">
+                          <p className="text-xs text-gray-500 text-center">
                             Supported: MP3, WAV, M4A, MP4, MOV, AVI, TXT, MD (max 100MB)
                           </p>
                         </div>
@@ -774,41 +775,31 @@ export default function TranscriptInput({
                   </Button>
 
                   {showModeSelector && (
-                    <div className="absolute bottom-12 left-0 bg-background/95 backdrop-blur-sm border border-border rounded-xl p-2 shadow-lg z-10 min-w-[150px]">
-                      <div className="space-y-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full justify-start text-sm"
-                          onClick={() => {
-                            onModeChange("study")
-                            setShowModeSelector(false)
-                          }}
-                        >
-                          Study
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full justify-start text-sm"
-                          onClick={() => {
-                            onModeChange("explain")
-                            setShowModeSelector(false)
-                          }}
-                        >
-                          Explain
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full justify-start text-sm"
-                          onClick={() => {
-                            onModeChange("summarize")
-                            setShowModeSelector(false)
-                          }}
-                        >
-                          Summarize
-                        </Button>
+                    <div className="absolute top-full mt-2 left-0 bg-[#0b1724]/95 backdrop-blur-sm border border-border/50 rounded-xl p-3 shadow-2xl z-10 min-w-[180px] animate-in fade-in slide-in-from-top-2 duration-200">
+                      {/* Caret arrow */}
+                      <div className="absolute -top-2 left-4 w-4 h-4 bg-[#0b1724]/95 rotate-45 border-l border-t border-border/50" />
+
+                      <div className="relative space-y-1">
+                        {[
+                          { id: "study", label: "Study" },
+                          { id: "explain", label: "Explain" },
+                          { id: "summarize", label: "Summarize" },
+                        ].map((modeOption) => (
+                          <button
+                            key={modeOption.id}
+                            onClick={() => {
+                              onModeChange(modeOption.id as StudyMode)
+                              setShowModeSelector(false)
+                            }}
+                            className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-all duration-200 ${
+                              mode === modeOption.id
+                                ? "bg-blue-500/20 border border-blue-400/30 text-blue-300"
+                                : "text-[#d1d5db] hover:bg-white/5 hover:text-white"
+                            }`}
+                          >
+                            {modeOption.label}
+                          </button>
+                        ))}
                       </div>
                     </div>
                   )}

@@ -88,7 +88,7 @@ export default function StudySettingsDropdown({
       {/* Caret arrow */}
       <div className="absolute -top-2 left-4 w-4 h-4 bg-[#0b1724]/95 rotate-45 border-l border-t border-border/50" />
 
-      <div className="relative bg-[#0b1724]/95 backdrop-blur-sm border border-border/50 rounded-xl shadow-2xl min-w-[280px] max-w-[320px] overflow-hidden">
+      <div className="relative bg-[#0b1724]/95 backdrop-blur-sm border border-border/50 rounded-xl shadow-2xl min-w-[280px] max-w-[320px] max-h-[70vh] overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
         <div className="p-3 space-y-1">
           {/* Study Mode Settings */}
           {mode === "study" && (
@@ -104,18 +104,15 @@ export default function StudySettingsDropdown({
                   {["easy", "medium", "hard"].map((diff) => (
                     <div
                       key={diff}
-                      className={`flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer transition-all ${
-                        difficulty === diff ? "bg-[#9be89b]/20 border border-[#9be89b]/30" : "hover:bg-white/5"
+                      className={`flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 ${
+                        difficulty === diff
+                          ? "bg-blue-500/20 border border-blue-400/30 text-blue-300"
+                          : "text-[#d1d5db] hover:bg-white/5 hover:text-white"
                       }`}
                       onClick={() => onDifficultyChange(diff)}
                     >
                       <RadioGroupItem value={diff} id={`diff-${diff}`} className="border-gray-600" />
-                      <Label
-                        htmlFor={`diff-${diff}`}
-                        className={`flex-1 cursor-pointer text-sm ${
-                          difficulty === diff ? "text-[#9be89b]" : "text-[#d1d5db]"
-                        }`}
-                      >
+                      <Label htmlFor={`diff-${diff}`} className="flex-1 cursor-pointer text-sm">
                         {diff.charAt(0).toUpperCase() + diff.slice(1)}
                       </Label>
                     </div>
@@ -133,10 +130,10 @@ export default function StudySettingsDropdown({
                     <button
                       key={count}
                       onClick={() => onQuestionCountChange(count)}
-                      className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
+                      className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
                         questionCount === count
-                          ? "bg-[#9be89b]/20 border border-[#9be89b]/30 text-[#9be89b]"
-                          : "text-[#d1d5db] hover:bg-white/5"
+                          ? "bg-blue-500/20 border border-blue-400/30 text-blue-300"
+                          : "text-[#d1d5db] hover:bg-white/5 hover:text-white"
                       }`}
                     >
                       {count} Questions
@@ -160,18 +157,15 @@ export default function StudySettingsDropdown({
                   ].map((type) => (
                     <div
                       key={type.value}
-                      className={`flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer transition-all ${
-                        questionType === type.value ? "bg-[#9be89b]/20 border border-[#9be89b]/30" : "hover:bg-white/5"
+                      className={`flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 ${
+                        questionType === type.value
+                          ? "bg-blue-500/20 border border-blue-400/30 text-blue-300"
+                          : "text-[#d1d5db] hover:bg-white/5 hover:text-white"
                       }`}
                       onClick={() => onQuestionTypeChange(type.value)}
                     >
                       <RadioGroupItem value={type.value} id={`type-${type.value}`} className="border-gray-600" />
-                      <Label
-                        htmlFor={`type-${type.value}`}
-                        className={`flex-1 cursor-pointer text-sm ${
-                          questionType === type.value ? "text-[#9be89b]" : "text-[#d1d5db]"
-                        }`}
-                      >
+                      <Label htmlFor={`type-${type.value}`} className="flex-1 cursor-pointer text-sm">
                         {type.label}
                       </Label>
                     </div>
@@ -200,9 +194,9 @@ export default function StudySettingsDropdown({
                 ].map((option) => (
                   <div
                     key={option.value}
-                    className={`flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer transition-all ${
+                    className={`flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 ${
                       summarizeSetting === option.value
-                        ? "bg-[#9be89b]/20 border border-[#9be89b]/30"
+                        ? "bg-blue-500/20 border border-blue-400/30"
                         : "hover:bg-white/5"
                     }`}
                     onClick={() => onSummarizeSettingChange(option.value as "brief" | "in-depth" | "key-points")}
@@ -212,7 +206,7 @@ export default function StudySettingsDropdown({
                       <Label
                         htmlFor={`sum-${option.value}`}
                         className={`cursor-pointer text-sm block ${
-                          summarizeSetting === option.value ? "text-[#9be89b]" : "text-[#d1d5db]"
+                          summarizeSetting === option.value ? "text-blue-300" : "text-[#d1d5db]"
                         }`}
                       >
                         {option.label}
@@ -245,10 +239,8 @@ export default function StudySettingsDropdown({
                 ].map((option) => (
                   <div
                     key={option.value}
-                    className={`flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer transition-all ${
-                      explainSetting === option.value
-                        ? "bg-[#9be89b]/20 border border-[#9be89b]/30"
-                        : "hover:bg-white/5"
+                    className={`flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 ${
+                      explainSetting === option.value ? "bg-blue-500/20 border border-blue-400/30" : "hover:bg-white/5"
                     }`}
                     onClick={() => onExplainSettingChange(option.value as "child" | "teen" | "adult" | "senior")}
                   >
@@ -257,7 +249,7 @@ export default function StudySettingsDropdown({
                       <Label
                         htmlFor={`exp-${option.value}`}
                         className={`cursor-pointer text-sm block ${
-                          explainSetting === option.value ? "text-[#9be89b]" : "text-[#d1d5db]"
+                          explainSetting === option.value ? "text-blue-300" : "text-[#d1d5db]"
                         }`}
                       >
                         {option.label}
