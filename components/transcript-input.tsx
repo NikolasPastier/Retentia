@@ -54,7 +54,6 @@ export default function TranscriptInput({
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
-  const [youtubeUrl, setYoutubeUrl] = useState("")
   const [isProcessingYoutube, setIsProcessingYoutube] = useState(false)
   const [youtubeError, setYoutubeError] = useState<string | null>(null)
   const [workerUrl, setWorkerUrl] = useState(process.env.NEXT_PUBLIC_YOUTUBE_WORKER_URL || "")
@@ -162,80 +161,90 @@ export default function TranscriptInput({
     }
   }
 
-  const handleYouTubeProcess = async () => {
-    if (!youtubeUrl.trim()) {
-      setYoutubeError("Please provide a YouTube link.")
-      return
+  const fetchYouTubeTranscript = async (url: string): Promise<string> => {
+    if (!workerUrl) {
+      throw new Error("YouTube worker service is not configured. Please contact support.")
     }
 
     const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/|v\/)|youtu\.be\/)[\w-]+/
-    if (!youtubeRegex.test(youtubeUrl)) {
-      setYoutubeError("Please enter a valid YouTube URL.")
-      return
+    if (!youtubeRegex.test(url)) {
+      throw new Error("Please enter a valid YouTube URL.")
     }
 
-    if (!workerUrl) {
-      setYoutubeError("YouTube worker service is not configured. Please contact support.")
-      return
+    // Call worker to download audio
+    const workerResponse = await fetch(`${workerUrl}/api/download-audio`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ youtubeUrl: url.trim() }),
+    })
+
+    const workerData = await workerResponse.json()
+    if (!workerResponse.ok) {
+      throw new Error(workerData?.error || "Failed to download YouTube audio")
+    }
+    if (!workerData.success || !workerData.fileUrl) {
+      throw new Error("Worker did not return a valid audio file URL")
     }
 
-    setIsProcessingYoutube(true)
-    setYoutubeError(null)
+    // Call our API to transcribe the audio
+    const transcribeResponse = await fetch("/api/transcribe-audio", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ audioUrl: workerData.fileUrl }),
+    })
 
-    try {
-      const workerResponse = await fetch(`${workerUrl}/api/download-audio`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ youtubeUrl: youtubeUrl.trim() }),
-      })
-
-      const workerData = await workerResponse.json()
-      if (!workerResponse.ok) {
-        throw new Error(workerData?.error || "Failed to download YouTube audio")
-      }
-      if (!workerData.success || !workerData.fileUrl) {
-        throw new Error("Worker did not return a valid audio file URL")
-      }
-
-      const response = await fetch("/api/youtube-to-questions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fileUrl: workerData.fileUrl,
-          difficulty,
-          questionCount: Number.parseInt(questionCount),
-          questionType,
-        }),
-      })
-
-      const data = await response.json()
-      if (!response.ok) {
-        throw new Error(data?.error || response.statusText || "Failed to process YouTube video")
-      }
-
-      if (data.questions && data.questions.length > 0) {
-        onQuestionsGenerated(data.questions)
-        setYoutubeUrl("")
-      } else if (data.transcript) {
-        setTranscript(data.transcript)
-        setYoutubeUrl("")
-      } else {
-        throw new Error("No content received from YouTube video")
-      }
-    } catch (error) {
-      let err = error instanceof Error ? error.message : "Failed to process YouTube video"
-      if (err.includes("Failed to download audio")) {
-        err += ". The video may be private, age-restricted, or unavailable."
-      } else if (err.includes("Audio file too large")) {
-        err += ". Please try a shorter video (under 100MB audio)."
-      } else if (err.includes("worker service is not configured")) {
-        err += " Please check your environment configuration."
-      }
-      setYoutubeError(err)
-    } finally {
-      setIsProcessingYoutube(false)
+    const transcribeData = await transcribeResponse.json()
+    if (!transcribeResponse.ok) {
+      throw new Error(transcribeData?.error || "Failed to transcribe audio")
     }
+
+    if (!transcribeData.transcript) {
+      throw new Error("No transcript received from audio")
+    }
+
+    return transcribeData.transcript
   }
+
+  useEffect(() => {
+    if (!detectedYoutubeUrl || isProcessingYoutube) return
+
+    const fetchTranscript = async () => {
+      setIsProcessingYoutube(true)
+      setYoutubeError(null)
+
+      try {
+        const transcriptText = await fetchYouTubeTranscript(detectedYoutubeUrl)
+
+        // Populate the textarea with the transcript
+        setTranscript(transcriptText)
+
+        // Clear YouTube URL states
+        setDetectedYoutubeUrl("")
+
+        toast({
+          title: "YouTube Transcript Fetched",
+          description: "The video has been transcribed. You can now generate questions, summary, or feedback.",
+        })
+      } catch (error) {
+        let err = error instanceof Error ? error.message : "Failed to process YouTube video"
+        if (err.includes("Failed to download audio")) {
+          err += ". The video may be private, age-restricted, or unavailable."
+        } else if (err.includes("Audio file too large")) {
+          err += ". Please try a shorter video (under 100MB audio)."
+        } else if (err.includes("worker service is not configured")) {
+          err += " Please check your environment configuration."
+        }
+        setYoutubeError(err)
+        setDetectedYoutubeUrl("")
+      } finally {
+        setIsProcessingYoutube(false)
+      }
+    }
+
+    // Debounce the fetch to avoid multiple calls
+    const timeoutId = setTimeout(fetchTranscript, 500)
+    return () => clearTimeout(timeoutId)
+  }, [detectedYoutubeUrl])
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value
@@ -321,9 +330,11 @@ export default function TranscriptInput({
       return
     }
 
-    // If there's a detected YouTube URL, process it
-    if (detectedYoutubeUrl) {
-      await handleYouTubeProcess()
+    if (isProcessingYoutube) {
+      toast({
+        title: "Processing YouTube Video",
+        description: "Please wait while we fetch the transcript...",
+      })
       return
     }
 
@@ -367,7 +378,7 @@ export default function TranscriptInput({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(requestBody),
+        body: JSON.JSON.stringify(requestBody),
       })
 
       if (!response.ok) {
@@ -703,18 +714,24 @@ export default function TranscriptInput({
               {detectedYoutubeUrl && (
                 <div className="inline-flex items-center gap-2 bg-muted/80 backdrop-blur-sm border border-border/50 rounded-full px-3 py-1.5 text-sm">
                   <Link className="h-4 w-4" />
-                  <span className="truncate max-w-[200px]">YouTube Video</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setDetectedYoutubeUrl("")
-                      setTranscript("")
-                    }}
-                    className="h-5 w-5 p-0 hover:bg-muted-foreground/20 rounded-full"
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
+                  <span className="truncate max-w-[200px]">
+                    {isProcessingYoutube ? "Fetching transcript..." : "YouTube Video"}
+                  </span>
+                  {isProcessingYoutube ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setDetectedYoutubeUrl("")
+                        setTranscript("")
+                      }}
+                      className="h-5 w-5 p-0 hover:bg-muted-foreground/20 rounded-full"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  )}
                 </div>
               )}
             </div>
@@ -727,6 +744,7 @@ export default function TranscriptInput({
               onChange={handleTextareaChange}
               className="min-h-[200px] bg-transparent border-none resize-none text-lg text-white placeholder:text-muted-foreground/70 focus-visible:ring-0 focus-visible:ring-offset-0 caret-white"
               maxLength={mode === "summarize" ? 15000 : 10000}
+              disabled={isProcessingYoutube}
             />
 
             {mode === "explain" && (
@@ -847,7 +865,7 @@ export default function TranscriptInput({
                   onClick={handleGenerate}
                   disabled={
                     isProcessing ||
-                    (!selectedFile && !detectedYoutubeUrl && !transcript.trim()) ||
+                    (!selectedFile && !transcript.trim()) ||
                     (mode === "explain" && !selectedFile && !userExplanation.trim())
                   }
                   className="group relative h-12 w-12 rounded-full bg-gradient-to-b from-gray-200 to-gray-300 hover:from-gray-300 hover:to-gray-400 disabled:from-gray-100 disabled:to-gray-200 disabled:cursor-not-allowed transition-all duration-200 ease-in-out hover:scale-105 active:scale-95 shadow-md hover:shadow-lg disabled:shadow-sm"
