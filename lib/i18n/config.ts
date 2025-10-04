@@ -1,2 +1,2 @@
-export const supportedLanguages = ["en", "es", "fr", "de", "it", "pt"]
+export const supportedLanguages = ["en", "cs", "sk", "es", "pt", "it", "fr", "de"]
 export const defaultLanguage = "en"
