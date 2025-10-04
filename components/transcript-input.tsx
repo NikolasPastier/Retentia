@@ -75,7 +75,7 @@ export default function TranscriptInput({
   const [summarizeSetting, setSummarizeSetting] = useState<"brief" | "in-depth" | "key-points">("brief")
   const [explainSetting, setExplainSetting] = useState<"child" | "teen" | "adult" | "senior">("adult")
 
-  const t = useTranslations()
+  const { t } = useTranslations()
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
