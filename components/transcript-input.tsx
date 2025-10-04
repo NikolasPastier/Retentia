@@ -10,20 +10,20 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Settings, Loader2, X, File, Link, ChevronRight, Grid3X3, CheckCircle } from "lucide-react"
+import { Settings, Loader2, ChevronRight, Grid3X3, CheckCircle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import type { StudyMode } from "./locale-page-client"
 
 const getPlaceholderText = (mode: StudyMode) => {
   switch (mode) {
     case "study":
-      return "Enter your transcript or paste a YouTube link here"
+      return "Enter your study material here..."
     case "explain":
       return "Paste your study material here..."
     case "summarize":
       return "Paste your material here..."
     default:
-      return "Enter your transcript or paste a YouTube link here"
+      return "Enter your study material here..."
   }
 }
 
@@ -51,23 +51,13 @@ export default function TranscriptInput({
   const [result, setResult] = useState<any>(null)
 
   const [isGenerating, setIsGenerating] = useState(false)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [isUploading, setIsUploading] = useState(false)
-  const [uploadError, setUploadError] = useState<string | null>(null)
-  const [isProcessingYoutube, setIsProcessingYoutube] = useState(false)
-  const [youtubeError, setYoutubeError] = useState<string | null>(null)
-  const [workerUrl, setWorkerUrl] = useState(process.env.NEXT_PUBLIC_YOUTUBE_WORKER_URL || "")
-  const [showUploadOptions, setShowUploadOptions] = useState(false)
   const [showModeSelector, setShowModeSelector] = useState(false)
   const [showSettingsDropdown, setShowSettingsDropdown] = useState(false)
   const [showDifficultyDropdown, setShowDifficultyDropdown] = useState(false)
   const [showCountDropdown, setShowCountDropdown] = useState(false)
   const [showTypeDropdown, setShowTypeDropdown] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const settingsButtonRef = useRef<HTMLButtonElement>(null)
-
-  const [detectedYoutubeUrl, setDetectedYoutubeUrl] = useState("")
 
   const { toast } = useToast()
 
@@ -89,192 +79,19 @@ export default function TranscriptInput({
     }
   }, [])
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      setSelectedFile(file)
-      setUploadError(null)
-      setShowUploadOptions(false)
-    }
-  }
-
-  const handleFileUpload = async () => {
-    if (!selectedFile) {
-      setUploadError("Please choose a file to upload.")
-      return
-    }
-
-    setIsUploading(true)
-    setUploadError(null)
-
-    try {
-      const formData = new FormData()
-      formData.append("file", selectedFile)
-
-      formData.append("difficulty", difficulty)
-      formData.append("questionCount", questionCount)
-      formData.append("questionType", questionType)
-
-      const response = await fetch("/api/media-to-questions", {
-        method: "POST",
-        body: formData,
-      })
-
-      if (!response.ok) {
-        let errorMessage = "Failed to process file"
-        try {
-          const errorData = await response.json()
-          errorMessage = errorData.error || errorMessage
-        } catch {
-          errorMessage = response.statusText || errorMessage
-        }
-        throw new Error(errorMessage)
-      }
-
-      const data = await response.json()
-
-      if (!data || !data.success) {
-        throw new Error(data?.error || "Invalid response from server")
-      }
-
-      if (mode === "study" && data.questions) {
-        onQuestionsGenerated(data.questions)
-        setTranscript(data.transcript)
-        toast({
-          title: "Questions Generated",
-          description: "Your questions have been generated based on the transcript.",
-        })
-      } else {
-        setTranscript(data.transcript)
-        toast({
-          title: "File Processed",
-          description: "Your file has been processed. You can now generate questions, summary, or feedback.",
-        })
-      }
-
-      setSelectedFile(null)
-      if (fileInputRef.current) fileInputRef.current.value = ""
-    } catch (error) {
-      setUploadError(error instanceof Error ? error.message : "Failed to process file")
-    } finally {
-      setIsUploading(false)
-    }
-  }
-
-  const fetchYouTubeTranscript = async (url: string): Promise<string> => {
-    if (!workerUrl) {
-      throw new Error("YouTube worker service is not configured. Please contact support.")
-    }
-
-    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/|v\/)|youtu\.be\/)[\w-]+/
-    if (!youtubeRegex.test(url)) {
-      throw new Error("Please enter a valid YouTube URL.")
-    }
-
-    // Call worker to download audio
-    const workerResponse = await fetch(`${workerUrl}/api/download-audio`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ youtubeUrl: url.trim() }),
-    })
-
-    const workerData = await workerResponse.json()
-    if (!workerResponse.ok) {
-      throw new Error(workerData?.error || "Failed to download YouTube audio")
-    }
-    if (!workerData.success || !workerData.fileUrl) {
-      throw new Error("Worker did not return a valid audio file URL")
-    }
-
-    // Call our API to transcribe the audio
-    const transcribeResponse = await fetch("/api/transcribe-audio", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ audioUrl: workerData.fileUrl }),
-    })
-
-    const transcribeData = await transcribeResponse.json()
-    if (!transcribeResponse.ok) {
-      throw new Error(transcribeData?.error || "Failed to transcribe audio")
-    }
-
-    if (!transcribeData.transcript) {
-      throw new Error("No transcript received from audio")
-    }
-
-    return transcribeData.transcript
-  }
-
-  useEffect(() => {
-    if (!detectedYoutubeUrl || isProcessingYoutube) return
-
-    const fetchTranscript = async () => {
-      setIsProcessingYoutube(true)
-      setYoutubeError(null)
-
-      try {
-        const transcriptText = await fetchYouTubeTranscript(detectedYoutubeUrl)
-
-        // Populate the textarea with the transcript
-        setTranscript(transcriptText)
-
-        // Clear YouTube URL states
-        setDetectedYoutubeUrl("")
-
-        toast({
-          title: "YouTube Transcript Fetched",
-          description: "The video has been transcribed. You can now generate questions, summary, or feedback.",
-        })
-      } catch (error) {
-        let err = error instanceof Error ? error.message : "Failed to process YouTube video"
-        if (err.includes("Failed to download audio")) {
-          err += ". The video may be private, age-restricted, or unavailable."
-        } else if (err.includes("Audio file too large")) {
-          err += ". Please try a shorter video (under 100MB audio)."
-        } else if (err.includes("worker service is not configured")) {
-          err += " Please check your environment configuration."
-        }
-        setYoutubeError(err)
-        setDetectedYoutubeUrl("")
-      } finally {
-        setIsProcessingYoutube(false)
-      }
-    }
-
-    // Debounce the fetch to avoid multiple calls
-    const timeoutId = setTimeout(fetchTranscript, 500)
-    return () => clearTimeout(timeoutId)
-  }, [detectedYoutubeUrl])
-
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value
     setTranscript(value)
-
-    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/|v\/)|youtu\.be\/)[\w-]+/
-    if (youtubeRegex.test(value.trim())) {
-      setDetectedYoutubeUrl(value.trim())
-      setYoutubeError(null)
-    } else {
-      setDetectedYoutubeUrl("")
-    }
   }
 
-  const handleRemoveFile = () => {
-    setSelectedFile(null)
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ""
-    }
-  }
-
-  const hasContent = transcript.trim() || selectedFile || detectedYoutubeUrl
-  const isProcessing = isGenerating || isUploading || isProcessingYoutube
+  const hasContent = transcript.trim()
+  const isProcessing = isGenerating
 
   const closeAllDropdowns = () => {
     setShowSettingsDropdown(false)
     setShowDifficultyDropdown(false)
     setShowCountDropdown(false)
     setShowTypeDropdown(false)
-    setShowUploadOptions(false)
     setShowModeSelector(false)
   }
 
@@ -284,15 +101,11 @@ export default function TranscriptInput({
       return
     }
 
-    if (dropdownType === "upload" && showUploadOptions) return closeAllDropdowns()
     if (dropdownType === "mode" && showModeSelector) return closeAllDropdowns()
 
     closeAllDropdowns()
 
     switch (dropdownType) {
-      case "upload":
-        setShowUploadOptions(true)
-        break
       case "mode":
         setShowModeSelector(true)
         break
@@ -322,23 +135,6 @@ export default function TranscriptInput({
   }
 
   const handleGenerate = async () => {
-    // If there's a selected file, upload it first
-    if (selectedFile) {
-      await handleFileUpload()
-      // For study mode, handleFileUpload already generates questions
-      // For other modes, the transcript is now set and user can generate
-      return
-    }
-
-    if (isProcessingYoutube) {
-      toast({
-        title: "Processing YouTube Video",
-        description: "Please wait while we fetch the transcript...",
-      })
-      return
-    }
-
-    // Otherwise, proceed with text-based generation
     await handleSubmit()
   }
 
@@ -695,48 +491,6 @@ export default function TranscriptInput({
         }}
       >
         <div className="bg-background/60 backdrop-blur-sm border border-border/50 rounded-3xl p-6 shadow-lg">
-          {(selectedFile || detectedYoutubeUrl) && (
-            <div className="flex flex-wrap gap-2 mb-4">
-              {selectedFile && (
-                <div className="inline-flex items-center gap-2 bg-muted/80 backdrop-blur-sm border border-border/50 rounded-full px-3 py-1.5 text-sm">
-                  <File className="h-4 w-4" />
-                  <span className="truncate max-w-[200px]">{selectedFile.name}</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleRemoveFile}
-                    className="h-5 w-5 p-0 hover:bg-muted-foreground/20 rounded-full"
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </div>
-              )}
-              {detectedYoutubeUrl && (
-                <div className="inline-flex items-center gap-2 bg-muted/80 backdrop-blur-sm border border-border/50 rounded-full px-3 py-1.5 text-sm">
-                  <Link className="h-4 w-4" />
-                  <span className="truncate max-w-[200px]">
-                    {isProcessingYoutube ? "Fetching transcript..." : "YouTube Video"}
-                  </span>
-                  {isProcessingYoutube ? (
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                  ) : (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setDetectedYoutubeUrl("")
-                        setTranscript("")
-                      }}
-                      className="h-5 w-5 p-0 hover:bg-muted-foreground/20 rounded-full"
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-
           <div className="relative">
             <Textarea
               placeholder={getPlaceholderText(mode)}
@@ -744,7 +498,6 @@ export default function TranscriptInput({
               onChange={handleTextareaChange}
               className="min-h-[200px] bg-transparent border-none resize-none text-lg text-white placeholder:text-muted-foreground/70 focus-visible:ring-0 focus-visible:ring-offset-0 caret-white"
               maxLength={mode === "summarize" ? 15000 : 10000}
-              disabled={isProcessingYoutube}
             />
 
             {mode === "explain" && (
@@ -764,42 +517,6 @@ export default function TranscriptInput({
 
             <div className="flex items-center justify-between mt-4">
               <div className="flex items-center gap-3" ref={dropdownRef}>
-                <div className="relative">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-10 w-10 rounded-full bg-muted/50 hover:bg-muted border border-border/50"
-                    onClick={() => openDropdown("upload")}
-                  >
-                    <Plus className="h-5 w-5" />
-                  </Button>
-
-                  {showUploadOptions && (
-                    <div className="absolute top-full mt-2 left-0 bg-[#0b1724]/95 backdrop-blur-sm border border-border/50 rounded-xl p-3 shadow-2xl z-10 min-w-[240px] animate-in fade-in slide-in-from-top-2 duration-200">
-                      {/* Caret arrow */}
-                      <div className="absolute -top-2 left-4 w-4 h-4 bg-[#0b1724]/95 rotate-45 border-l border-t border-border/50" />
-
-                      <div className="relative space-y-1">
-                        <button
-                          onClick={() => {
-                            fileInputRef.current?.click()
-                            setShowUploadOptions(false)
-                          }}
-                          className="w-full text-left px-3 py-2.5 rounded-lg text-sm text-[#d1d5db] hover:bg-white/5 hover:text-white transition-all duration-200 flex items-center gap-2"
-                        >
-                          <File className="h-4 w-4" />
-                          Upload File
-                        </button>
-                        <div className="px-3 py-2">
-                          <p className="text-xs text-gray-500 text-center">
-                            Supported: MP3, WAV, M4A, MP4, MOV, AVI, TXT, MD (max 100MB)
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
                 <div className="relative">
                   <Button
                     variant="ghost"
@@ -863,11 +580,7 @@ export default function TranscriptInput({
 
                 <button
                   onClick={handleGenerate}
-                  disabled={
-                    isProcessing ||
-                    (!selectedFile && !transcript.trim()) ||
-                    (mode === "explain" && !selectedFile && !userExplanation.trim())
-                  }
+                  disabled={isProcessing || !transcript.trim() || (mode === "explain" && !userExplanation.trim())}
                   className="group relative h-12 w-12 rounded-full bg-gradient-to-b from-gray-200 to-gray-300 hover:from-gray-300 hover:to-gray-400 disabled:from-gray-100 disabled:to-gray-200 disabled:cursor-not-allowed transition-all duration-200 ease-in-out hover:scale-105 active:scale-95 shadow-md hover:shadow-lg disabled:shadow-sm"
                   title={t("generate")}
                   aria-label={t("generate")}
@@ -894,20 +607,6 @@ export default function TranscriptInput({
               </div>
             </div>
           </div>
-
-          {(uploadError || youtubeError) && (
-            <div className="mt-4 bg-destructive/10 backdrop-blur-sm border border-destructive/20 rounded-2xl p-4 shadow-lg">
-              <p className="text-sm text-destructive">{uploadError || youtubeError}</p>
-            </div>
-          )}
-
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".txt,.md,audio/*,video/*"
-            onChange={handleFileSelect}
-            className="hidden"
-          />
         </div>
       </div>
 
