@@ -108,7 +108,6 @@ export async function POST(request: NextRequest) {
           file: audioBuffer,
           filename: filename,
           model: "whisper-large-v3",
-          response_format: "text",
         })
 
         if (!transcription || !transcription.text) {
@@ -118,7 +117,7 @@ export async function POST(request: NextRequest) {
         transcript = transcription.text.trim()
         console.log("[v0] Transcription completed successfully, length:", transcript.length)
 
-        if (!transcript || transcript.length < 10) {
+        if (transcript.length < 10) {
           throw new Error("Transcription too short or empty")
         }
       } catch (transcriptionError) {

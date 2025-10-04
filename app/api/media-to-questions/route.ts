@@ -156,7 +156,6 @@ export async function POST(request: NextRequest) {
         const transcription = await groqClient.audio.transcriptions.create({
           file: fileBuffer,
           model: "whisper-large-v3",
-          response_format: "text",
           filename: filename,
         })
 
