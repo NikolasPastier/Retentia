@@ -8,10 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Plus, File, X, Loader2, MessageSquare, CheckCircle } from "lucide-react"
-import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast"
-import { saveStudySession } from "@/lib/firebase/firestore"
-import { checkGenerationLimit, recordGeneration } from "@/lib/plans/plan-limits"
 
 interface ExplainModeProps {
   transcript: string
@@ -36,7 +33,6 @@ export default function ExplainMode({
   const [isProcessing, setIsProcessing] = useState(false)
   const [showUploadOptions, setShowUploadOptions] = useState(false)
 
-  const { user } = useAuth()
   const { toast } = useToast()
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,25 +60,6 @@ export default function ExplainMode({
       return
     }
 
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to use the explain feature.",
-        variant: "destructive",
-      })
-      return
-    }
-
-    const canGenerate = await checkGenerationLimit(user.uid)
-    if (!canGenerate.allowed) {
-      toast({
-        title: "Limit Reached",
-        description: canGenerate.reason || "Generation limit reached",
-        variant: "destructive",
-      })
-      return
-    }
-
     setIsProcessing(true)
     try {
       const response = await fetch("/api/explain-feedback", {
@@ -93,7 +70,6 @@ export default function ExplainMode({
         body: JSON.stringify({
           material: transcript,
           explanation: userExplanation,
-          userId: user.uid,
         }),
       })
 
@@ -103,25 +79,11 @@ export default function ExplainMode({
 
       const data = await response.json()
 
-      await recordGeneration(user.uid)
-
-      // Save study session
-      const sessionTitle = `Explain Session - ${new Date().toLocaleDateString()}`
-      await saveStudySession({
-        userId: user.uid,
-        title: sessionTitle,
-        createdAt: new Date(),
-        transcript: transcript,
-        mode: "explain",
-        explanation: userExplanation,
-        feedback: data,
-      })
-
       onResult(data)
 
       toast({
         title: "Feedback Generated",
-        description: "Your explanation has been reviewed and saved to your dashboard",
+        description: "Your explanation has been reviewed",
       })
     } catch (error) {
       console.error("Error getting explanation feedback:", error)

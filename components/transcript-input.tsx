@@ -10,12 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Plus, Settings, Loader2, X, File, Link, ChevronRight, Grid3X3, CheckCircle } from "lucide-react"
-import { useAuth } from "@/hooks/use-auth"
-import { saveStudySession } from "@/lib/firebase/firestore"
-import { checkGenerationLimit, recordGeneration, checkInputLimits } from "@/lib/plans/plan-limits"
 import { useToast } from "@/hooks/use-toast"
-import AuthModal from "@/components/auth/auth-modal"
-import UsageLimitModal from "@/components/plans/usage-limit-modal"
 import type { StudyMode } from "./locale-page-client"
 
 const getPlaceholderText = (mode: StudyMode) => {
@@ -73,13 +68,8 @@ export default function TranscriptInput({
 
   const [detectedYoutubeUrl, setDetectedYoutubeUrl] = useState("")
 
-  const { user, userProfile } = useAuth()
   const { toast } = useToast()
-  const [showAuthModal, setShowAuthModal] = useState(false)
-  const [showLimitModal, setShowLimitModal] = useState(false)
-  const [limitMessage, setLimitMessage] = useState("")
 
-  // NEW: per-mode setting selections
   const [summarizeSetting, setSummarizeSetting] = useState<"brief" | "in-depth" | "key-points">("brief")
   const [explainSetting, setExplainSetting] = useState<"child" | "teen" | "adult" | "senior">("adult")
 
@@ -110,11 +100,6 @@ export default function TranscriptInput({
   const handleFileUpload = async () => {
     if (!selectedFile) {
       setUploadError("Please choose a file to upload.")
-      return
-    }
-
-    if (!user) {
-      setShowAuthModal(true)
       return
     }
 
@@ -153,29 +138,12 @@ export default function TranscriptInput({
 
       if (mode === "study" && data.questions) {
         onQuestionsGenerated(data.questions)
-
-        // Save the session
-        await recordGeneration(user.uid)
-        const sessionTitle = `Study Session - ${new Date().toLocaleDateString()}`
-        const sessionData = {
-          userId: user.uid,
-          title: sessionTitle,
-          createdAt: new Date(),
-          transcript: data.transcript,
-          questions: data.questions,
-          mode: "study",
-          setting: difficulty,
-        }
-
-        const sessionId = await saveStudySession(sessionData)
-        if (sessionId) {
-          toast({
-            title: "Study Session Saved",
-            description: "Your study session has been saved to your dashboard",
-          })
-        }
+        setTranscript(data.transcript)
+        toast({
+          title: "Questions Generated",
+          description: "Your questions have been generated based on the transcript.",
+        })
       } else {
-        // For explain and summarize modes, set the transcript
         setTranscript(data.transcript)
         toast({
           title: "File Processed",
@@ -301,7 +269,6 @@ export default function TranscriptInput({
 
   const openDropdown = (dropdownType: string) => {
     if (dropdownType === "settings") {
-      // Always open the settings modal for better UX
       setShowSettingsModal(true)
       return
     }
@@ -344,52 +311,11 @@ export default function TranscriptInput({
   }
 
   const handleSubmit = async () => {
-    if (!user) {
-      setShowAuthModal(true)
-      return
-    }
-
-    // Mode-specific validation
-    if (mode === "explain" && (!transcript.trim() || !userExplanation.trim())) {
-      toast({
-        title: "Missing Content",
-        description: "Please provide both material to study and your explanation.",
-        variant: "destructive",
-      })
-      return
-    }
-
-    if ((mode === "study" || mode === "summarize") && !transcript.trim()) {
-      toast({
-        title: "Missing Content",
-        description: `Please provide material to ${mode}.`,
-        variant: "destructive",
-      })
-      return
-    }
-
-    // Check plan limits
-    const planLimits = checkInputLimits(userProfile?.plan || "free", transcript, selectedFile ? 1 : 0)
-    if (!planLimits.valid) {
-      setLimitMessage(planLimits.reason || "Plan limit exceeded")
-      setShowLimitModal(true)
-      return
-    }
-
-    // Check generation limits
-    const canGenerate = await checkGenerationLimit(user.uid)
-    if (!canGenerate.allowed) {
-      setLimitMessage(canGenerate.reason || "Generation limit reached")
-      setShowLimitModal(true)
-      return
-    }
-
     setIsGenerating(true)
     try {
       let apiEndpoint = "/api/generate-questions"
       let requestBody: any = {
         text: transcript,
-        userId: user.uid,
         setting: setting,
       }
 
@@ -405,15 +331,13 @@ export default function TranscriptInput({
         requestBody = {
           material: transcript,
           explanation: userExplanation,
-          userId: user.uid,
-          audience: explainSetting, // pass chosen audience
+          audience: explainSetting,
         }
       } else if (mode === "summarize") {
         apiEndpoint = "/api/summarize"
         requestBody = {
           text: transcript,
-          userId: user.uid,
-          setting: summarizeSetting, // pass chosen summary style
+          setting: summarizeSetting,
         }
       }
 
@@ -435,38 +359,18 @@ export default function TranscriptInput({
 
       const data = await response.json()
 
-      await recordGeneration(user.uid)
-
-      const sessionTitle = `${mode.charAt(0).toUpperCase() + mode.slice(1)} Session - ${new Date().toLocaleDateString()}`
-      const sessionData: any = {
-        userId: user.uid,
-        title: sessionTitle,
-        createdAt: new Date(),
-        transcript: transcript,
-        mode: mode,
-        setting: mode === "summarize" ? summarizeSetting : mode === "explain" ? explainSetting : setting,
-      }
-
       if (mode === "study") {
-        sessionData.questions = data.questions
         onQuestionsGenerated(data.questions)
       } else if (mode === "explain") {
-        sessionData.explanation = userExplanation
-        sessionData.feedback = data
         setResult(data)
       } else if (mode === "summarize") {
-        sessionData.summary = data
         setResult(data)
       }
 
-      const sessionId = await saveStudySession(sessionData)
-
-      if (sessionId) {
-        toast({
-          title: `${mode.charAt(0).toUpperCase() + mode.slice(1)} Session Saved`,
-          description: `Your ${mode} session has been saved to your dashboard`,
-        })
-      }
+      toast({
+        title: `${mode.charAt(0).toUpperCase() + mode.slice(1)} Complete`,
+        description: `Your ${mode} request has been processed successfully`,
+      })
     } catch (error) {
       toast({
         title: `${mode.charAt(0).toUpperCase() + mode.slice(1)} Failed`,
@@ -1065,19 +969,6 @@ export default function TranscriptInput({
           </CardContent>
         </Card>
       )}
-
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        onSuccess={() => {
-          toast({
-            title: "Welcome!",
-            description: "You can now generate and save study sessions",
-          })
-        }}
-      />
-
-      <UsageLimitModal isOpen={showLimitModal} onClose={() => setShowLimitModal(false)} message={limitMessage} />
 
       <StudySettingsModal
         isOpen={showSettingsModal}

@@ -5,7 +5,6 @@ import { GeistMono } from "geist/font/mono"
 import { Instrument_Serif } from "next/font/google"
 import "./globals.css"
 import I18nProvider from "@/components/i18n-provider"
-import { AuthProvider } from "@/hooks/use-auth"
 
 const figtree = Figtree({
   subsets: ["latin"],
@@ -50,9 +49,7 @@ html {
         `}</style>
       </head>
       <body className={`${figtree.variable} ${instrumentSerif.variable}`}>
-        <AuthProvider>
-          <I18nProvider>{children}</I18nProvider>
-        </AuthProvider>
+        <I18nProvider>{children}</I18nProvider>
       </body>
     </html>
   )

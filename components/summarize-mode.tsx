@@ -7,11 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Plus, File, X, Loader2, FileText, CheckCircle } from 'lucide-react'
-import { useAuth } from "@/hooks/use-auth"
+import { Plus, File, X, Loader2, FileText, CheckCircle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { saveStudySession } from "@/lib/firebase/firestore"
-import { checkGenerationLimit, recordGeneration } from "@/lib/plans/plan-limits"
 
 interface SummarizeModeProps {
   transcript: string
@@ -35,7 +32,6 @@ export default function SummarizeMode({
   const [isProcessing, setIsProcessing] = useState(false)
   const [showUploadOptions, setShowUploadOptions] = useState(false)
 
-  const { user } = useAuth()
   const { toast } = useToast()
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,25 +59,6 @@ export default function SummarizeMode({
       return
     }
 
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to use the summarize feature.",
-        variant: "destructive",
-      })
-      return
-    }
-
-    const canGenerate = await checkGenerationLimit(user.uid)
-    if (!canGenerate.allowed) {
-      toast({
-        title: "Limit Reached",
-        description: canGenerate.reason || "Generation limit reached",
-        variant: "destructive",
-      })
-      return
-    }
-
     setIsProcessing(true)
     try {
       const response = await fetch("/api/summarize", {
@@ -91,7 +68,6 @@ export default function SummarizeMode({
         },
         body: JSON.stringify({
           text: transcript,
-          userId: user.uid,
         }),
       })
 
@@ -101,24 +77,11 @@ export default function SummarizeMode({
 
       const data = await response.json()
 
-      await recordGeneration(user.uid)
-
-      // Save study session
-      const sessionTitle = `Summary Session - ${new Date().toLocaleDateString()}`
-      await saveStudySession({
-        userId: user.uid,
-        title: sessionTitle,
-        createdAt: new Date(),
-        transcript: transcript,
-        mode: "summarize",
-        summary: data,
-      })
-
       onResult(data)
 
       toast({
         title: "Summary Generated",
-        description: "Your summary has been created and saved to your dashboard",
+        description: "Your summary has been created",
       })
     } catch (error) {
       console.error("Error generating summary:", error)

@@ -1,10 +1,5 @@
 "use client"
 import Image from "next/image"
-import { useState } from "react"
-import { useAuth } from "@/hooks/use-auth"
-import { UserProfileDropdown } from "./user-profile-dropdown"
-import LoginModal from "./login-modal"
-import SignupModal from "./signup-modal"
 import { useTranslations } from "@/lib/i18n/context"
 
 interface NavigationProps {
@@ -24,32 +19,7 @@ export default function Navigation({
   currentSetting = "adult",
   onSettingChange,
 }: NavigationProps) {
-  const { user, userProfile, loading } = useAuth()
   const { t } = useTranslations()
-  const [showLoginModal, setShowLoginModal] = useState(false)
-  const [showSignupModal, setShowSignupModal] = useState(false)
-
-  const switchToSignup = () => {
-    console.log("[v0] Switching to signup modal")
-    setShowLoginModal(false)
-    setShowSignupModal(true)
-  }
-
-  const switchToLogin = () => {
-    console.log("[v0] Switching to login modal")
-    setShowSignupModal(false)
-    setShowLoginModal(true)
-  }
-
-  const handleLoginClick = () => {
-    console.log("[v0] Login button clicked in navigation")
-    switchToLogin()
-  }
-
-  const handleSignupClick = () => {
-    console.log("[v0] Get Started button clicked in navigation")
-    switchToSignup()
-  }
 
   return (
     <>
@@ -61,48 +31,8 @@ export default function Navigation({
               <h1 className="text-xl font-bold text-white">Retentia</h1>
             </div>
           </div>
-
-          <div className="flex items-center gap-3">
-            {loading ? (
-              <div className="w-20 h-10 bg-white/10 rounded-lg animate-pulse" />
-            ) : user && userProfile ? (
-              <UserProfileDropdown />
-            ) : (
-              <>
-                <button
-                  onClick={handleLoginClick}
-                  className="px-4 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200 text-sm font-medium"
-                >
-                  {t("nav.logIn")}
-                </button>
-                <button
-                  onClick={handleSignupClick}
-                  className="px-4 py-2 rounded-lg bg-white text-gray-900 hover:bg-gray-100 transition-all duration-200 text-sm font-medium"
-                >
-                  {t("nav.getStarted")}
-                </button>
-              </>
-            )}
-          </div>
         </div>
       </header>
-
-      <LoginModal
-        isOpen={showLoginModal}
-        onClose={() => {
-          console.log("[v0] Closing login modal")
-          setShowLoginModal(false)
-        }}
-        onSwitchToSignup={switchToSignup}
-      />
-      <SignupModal
-        isOpen={showSignupModal}
-        onClose={() => {
-          console.log("[v0] Closing signup modal")
-          setShowSignupModal(false)
-        }}
-        onSwitchToLogin={switchToLogin}
-      />
     </>
   )
 }

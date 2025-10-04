@@ -5,23 +5,12 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Menu, X } from "lucide-react"
 import { useI18n } from "@/lib/i18n/context"
-import { useAuth } from "@/hooks/use-auth"
-import { UserAccountDropdown } from "./user-account-dropdown"
-import { AuthModal } from "./auth/auth-modal"
 
 export default function NavBar() {
   const [isOpen, setIsOpen] = useState(false)
-  const [showAuthModal, setShowAuthModal] = useState(false)
-  const [authMode, setAuthMode] = useState<"signin" | "signup">("signin")
   const { t } = useI18n()
-  const { user, loading } = useAuth()
 
   const toggleMenu = () => setIsOpen(!isOpen)
-
-  const handleAuthClick = (mode: "signin" | "signup") => {
-    setAuthMode(mode)
-    setShowAuthModal(true)
-  }
 
   return (
     <>
@@ -69,23 +58,6 @@ export default function NavBar() {
                   {t("nav.contact")}
                 </Link>
               </div>
-            </div>
-
-            <div className="hidden md:block">
-              {loading ? (
-                <div className="h-10 w-10 animate-pulse bg-gray-200 rounded-full" />
-              ) : user ? (
-                <UserAccountDropdown />
-              ) : (
-                <div className="ml-4 flex items-center space-x-4">
-                  <Button variant="ghost" size="sm" onClick={() => handleAuthClick("signin")}>
-                    {t("nav.signIn")}
-                  </Button>
-                  <Button size="sm" onClick={() => handleAuthClick("signup")}>
-                    {t("nav.getStarted")}
-                  </Button>
-                </div>
-              )}
             </div>
 
             {/* Mobile menu button */}
@@ -141,31 +113,10 @@ export default function NavBar() {
               >
                 {t("nav.contact")}
               </Link>
-              <div className="pt-4 pb-3 border-t border-gray-200">
-                {loading ? (
-                  <div className="h-10 animate-pulse bg-gray-200 rounded mx-3" />
-                ) : user ? (
-                  <div className="px-3">
-                    <UserAccountDropdown />
-                  </div>
-                ) : (
-                  <div className="flex items-center px-3 space-x-3">
-                    <Button variant="ghost" size="sm" className="w-full" onClick={() => handleAuthClick("signin")}>
-                      {t("nav.signIn")}
-                    </Button>
-                    <Button size="sm" className="w-full" onClick={() => handleAuthClick("signup")}>
-                      {t("nav.getStarted")}
-                    </Button>
-                  </div>
-                )}
-              </div>
             </div>
           </div>
         )}
       </nav>
-
-      {/* Auth Modal */}
-      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} initialMode={authMode} />
     </>
   )
 }
