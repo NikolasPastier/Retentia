@@ -111,11 +111,15 @@ export async function POST(request: NextRequest) {
           response_format: "text",
         })
 
-        transcript = transcription.trim()
+        if (!transcription || !transcription.text) {
+          throw new Error("Empty transcription result")
+        }
+
+        transcript = transcription.text.trim()
         console.log("[v0] Transcription completed successfully, length:", transcript.length)
 
-        if (!transcript) {
-          throw new Error("Empty transcription result")
+        if (!transcript || transcript.length < 10) {
+          throw new Error("Transcription too short or empty")
         }
       } catch (transcriptionError) {
         console.log("[v0] Transcription error:", transcriptionError)

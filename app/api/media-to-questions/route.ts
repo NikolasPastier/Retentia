@@ -162,7 +162,7 @@ export async function POST(request: NextRequest) {
 
         console.log("[v0] Transcription complete")
 
-        if (!transcription || transcription.length < 10) {
+        if (!transcription || !transcription.text || transcription.text.length < 10) {
           return NextResponse.json(
             {
               error: "Failed to transcribe file or transcript too short",
@@ -171,7 +171,7 @@ export async function POST(request: NextRequest) {
           )
         }
 
-        transcript = transcription.trim()
+        transcript = transcription.text.trim()
       } catch (transcriptionError) {
         console.error("[v0] Transcription error:", transcriptionError)
         return NextResponse.json(
