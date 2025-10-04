@@ -190,14 +190,32 @@ export default function ExplainMode({
             />
 
             <div className="flex items-center justify-between">
-              <Button
+              <button
                 onClick={handleExplainSubmit}
                 disabled={isProcessing || !transcript.trim() || !userExplanation.trim()}
-                className="flex items-center gap-2"
+                className="group relative h-12 w-12 rounded-full bg-gradient-to-b from-gray-200 to-gray-300 hover:from-gray-300 hover:to-gray-400 disabled:from-gray-100 disabled:to-gray-200 disabled:cursor-not-allowed transition-all duration-200 ease-in-out hover:scale-105 active:scale-95 shadow-md hover:shadow-lg disabled:shadow-sm"
+                title="Generate"
+                aria-label="Generate"
               >
-                {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
-                Get Feedback
-              </Button>
+                {isProcessing ? (
+                  <Loader2 className="h-5 w-5 text-gray-800 animate-spin absolute inset-0 m-auto" />
+                ) : (
+                  <svg
+                    className="h-5 w-5 text-gray-800 absolute inset-0 m-auto"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2.5}
+                      d="M5 10l7-7m0 0l7 7m-7-7v18"
+                    />
+                  </svg>
+                )}
+              </button>
               <span className="text-xs text-muted-foreground">{userExplanation.length}/5,000</span>
             </div>
           </CardContent>

@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import StudySettingsModal from "@/components/study-settings-modal"
+import StudySettingsDropdown from "@/components/study-settings-dropdown"
 
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
@@ -65,6 +65,7 @@ export default function TranscriptInput({
   const [showTypeDropdown, setShowTypeDropdown] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const settingsButtonRef = useRef<HTMLButtonElement>(null)
 
   const [detectedYoutubeUrl, setDetectedYoutubeUrl] = useState("")
 
@@ -72,8 +73,6 @@ export default function TranscriptInput({
 
   const [summarizeSetting, setSummarizeSetting] = useState<"brief" | "in-depth" | "key-points">("brief")
   const [explainSetting, setExplainSetting] = useState<"child" | "teen" | "adult" | "senior">("adult")
-
-  const [showSettingsModal, setShowSettingsModal] = useState(false)
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -269,7 +268,7 @@ export default function TranscriptInput({
 
   const openDropdown = (dropdownType: string) => {
     if (dropdownType === "settings") {
-      setShowSettingsModal(true)
+      setShowSettingsDropdown(!showSettingsDropdown)
       return
     }
 
@@ -814,6 +813,7 @@ export default function TranscriptInput({
 
                 <div className="relative">
                   <Button
+                    ref={settingsButtonRef}
                     variant="ghost"
                     size="sm"
                     className="h-10 px-4 rounded-full bg-muted/50 hover:bg-muted border border-border/50 flex items-center gap-2"
@@ -830,22 +830,32 @@ export default function TranscriptInput({
                   {transcript.length}/{mode === "summarize" ? "15,000" : "10,000"}
                 </span>
 
-                <Button
+                <button
                   onClick={handleSubmit}
                   disabled={isProcessing || !transcript.trim() || (mode === "explain" && !userExplanation.trim())}
-                  className="h-10 px-6 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground"
-                  size="sm"
+                  className="group relative h-12 w-12 rounded-full bg-gradient-to-b from-gray-200 to-gray-300 hover:from-gray-300 hover:to-gray-400 disabled:from-gray-100 disabled:to-gray-200 disabled:cursor-not-allowed transition-all duration-200 ease-in-out hover:scale-105 active:scale-95 shadow-md hover:shadow-lg disabled:shadow-sm"
+                  title="Generate"
+                  aria-label="Generate"
                 >
                   {isProcessing ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <Loader2 className="h-5 w-5 text-gray-800 animate-spin absolute inset-0 m-auto" />
                   ) : (
-                    <>
-                      {mode === "study" && "Generate Questions"}
-                      {mode === "explain" && "Get Feedback"}
-                      {mode === "summarize" && "Generate Summary"}
-                    </>
+                    <svg
+                      className="h-5 w-5 text-gray-800 absolute inset-0 m-auto"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2.5}
+                        d="M5 10l7-7m0 0l7 7m-7-7v18"
+                      />
+                    </svg>
                   )}
-                </Button>
+                </button>
               </div>
             </div>
           </div>
@@ -970,10 +980,11 @@ export default function TranscriptInput({
         </Card>
       )}
 
-      <StudySettingsModal
-        isOpen={showSettingsModal}
-        onClose={() => setShowSettingsModal(false)}
+      <StudySettingsDropdown
+        isOpen={showSettingsDropdown}
+        onClose={() => setShowSettingsDropdown(false)}
         mode={mode}
+        buttonRef={settingsButtonRef}
         difficulty={difficulty}
         questionCount={questionCount}
         questionType={questionType}
