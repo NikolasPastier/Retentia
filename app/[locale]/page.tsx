@@ -1,5 +1,6 @@
 import Footer from "@/components/footer"
 import LocalePageClient from "@/components/locale-page-client"
+import ShaderBackground from "@/components/shader-background"
 
 interface LocalePageProps {
   params: { locale: string }
@@ -7,9 +8,11 @@ interface LocalePageProps {
 
 export default function LocalePage({ params: { locale } }: LocalePageProps) {
   return (
-    <div className="min-h-screen gradient-bg">
-      <LocalePageClient />
-      <Footer />
-    </div>
+    <ShaderBackground>
+      <div className="min-h-screen relative">
+        <LocalePageClient />
+        <Footer />
+      </div>
+    </ShaderBackground>
   )
 }

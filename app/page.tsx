@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import Navigation from "@/components/navigation"
+import Header from "@/components/header"
 import TranscriptInput from "@/components/transcript-input"
 import QuestionDisplay from "@/components/question-display"
 import Footer from "@/components/footer"
@@ -27,16 +27,9 @@ export default function LearningApp() {
   return (
     <ShaderBackground>
       <div className="min-h-screen relative">
-        <Navigation
-          activeSection={activeSection}
-          setActiveSection={setActiveSection}
-          currentMode={currentMode}
-          onModeChange={setCurrentMode}
-          currentSetting={currentSetting}
-          onSettingChange={setCurrentSetting}
-        />
+        <Header />
 
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-4 py-8 pt-32">
           <div className="space-y-8">
             <TranscriptInput
               transcript={transcript}
