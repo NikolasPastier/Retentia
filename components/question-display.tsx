@@ -31,7 +31,7 @@ export default function QuestionDisplay({ questions, onBack }: QuestionDisplayPr
   const [quizCompleted, setQuizCompleted] = useState(false)
   const [revealedAnswers, setRevealedAnswers] = useState<boolean[]>(new Array(questions.length).fill(false))
   const [savedQuestions, setSavedQuestions] = useState<boolean[]>(new Array(questions.length).fill(false))
-  const t = useTranslations()
+  const { t } = useTranslations()
 
   const handleAnswerSelect = (answer: string) => {
     const newAnswers = [...selectedAnswers]
