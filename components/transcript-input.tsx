@@ -2,6 +2,7 @@
 
 import type React from "react"
 import StudySettingsDropdown from "@/components/study-settings-dropdown"
+import { useTranslations } from "@/lib/i18n/context"
 
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
@@ -73,6 +74,8 @@ export default function TranscriptInput({
 
   const [summarizeSetting, setSummarizeSetting] = useState<"brief" | "in-depth" | "key-points">("brief")
   const [explainSetting, setExplainSetting] = useState<"child" | "teen" | "adult" | "senior">("adult")
+
+  const t = useTranslations()
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -710,7 +713,7 @@ export default function TranscriptInput({
             {mode === "explain" && (
               <div className="mt-4">
                 <Textarea
-                  placeholder="Write your explanation here as if explaining to a 10-year-old..."
+                  placeholder={t("transcript.explanationPlaceholder")}
                   value={userExplanation}
                   onChange={(e) => setUserExplanation(e.target.value)}
                   className="min-h-[150px] bg-transparent border border-border/50 rounded-xl resize-none text-lg text-white placeholder:text-muted-foreground/70 focus-visible:ring-1 focus-visible:ring-ring caret-white"
@@ -834,8 +837,8 @@ export default function TranscriptInput({
                   onClick={handleSubmit}
                   disabled={isProcessing || !transcript.trim() || (mode === "explain" && !userExplanation.trim())}
                   className="group relative h-12 w-12 rounded-full bg-gradient-to-b from-gray-200 to-gray-300 hover:from-gray-300 hover:to-gray-400 disabled:from-gray-100 disabled:to-gray-200 disabled:cursor-not-allowed transition-all duration-200 ease-in-out hover:scale-105 active:scale-95 shadow-md hover:shadow-lg disabled:shadow-sm"
-                  title="Generate"
-                  aria-label="Generate"
+                  title={t("generate")}
+                  aria-label={t("generate")}
                 >
                   {isProcessing ? (
                     <Loader2 className="h-5 w-5 text-gray-800 animate-spin absolute inset-0 m-auto" />
@@ -881,16 +884,15 @@ export default function TranscriptInput({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CheckCircle className="h-5 w-5 text-green-500" />
-              {mode === "explain" ? "AI Feedback" : "Summary"}
+              {mode === "explain" ? t("results.aiFeedback") : t("results.summary")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             {mode === "explain" && (
               <>
-                {/* Rating */}
                 <div className="text-center space-y-4">
                   <div className="space-y-2">
-                    <h3 className="text-lg font-semibold">Understanding Rating</h3>
+                    <h3 className="text-lg font-semibold">{t("results.understandingRating")}</h3>
                     <div
                       className={`text-6xl font-bold ${
                         result.rating >= 80
@@ -903,24 +905,20 @@ export default function TranscriptInput({
                       {result.rating}%
                     </div>
                     <Progress value={result.rating} className="w-full max-w-md mx-auto h-3" />
-                    <p className="text-sm text-muted-foreground">
-                      How well the selected audience would understand your explanation
-                    </p>
+                    <p className="text-sm text-muted-foreground">{t("results.ratingDescription")}</p>
                   </div>
                 </div>
 
-                {/* Feedback */}
                 <div className="space-y-4">
-                  <h4 className="text-lg font-semibold">Detailed Feedback</h4>
+                  <h4 className="text-lg font-semibold">{t("results.detailedFeedback")}</h4>
                   <div className="bg-muted/20 rounded-lg p-4">
                     <p className="text-muted-foreground whitespace-pre-wrap">{result.feedback}</p>
                   </div>
                 </div>
 
-                {/* Improvements */}
                 {result.improvements && (
                   <div className="space-y-4">
-                    <h4 className="text-lg font-semibold">Suggested Improvements</h4>
+                    <h4 className="text-lg font-semibold">{t("results.suggestedImprovements")}</h4>
                     <div className="bg-blue-50 dark:bg-blue-950/20 rounded-lg p-4">
                       <p className="text-blue-800 dark:text-blue-200 text-sm">{result.improvements}</p>
                     </div>
@@ -931,9 +929,8 @@ export default function TranscriptInput({
 
             {mode === "summarize" && (
               <>
-                {/* Main Summary */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Overview</h3>
+                  <h3 className="text-lg font-semibold">{t("results.overview")}</h3>
                   <div className="bg-muted/20 rounded-lg p-4">
                     <p className="text-muted-foreground whitespace-pre-wrap">
                       {result.summary || result?.data?.summary || ""}
@@ -941,10 +938,9 @@ export default function TranscriptInput({
                   </div>
                 </div>
 
-                {/* Key Points */}
                 {(result.keyPoints?.length ? result.keyPoints : result?.data?.keyPoints) && (
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">Key Points</h3>
+                    <h3 className="text-lg font-semibold">{t("results.keyPoints")}</h3>
                     <div className="space-y-2">
                       {(result.keyPoints ?? result?.data?.keyPoints).map((point: string, index: number) => (
                         <div
@@ -961,10 +957,9 @@ export default function TranscriptInput({
                   </div>
                 )}
 
-                {/* Important Concepts */}
                 {(result.concepts?.length ? result.concepts : result?.data?.concepts) && (
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">Important Concepts</h3>
+                    <h3 className="text-lg font-semibold">{t("results.importantConcepts")}</h3>
                     <div className="flex flex-wrap gap-2">
                       {(result.concepts ?? result?.data?.concepts).map((concept: string, index: number) => (
                         <Badge key={index} variant="secondary" className="text-xs">

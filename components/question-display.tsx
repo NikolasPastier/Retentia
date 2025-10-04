@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { CheckCircle, XCircle, RotateCcw, Eye, EyeOff, Bookmark, BookmarkCheck, X } from "lucide-react"
+import { useTranslations } from "@/lib/i18n/context"
 
 interface Question {
   question: string
@@ -30,6 +31,7 @@ export default function QuestionDisplay({ questions, onBack }: QuestionDisplayPr
   const [quizCompleted, setQuizCompleted] = useState(false)
   const [revealedAnswers, setRevealedAnswers] = useState<boolean[]>(new Array(questions.length).fill(false))
   const [savedQuestions, setSavedQuestions] = useState<boolean[]>(new Array(questions.length).fill(false))
+  const t = useTranslations()
 
   const handleAnswerSelect = (answer: string) => {
     const newAnswers = [...selectedAnswers]
@@ -106,23 +108,27 @@ export default function QuestionDisplay({ questions, onBack }: QuestionDisplayPr
     return (
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold text-foreground">Quiz Results</h1>
+          <h1 className="text-4xl font-bold text-foreground">{t("questions.title")}</h1>
           <p className="text-xl text-muted-foreground">
-            You scored {score} out of {questions.length} ({percentage}%)
+            {t("questions.score", { score, total: questions.length, percentage })}
           </p>
         </div>
 
         <Card className="glass-card">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">
-              {percentage >= 80 ? "Excellent!" : percentage >= 60 ? "Good Job!" : "Keep Practicing!"}
+              {percentage >= 80
+                ? t("questions.excellent")
+                : percentage >= 60
+                  ? t("questions.goodJob")
+                  : t("questions.keepPracticing")}
             </CardTitle>
             <CardDescription>
               {percentage >= 80
-                ? "You have a strong understanding of the material!"
+                ? t("questions.excellentDesc")
                 : percentage >= 60
-                  ? "You're on the right track. Review the explanations below."
-                  : "Consider reviewing the material and trying again."}
+                  ? t("questions.goodJobDesc")
+                  : t("questions.keepPracticingDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -142,7 +148,8 @@ export default function QuestionDisplay({ questions, onBack }: QuestionDisplayPr
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <h3 className="font-semibold">
-                          Question {index + 1}: {question.question}
+                          {t("questions.questionNumber", { number: index + 1, total: questions.length })}:{" "}
+                          {question.question}
                         </h3>
                         <Badge variant="outline" className="text-xs">
                           {question.type.replace("-", " ")}
@@ -150,14 +157,14 @@ export default function QuestionDisplay({ questions, onBack }: QuestionDisplayPr
                       </div>
                       <div className="space-y-1 text-sm">
                         <p>
-                          <span className="font-medium">Your answer:</span>{" "}
+                          <span className="font-medium">{t("questions.yourAnswer")}</span>{" "}
                           <span className={isCorrect ? "text-green-600" : "text-red-600"}>
-                            {userAnswer || "Not answered"}
+                            {userAnswer || t("questions.notAnswered")}
                           </span>
                         </p>
                         {question.type !== "open-ended" && (
                           <p>
-                            <span className="font-medium">Correct answer:</span>{" "}
+                            <span className="font-medium">{t("questions.correctAnswer")}</span>{" "}
                             <span className="text-green-600">{correctAnswer}</span>
                           </p>
                         )}
@@ -172,11 +179,11 @@ export default function QuestionDisplay({ questions, onBack }: QuestionDisplayPr
             <div className="flex gap-4 justify-center pt-4">
               <Button onClick={resetQuiz} variant="outline" className="flex items-center gap-2 bg-transparent">
                 <RotateCcw className="h-4 w-4" />
-                Retake Quiz
+                {t("questions.retakeQuiz")}
               </Button>
               <Button onClick={onBack} className="flex items-center gap-2">
                 <X className="h-4 w-4" />
-                Clear Questions
+                {t("questions.clearQuestions")}
               </Button>
             </div>
           </CardContent>
@@ -271,7 +278,7 @@ export default function QuestionDisplay({ questions, onBack }: QuestionDisplayPr
             {isAnswerRevealed && (
               <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
                 <p className="text-green-800">
-                  <span className="font-semibold">Correct answer:</span> {getCorrectAnswer(question)}
+                  <span className="font-semibold">{t("questions.correctAnswer")}</span>: {getCorrectAnswer(question)}
                 </p>
               </div>
             )}
@@ -290,7 +297,7 @@ export default function QuestionDisplay({ questions, onBack }: QuestionDisplayPr
             {isAnswerRevealed && (
               <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-blue-800">
-                  <span className="font-semibold">Sample answer:</span> {getCorrectAnswer(question)}
+                  <span className="font-semibold">{t("questions.sampleAnswer")}</span>: {getCorrectAnswer(question)}
                 </p>
               </div>
             )}
@@ -308,7 +315,7 @@ export default function QuestionDisplay({ questions, onBack }: QuestionDisplayPr
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Badge variant="outline">
-              Question {currentQuestion + 1} of {questions.length}
+              {t("questions.questionNumber", { number: currentQuestion + 1, total: questions.length })}
             </Badge>
             <Badge variant="secondary" className="capitalize">
               {question.type.replace("-", " ")}
@@ -329,7 +336,7 @@ export default function QuestionDisplay({ questions, onBack }: QuestionDisplayPr
           </div>
           <Button onClick={onBack} variant="ghost" size="sm" className="flex items-center gap-2">
             <X className="h-4 w-4" />
-            Clear Questions
+            {t("questions.clearQuestions")}
           </Button>
         </div>
         <Progress value={progress} className="w-full" />
@@ -347,7 +354,7 @@ export default function QuestionDisplay({ questions, onBack }: QuestionDisplayPr
                 className="flex items-center gap-2"
               >
                 {isAnswerRevealed ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                {isAnswerRevealed ? "Hide Answer" : "Show Answer"}
+                {isAnswerRevealed ? t("questions.hideAnswer") : t("questions.showAnswer")}
               </Button>
               <Button
                 variant="outline"
@@ -356,7 +363,7 @@ export default function QuestionDisplay({ questions, onBack }: QuestionDisplayPr
                 className="flex items-center gap-2"
               >
                 {isQuestionSaved ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
-                {isQuestionSaved ? "Saved" : "Save"}
+                {isQuestionSaved ? t("questions.saved") : t("questions.save")}
               </Button>
             </div>
           </div>
@@ -366,17 +373,17 @@ export default function QuestionDisplay({ questions, onBack }: QuestionDisplayPr
 
           {isAnswerRevealed && question.explanation && (
             <div className="mt-4 p-4 bg-accent/10 rounded-lg border">
-              <h4 className="font-semibold text-foreground mb-2">Explanation:</h4>
+              <h4 className="font-semibold text-foreground mb-2">{t("questions.explanation")}</h4>
               <p className="text-muted-foreground">{question.explanation}</p>
             </div>
           )}
 
           <div className="flex justify-between pt-4">
             <Button onClick={handlePrevious} disabled={currentQuestion === 0} variant="outline">
-              Previous
+              {t("previous")}
             </Button>
             <Button onClick={handleNext} disabled={!selectedAnswers[currentQuestion] && !isAnswerRevealed}>
-              {currentQuestion === questions.length - 1 ? "Finish Quiz" : "Next"}
+              {currentQuestion === questions.length - 1 ? t("questions.finishQuiz") : t("next")}
             </Button>
           </div>
         </CardContent>
