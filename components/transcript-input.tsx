@@ -378,7 +378,7 @@ export default function TranscriptInput({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.JSON.stringify(requestBody),
+        body: JSON.stringify(requestBody),
       })
 
       if (!response.ok) {
