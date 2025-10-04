@@ -20,8 +20,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Your explanation is required" }, { status: 400 })
     }
 
-    if (!userId) {
-      return NextResponse.json({ error: "User authentication required" }, { status: 401 })
+    // Log userId if present for analytics, but don't require it
+    if (userId) {
+      console.log(`[v0] Request from user: ${userId}`)
+    } else {
+      console.log("[v0] Anonymous request")
     }
 
     console.log(`[v0] Generating feedback for ${audience} audience`)

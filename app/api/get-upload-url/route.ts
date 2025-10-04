@@ -37,13 +37,15 @@ export async function POST(request: NextRequest) {
 
     console.log("[v0] Creating presigned POST for:", key)
 
+    // Extract the media type prefix (audio or video) from the contentType
+    const mediaTypePrefix = contentType.split("/")[0] // "audio" or "video"
+
     const { url, fields } = await createPresignedPost(s3Client, {
       Bucket: process.env.S3_BUCKET!,
       Key: key,
       Conditions: [
         ["content-length-range", 0, 100 * 1024 * 1024], // 100MB max
-        ["starts-with", "$Content-Type", "audio/"],
-        ["starts-with", "$Content-Type", "video/"],
+        ["starts-with", "$Content-Type", `${mediaTypePrefix}/`], // Single condition matching requested type
       ],
       Fields: {
         "Content-Type": contentType,
