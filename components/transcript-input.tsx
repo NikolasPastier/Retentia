@@ -312,6 +312,25 @@ export default function TranscriptInput({
     }
   }
 
+  const handleGenerate = async () => {
+    // If there's a selected file, upload it first
+    if (selectedFile) {
+      await handleFileUpload()
+      // For study mode, handleFileUpload already generates questions
+      // For other modes, the transcript is now set and user can generate
+      return
+    }
+
+    // If there's a detected YouTube URL, process it
+    if (detectedYoutubeUrl) {
+      await handleYouTubeProcess()
+      return
+    }
+
+    // Otherwise, proceed with text-based generation
+    await handleSubmit()
+  }
+
   const handleSubmit = async () => {
     setIsGenerating(true)
     try {
@@ -825,8 +844,12 @@ export default function TranscriptInput({
                 </span>
 
                 <button
-                  onClick={handleSubmit}
-                  disabled={isProcessing || !transcript.trim() || (mode === "explain" && !userExplanation.trim())}
+                  onClick={handleGenerate}
+                  disabled={
+                    isProcessing ||
+                    (!selectedFile && !detectedYoutubeUrl && !transcript.trim()) ||
+                    (mode === "explain" && !selectedFile && !userExplanation.trim())
+                  }
                   className="group relative h-12 w-12 rounded-full bg-gradient-to-b from-gray-200 to-gray-300 hover:from-gray-300 hover:to-gray-400 disabled:from-gray-100 disabled:to-gray-200 disabled:cursor-not-allowed transition-all duration-200 ease-in-out hover:scale-105 active:scale-95 shadow-md hover:shadow-lg disabled:shadow-sm"
                   title={t("generate")}
                   aria-label={t("generate")}
