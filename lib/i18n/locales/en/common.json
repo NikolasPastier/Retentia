@@ -35,6 +35,33 @@
     "titleHighlight": "Study",
     "subtitle": "Test yourself, explain topics, generate AI-powered summaries."
   },
+  "heroSection": {
+    "badge": "AI-Powered Learning Platform",
+    "heading": {
+      "line1": "Transform Learning",
+      "line2": "With AI Magic"
+    },
+    "subtitle": "Turn any content into interactive study materials. Generate smart questions, track your progress, and master any subject faster.",
+    "cta": {
+      "getStarted": "Get Started Free",
+      "watchDemo": "Watch Demo"
+    },
+    "features": {
+      "smartQuestions": {
+        "title": "Smart Questions",
+        "description": "AI generates contextual questions from your content"
+      },
+      "instantFeedback": {
+        "title": "Instant Feedback",
+        "description": "Get immediate insights on your understanding"
+      },
+      "adaptiveLearning": {
+        "title": "Adaptive Learning",
+        "description": "Personalized difficulty based on your progress"
+      }
+    },
+    "scrollHelper": "Scroll to explore"
+  },
   "transcript": {
     "placeholder": {
       "questions": "Enter your study material here...",

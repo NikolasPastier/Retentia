@@ -30,6 +30,124 @@
     "profile": "Profil",
     "logout": "Abmelden"
   },
+  "hero": {
+    "title": "Verändere Die Art Wie Du",
+    "titleHighlight": "Lernst",
+    "subtitle": "Teste dich selbst, erkläre Themen, generiere KI-gestützte Zusammenfassungen."
+  },
+  "heroSection": {
+    "badge": "KI-gestützte Lernplattform",
+    "heading": {
+      "line1": "Lernen Transformieren",
+      "line2": "Mit KI-Magie"
+    },
+    "subtitle": "Verwandeln Sie jeden Inhalt in interaktive Lernmaterialien. Generieren Sie intelligente Fragen, verfolgen Sie Ihren Fortschritt und meistern Sie jedes Thema schneller.",
+    "cta": {
+      "getStarted": "Kostenlos Starten",
+      "watchDemo": "Demo Ansehen"
+    },
+    "features": {
+      "smartQuestions": {
+        "title": "Intelligente Fragen",
+        "description": "KI generiert kontextbezogene Fragen aus Ihrem Inhalt"
+      },
+      "instantFeedback": {
+        "title": "Sofortiges Feedback",
+        "description": "Erhalten Sie sofortige Einblicke in Ihr Verständnis"
+      },
+      "adaptiveLearning": {
+        "title": "Adaptives Lernen",
+        "description": "Personalisierte Schwierigkeit basierend auf Ihrem Fortschritt"
+      }
+    },
+    "scrollHelper": "Scrollen zum Erkunden"
+  },
+  "transcript": {
+    "placeholder": {
+      "questions": "Geben Sie hier Ihr Lernmaterial ein...",
+      "explain": "Schreiben Sie Ihre Erklärung hier, als würden Sie es einem 10-Jährigen erklären...",
+      "summarize": "Fügen Sie Ihr Material hier ein..."
+    },
+    "modeButton": "Modus",
+    "modes": {
+      "questions": "Fragen",
+      "explain": "Erklären",
+      "summarize": "Zusammenfassen"
+    },
+    "characterCount": "{{count}}/{{max}}",
+    "settings": {
+      "quizOptions": "Quiz-Optionen",
+      "summaryStyle": "Zusammenfassungsstil",
+      "targetAudience": "Zielgruppe",
+      "difficulty": "Schwierigkeit",
+      "easy": "Einfach",
+      "medium": "Mittel",
+      "hard": "Schwer",
+      "numberOfQuestions": "Anzahl der Fragen",
+      "questionsCount": "{{count}} Fragen",
+      "questionType": "Fragetyp",
+      "mixedTypes": "Gemischte Typen",
+      "multipleChoice": "Multiple Choice",
+      "trueFalse": "Wahr/Falsch",
+      "openEnded": "Offene Frage",
+      "fillBlank": "Lückentext",
+      "briefSummary": "Kurze Zusammenfassung",
+      "briefSummaryDesc": "Schneller Überblick",
+      "keyPoints": "Kernpunkte",
+      "keyPointsDesc": "Strukturierte Aufzählungen",
+      "inDepth": "Ausführlich",
+      "inDepthDesc": "Umfassend",
+      "child": "Kind (5-10)",
+      "childDesc": "Einfache Sprache",
+      "teen": "Teenager (13-17)",
+      "teenDesc": "Ansprechende Beispiele",
+      "adult": "Erwachsener (18+)",
+      "adultDesc": "Professionell",
+      "senior": "Senior (65+)",
+      "seniorDesc": "Geduldig & klar"
+    },
+    "errors": {
+      "requestFailed": "Anfrage Fehlgeschlagen",
+      "requestFailedDesc": "Bei der Verarbeitung Ihrer {{mode}}-Anfrage ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
+    },
+    "success": {
+      "requestComplete": "Anfrage Abgeschlossen",
+      "requestCompleteDesc": "Ihre {{mode}}-Anfrage wurde erfolgreich verarbeitet"
+    }
+  },
+  "questions": {
+    "title": "Quiz-Ergebnisse",
+    "score": "Sie haben {{score}} von {{total}} erreicht ({{percentage}}%)",
+    "excellent": "Ausgezeichnet!",
+    "goodJob": "Gute Arbeit!",
+    "keepPracticing": "Weiter Üben!",
+    "excellentDesc": "Sie haben ein starkes Verständnis des Materials!",
+    "goodJobDesc": "Sie sind auf dem richtigen Weg. Überprüfen Sie die Erklärungen unten.",
+    "keepPracticingDesc": "Erwägen Sie, das Material zu überprüfen und es erneut zu versuchen.",
+    "questionNumber": "Frage {{number}} von {{total}}",
+    "questionsCount": "{{count}} Fragen",
+    "yourAnswer": "Ihre Antwort:",
+    "correctAnswer": "Richtige Antwort:",
+    "notAnswered": "Nicht beantwortet",
+    "true": "Wahr",
+    "false": "Falsch",
+    "fillBlankPlaceholder": "Geben Sie Ihre Antwort ein...",
+    "openEndedPlaceholder": "Schreiben Sie hier Ihre ausführliche Antwort...",
+    "submitAnswers": "Antworten Senden",
+    "retakeQuiz": "Quiz Wiederholen",
+    "clearQuestions": "Fragen Löschen"
+  },
+  "results": {
+    "aiFeedback": "KI-Feedback",
+    "summary": "Zusammenfassung",
+    "understandingRating": "Verständnisbewertung",
+    "ratingDescription": "Wie gut die ausgewählte Zielgruppe Ihre Erklärung verstehen würde",
+    "detailedFeedback": "Detailliertes Feedback",
+    "suggestedImprovements": "Verbesserungsvorschläge",
+    "overview": "Überblick",
+    "keyPoints": "Kernpunkte",
+    "importantConcepts": "Wichtige Konzepte"
+  },
   "footer": {
     "howItWorks": "Wie Es Funktioniert",
     "pricing": "Preise",
@@ -37,7 +155,8 @@
     "privacyPolicy": "Datenschutzrichtlinie",
     "termsOfService": "Nutzungsbedingungen",
     "contact": "Kontakt",
-    "cookies": "Cookies"
+    "cookies": "Cookies",
+    "copyright": "© {{year}} Retentia.app Alle Rechte vorbehalten"
   },
   "auth": {
     "login": "Anmelden",

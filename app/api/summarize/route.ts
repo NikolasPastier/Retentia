@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server"
 import { generateText } from "ai"
 import { createGroq } from "@ai-sdk/groq"
+import { validateGroqApiKey } from "@/lib/utils"
 
 const groq = createGroq({
   apiKey: process.env.GROQ_API_KEY,
 })
 
 export async function POST(request: Request) {
+  const apiKeyError = validateGroqApiKey()
+  if (apiKeyError) return apiKeyError
+
   try {
     console.log("[v0] Summarize API called")
 

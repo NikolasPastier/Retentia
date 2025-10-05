@@ -30,6 +30,124 @@
     "profile": "Perfil",
     "logout": "Sair"
   },
+  "hero": {
+    "title": "Mude A Forma Como Você",
+    "titleHighlight": "Estuda",
+    "subtitle": "Teste-se, explique tópicos, gere resumos com IA."
+  },
+  "heroSection": {
+    "badge": "Plataforma de Aprendizagem com IA",
+    "heading": {
+      "line1": "Transforme o Aprendizado",
+      "line2": "Com Magia de IA"
+    },
+    "subtitle": "Transforme qualquer conteúdo em materiais de estudo interativos. Gere perguntas inteligentes, acompanhe seu progresso e domine qualquer assunto mais rápido.",
+    "cta": {
+      "getStarted": "Começar Grátis",
+      "watchDemo": "Ver Demo"
+    },
+    "features": {
+      "smartQuestions": {
+        "title": "Perguntas Inteligentes",
+        "description": "IA gera perguntas contextuais do seu conteúdo"
+      },
+      "instantFeedback": {
+        "title": "Feedback Instantâneo",
+        "description": "Obtenha insights imediatos sobre sua compreensão"
+      },
+      "adaptiveLearning": {
+        "title": "Aprendizado Adaptativo",
+        "description": "Dificuldade personalizada com base no seu progresso"
+      }
+    },
+    "scrollHelper": "Role para explorar"
+  },
+  "transcript": {
+    "placeholder": {
+      "questions": "Digite seu material de estudo aqui...",
+      "explain": "Escreva sua explicação aqui como se estivesse explicando para uma criança de 10 anos...",
+      "summarize": "Cole seu material aqui..."
+    },
+    "modeButton": "Modo",
+    "modes": {
+      "questions": "Perguntas",
+      "explain": "Explicar",
+      "summarize": "Resumir"
+    },
+    "characterCount": "{{count}}/{{max}}",
+    "settings": {
+      "quizOptions": "Opções de Quiz",
+      "summaryStyle": "Estilo de Resumo",
+      "targetAudience": "Público-Alvo",
+      "difficulty": "Dificuldade",
+      "easy": "Fácil",
+      "medium": "Médio",
+      "hard": "Difícil",
+      "numberOfQuestions": "Número de Perguntas",
+      "questionsCount": "{{count}} Perguntas",
+      "questionType": "Tipo de Pergunta",
+      "mixedTypes": "Tipos Mistos",
+      "multipleChoice": "Múltipla Escolha",
+      "trueFalse": "Verdadeiro/Falso",
+      "openEnded": "Resposta Aberta",
+      "fillBlank": "Preencher Lacuna",
+      "briefSummary": "Resumo Breve",
+      "briefSummaryDesc": "Visão rápida",
+      "keyPoints": "Pontos-Chave",
+      "keyPointsDesc": "Marcadores estruturados",
+      "inDepth": "Detalhado",
+      "inDepthDesc": "Abrangente",
+      "child": "Criança (5-10)",
+      "childDesc": "Linguagem simples",
+      "teen": "Adolescente (13-17)",
+      "teenDesc": "Exemplos envolventes",
+      "adult": "Adulto (18+)",
+      "adultDesc": "Profissional",
+      "senior": "Idoso (65+)",
+      "seniorDesc": "Paciente e claro"
+    },
+    "errors": {
+      "requestFailed": "Solicitação Falhou",
+      "requestFailedDesc": "Houve um erro ao processar sua solicitação de {{mode}}. Por favor, tente novamente."
+    },
+    "success": {
+      "requestComplete": "Solicitação Concluída",
+      "requestCompleteDesc": "Sua solicitação de {{mode}} foi processada com sucesso"
+    }
+  },
+  "questions": {
+    "title": "Resultados do Quiz",
+    "score": "Você pontuou {{score}} de {{total}} ({{percentage}}%)",
+    "excellent": "Excelente!",
+    "goodJob": "Bom Trabalho!",
+    "keepPracticing": "Continue Praticando!",
+    "excellentDesc": "Você tem uma compreensão sólida do material!",
+    "goodJobDesc": "Você está no caminho certo. Revise as explicações abaixo.",
+    "keepPracticingDesc": "Considere revisar o material e tentar novamente.",
+    "questionNumber": "Pergunta {{number}} de {{total}}",
+    "questionsCount": "{{count}} Perguntas",
+    "yourAnswer": "Sua resposta:",
+    "correctAnswer": "Resposta correta:",
+    "notAnswered": "Não respondida",
+    "true": "Verdadeiro",
+    "false": "Falso",
+    "fillBlankPlaceholder": "Digite sua resposta...",
+    "openEndedPlaceholder": "Escreva sua resposta detalhada aqui...",
+    "submitAnswers": "Enviar Respostas",
+    "retakeQuiz": "Refazer Quiz",
+    "clearQuestions": "Limpar Perguntas"
+  },
+  "results": {
+    "aiFeedback": "Feedback de IA",
+    "summary": "Resumo",
+    "understandingRating": "Avaliação de Compreensão",
+    "ratingDescription": "Quão bem o público selecionado entenderia sua explicação",
+    "detailedFeedback": "Feedback Detalhado",
+    "suggestedImprovements": "Melhorias Sugeridas",
+    "overview": "Visão Geral",
+    "keyPoints": "Pontos-Chave",
+    "importantConcepts": "Conceitos Importantes"
+  },
   "footer": {
     "howItWorks": "Como Funciona",
     "pricing": "Preços",
@@ -37,7 +155,8 @@
     "privacyPolicy": "Política de Privacidade",
     "termsOfService": "Termos de Serviço",
     "contact": "Contato",
-    "cookies": "Cookies"
+    "cookies": "Cookies",
+    "copyright": "© {{year}} Retentia.app Todos os direitos reservados"
   },
   "auth": {
     "login": "Entrar",

@@ -35,21 +35,51 @@
     "titleHighlight": "Študujete",
     "subtitle": "Testujte sa, vysvetľujte témy, generujte zhrnutia pomocou AI."
   },
+  "heroSection": {
+    "badge": "AI platforma pre učenie",
+    "heading": {
+      "line1": "Transformujte učenie",
+      "line2": "S mágiou AI"
+    },
+    "subtitle": "Premeňte akýkoľvek obsah na interaktívne študijné materiály. Generujte chytré otázky, sledujte svoj pokrok a zvládnite akýkoľvek predmet rýchlejšie.",
+    "cta": {
+      "getStarted": "Začať zadarmo",
+      "watchDemo": "Sledovať demo"
+    },
+    "features": {
+      "smartQuestions": {
+        "title": "Chytré otázky",
+        "description": "AI generuje kontextové otázky z vášho obsahu"
+      },
+      "instantFeedback": {
+        "title": "Okamžitá spätná väzba",
+        "description": "Získajte okamžitý prehľad o svojom porozumení"
+      },
+      "adaptiveLearning": {
+        "title": "Adaptívne učenie",
+        "description": "Personalizovaná obtiažnosť na základe vášho pokroku"
+      }
+    },
+    "scrollHelper": "Posuňte sa nadol a preskúmajte"
+  },
   "transcript": {
     "placeholder": {
       "study": "Zadajte svoj prepis alebo vložte odkaz na YouTube tu",
       "explain": "Vložte svoj študijný materiál tu...",
-      "summarize": "Vložte svoj materiál tu..."
+      "summarize": "Vložte svoj materiál tu...",
+      "questions": "Zadajte svoj študijný materiál tu..."
     },
     "explanationPlaceholder": "Napíšte svoje vysvetlenie, ako keby ste vysvetľovali 10-ročnému dieťaťu...",
     "characterCount": "{{count}}/{{max}}",
     "uploadFile": "Nahrať súbor",
     "supportedFormats": "Podporované: MP3, WAV, M4A, MP4, MOV, AVI, TXT, MD (max 100MB)",
     "youtubeVideo": "YouTube video",
+    "modeButton": "Režim",
     "modes": {
       "study": "Študovať",
       "explain": "Vysvetliť",
-      "summarize": "Zhrnúť"
+      "summarize": "Zhrnúť",
+      "questions": "Otázky"
     },
     "actions": {
       "generateQuestions": "Generovať otázky",
@@ -57,37 +87,59 @@
       "generateSummary": "Generovať zhrnutie"
     },
     "settings": {
+      "quizOptions": "Možnosti kvízu",
+      "summaryStyle": "Štýl zhrnutia",
+      "targetAudience": "Cieľové publikum",
       "difficulty": "Obtiažnosť",
       "questions": "Otázky",
       "type": "Typ",
       "easy": "Ľahké",
       "medium": "Stredné",
       "hard": "Ťažké",
+      "numberOfQuestions": "Počet otázok",
+      "questionsCount": "{{count}} Otázok",
+      "questionType": "Typ otázky",
       "mixedTypes": "Zmiešané typy",
       "multipleChoice": "Výber z možností",
       "trueFalse": "Pravda/Nepravda",
       "openEnded": "Otvorené",
       "fillBlank": "Doplňte prázdne miesto",
       "briefly": "Stručne",
+      "briefSummary": "Stručné zhrnutie",
+      "briefSummaryDesc": "Rýchly prehľad",
       "inDepth": "Podrobne",
+      "inDepthDesc": "Komplexné",
       "keyPoints": "Kľúčové body",
+      "keyPointsDesc": "Štruktúrované odrážky",
       "explainToChild": "Vysvetliť dieťaťu",
+      "child": "Dieťa (5-10)",
+      "childDesc": "Jednoduchý jazyk",
       "explainToTeen": "Vysvetliť tínedžerovi",
+      "teen": "Tínedžer (13-17)",
+      "teenDesc": "Pútavé príklady",
       "explainToAdult": "Vysvetliť dospelému",
-      "explainToSenior": "Vysvetliť seniorovi"
+      "adult": "Dospelý (18+)",
+      "adultDesc": "Profesionálny",
+      "explainToSenior": "Vysvetliť seniorovi",
+      "senior": "Senior (65+)",
+      "seniorDesc": "Trpezlivý a jasný"
     },
     "errors": {
       "missingContent": "Chýbajúci obsah",
       "missingContentDesc": "Prosím, poskytnite tak materiál na štúdium, ako aj svoje vysvetlenie.",
       "missingMaterial": "Prosím, poskytnite materiál na {{mode}}.",
       "uploadFailed": "Nepodarilo sa spracovať súbor",
-      "youtubeFailed": "Nepodarilo sa spracovať YouTube video"
+      "youtubeFailed": "Nepodarilo sa spracovať YouTube video",
+      "requestFailed": "Požiadavka zlyhala",
+      "requestFailedDesc": "Pri spracovaní vašej požiadavky {{mode}} došlo k chybe. Skúste to prosím znova."
     },
     "success": {
       "fileProcessed": "Súbor spracovaný",
       "fileProcessedDesc": "Váš súbor bol spracovaný. Teraz môžete generovať otázky, zhrnutie alebo spätnú väzbu.",
       "sessionSaved": "{{mode}} relácia uložená",
-      "sessionSavedDesc": "Vaša {{mode}} relácia bola uložená na vašu nástenku"
+      "sessionSavedDesc": "Vaša {{mode}} relácia bola uložená na vašu nástenku",
+      "requestComplete": "Požiadavka dokončená",
+      "requestCompleteDesc": "Vaša požiadavka {{mode}} bola úspešne spracovaná"
     }
   },
   "questions": {
@@ -100,9 +152,15 @@
     "goodJobDesc": "Ste na správnej ceste. Prejdite si vysvetlenia nižšie.",
     "keepPracticingDesc": "Zvážte preskúmanie materiálu a skúste to znova.",
     "questionNumber": "Otázka {{number}} z {{total}}",
+    "questionsCount": "{{count}} Otázok",
     "yourAnswer": "Vaša odpoveď:",
     "correctAnswer": "Správna odpoveď:",
     "notAnswered": "Nezodpovedané",
+    "true": "Pravda",
+    "false": "Nepravda",
+    "fillBlankPlaceholder": "Zadajte svoju odpoveď...",
+    "openEndedPlaceholder": "Napíšte tu svoju podrobnú odpoveď...",
+    "submitAnswers": "Odoslať odpovede",
     "explanation": "Vysvetlenie:",
     "showAnswer": "Zobraziť odpoveď",
     "hideAnswer": "Skryť odpoveď",
@@ -160,6 +218,7 @@
     "privacyPolicy": "Zásady ochrany osobných údajov",
     "termsOfService": "Podmienky služby",
     "contact": "Kontakt",
-    "cookies": "Cookies"
+    "cookies": "Cookies",
+    "copyright": "© {{year}} Retentia.app Všetky práva vyhradené"
   }
 }

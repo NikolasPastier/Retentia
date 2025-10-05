@@ -229,7 +229,7 @@ export default function TranscriptInput({
                     onClick={() => openDropdown("mode")}
                   >
                     <span className="text-sm">{t("transcript.modeButton")}</span>
-                    <ChevronDown className="h-4 w-4" />
+                    
                   </Button>
 
                   {showModeSelector && (
@@ -269,11 +269,11 @@ export default function TranscriptInput({
                     ref={settingsButtonRef}
                     variant="ghost"
                     size="sm"
-                    className="h-10 px-4 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 flex items-center gap-2 text-white"
+                    className="h-10 p-2 md:px-4 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 flex items-center gap-2 text-white"
                     onClick={() => openDropdown("settings")}
                   >
                     <Settings className="h-4 w-4" />
-                    <span className="text-sm">{t("settings")}</span>
+                    <span className="text-sm hidden md:inline">{t("settings")}</span>
                   </Button>
 
                   <StudySettingsDropdown

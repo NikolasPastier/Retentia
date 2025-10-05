@@ -4,8 +4,10 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Sparkles, Brain, Zap } from "lucide-react"
+import { useTranslations } from "@/lib/i18n/context"
 
 export default function HeroSection() {
+  const { t } = useTranslations()
   const [isVisible, setIsVisible] = useState(false)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
 
@@ -49,7 +51,7 @@ export default function HeroSection() {
           }`}
         >
           <Sparkles className="w-4 h-4 text-cyan-400" />
-          <span className="text-sm text-cyan-300 font-medium">AI-Powered Learning Platform</span>
+          <span className="text-sm text-cyan-300 font-medium">{t("heroSection.badge")}</span>
         </div>
 
         {/* Main heading with parallax effect */}
@@ -62,10 +64,10 @@ export default function HeroSection() {
           }}
         >
           <span className="bg-gradient-to-r from-white via-cyan-200 to-blue-400 bg-clip-text text-transparent leading-tight block">
-            Transform Learning
+            {t("heroSection.heading.line1")}
           </span>
           <span className="bg-gradient-to-r from-blue-400 via-cyan-300 to-white bg-clip-text text-transparent leading-tight block">
-            With AI Magic
+            {t("heroSection.heading.line2")}
           </span>
         </h1>
 
@@ -78,8 +80,7 @@ export default function HeroSection() {
             transform: `translate(${mousePosition.x * 0.3}px, ${mousePosition.y * 0.3}px)`,
           }}
         >
-          Turn any content into interactive study materials. Generate smart questions, track your progress, and master
-          any subject faster.
+          {t("heroSection.subtitle")}
         </p>
 
         {/* CTA Buttons */}
@@ -92,7 +93,7 @@ export default function HeroSection() {
             size="lg"
             className="group bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white px-8 py-6 text-lg rounded-xl shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-300"
           >
-            Get Started Free
+            {t("heroSection.cta.getStarted")}
             <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </Button>
           <Button
@@ -100,7 +101,7 @@ export default function HeroSection() {
             variant="outline"
             className="px-8 py-6 text-lg rounded-xl border-white/20 hover:border-cyan-400/50 hover:bg-cyan-500/10 text-white backdrop-blur-sm transition-all duration-300 bg-transparent"
           >
-            Watch Demo
+            {t("heroSection.cta.watchDemo")}
           </Button>
         </div>
 
@@ -112,20 +113,20 @@ export default function HeroSection() {
         >
           <FeatureCard
             icon={<Brain className="w-6 h-6" />}
-            title="Smart Questions"
-            description="AI generates contextual questions from your content"
+            title={t("heroSection.features.smartQuestions.title")}
+            description={t("heroSection.features.smartQuestions.description")}
             delay={0}
           />
           <FeatureCard
             icon={<Zap className="w-6 h-6" />}
-            title="Instant Feedback"
-            description="Get immediate insights on your understanding"
+            title={t("heroSection.features.instantFeedback.title")}
+            description={t("heroSection.features.instantFeedback.description")}
             delay={100}
           />
           <FeatureCard
             icon={<Sparkles className="w-6 h-6" />}
-            title="Adaptive Learning"
-            description="Personalized difficulty based on your progress"
+            title={t("heroSection.features.adaptiveLearning.title")}
+            description={t("heroSection.features.adaptiveLearning.description")}
             delay={200}
           />
         </div>
@@ -138,7 +139,7 @@ export default function HeroSection() {
         }`}
       >
         <div className="flex flex-col items-center gap-2 animate-bounce">
-          <span className="text-sm text-gray-400">Scroll to explore</span>
+          <span className="text-sm text-gray-400">{t("heroSection.scrollHelper")}</span>
           <div className="w-6 h-10 rounded-full border-2 border-gray-400/30 flex items-start justify-center p-2">
             <div className="w-1 h-3 bg-cyan-400 rounded-full animate-pulse" />
           </div>

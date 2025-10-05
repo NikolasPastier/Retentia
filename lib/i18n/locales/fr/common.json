@@ -35,21 +35,51 @@
     "titleHighlight": "Étudier",
     "subtitle": "Testez-vous, expliquez des sujets, générez des résumés IA."
   },
+  "heroSection": {
+    "badge": "Plateforme d'Apprentissage IA",
+    "heading": {
+      "line1": "Transformez l'Apprentissage",
+      "line2": "Avec la Magie de l'IA"
+    },
+    "subtitle": "Transformez n'importe quel contenu en matériel d'étude interactif. Générez des questions intelligentes, suivez vos progrès et maîtrisez n'importe quel sujet plus rapidement.",
+    "cta": {
+      "getStarted": "Commencer Gratuitement",
+      "watchDemo": "Voir la Démo"
+    },
+    "features": {
+      "smartQuestions": {
+        "title": "Questions Intelligentes",
+        "description": "L'IA génère des questions contextuelles à partir de votre contenu"
+      },
+      "instantFeedback": {
+        "title": "Retour Instantané",
+        "description": "Obtenez des informations immédiates sur votre compréhension"
+      },
+      "adaptiveLearning": {
+        "title": "Apprentissage Adaptatif",
+        "description": "Difficulté personnalisée en fonction de vos progrès"
+      }
+    },
+    "scrollHelper": "Faites défiler pour explorer"
+  },
   "transcript": {
     "placeholder": {
       "study": "Entrez votre transcription ou collez un lien YouTube ici",
       "explain": "Collez votre matériel d'étude ici...",
-      "summarize": "Collez votre matériel ici..."
+      "summarize": "Collez votre matériel ici...",
+      "questions": "Entrez votre matériel d'étude ici..."
     },
     "explanationPlaceholder": "Écrivez votre explication comme si vous expliquiez à un enfant de 10 ans...",
     "characterCount": "{{count}}/{{max}}",
     "uploadFile": "Télécharger un fichier",
     "supportedFormats": "Formats supportés: MP3, WAV, M4A, MP4, MOV, AVI, TXT, MD (max 100MB)",
     "youtubeVideo": "Vidéo YouTube",
+    "modeButton": "Mode",
     "modes": {
       "study": "Étudier",
       "explain": "Expliquer",
-      "summarize": "Résumer"
+      "summarize": "Résumer",
+      "questions": "Questions"
     },
     "actions": {
       "generateQuestions": "Générer des questions",
@@ -57,37 +87,59 @@
       "generateSummary": "Générer un résumé"
     },
     "settings": {
+      "quizOptions": "Options du quiz",
+      "summaryStyle": "Style de résumé",
+      "targetAudience": "Public cible",
       "difficulty": "Difficulté",
       "questions": "Questions",
       "type": "Type",
       "easy": "Facile",
       "medium": "Moyen",
       "hard": "Difficile",
+      "numberOfQuestions": "Nombre de questions",
+      "questionsCount": "{{count}} Questions",
+      "questionType": "Type de question",
       "mixedTypes": "Types mixtes",
       "multipleChoice": "Choix multiples",
       "trueFalse": "Vrai/Faux",
       "openEnded": "Ouvert",
       "fillBlank": "Remplir les blancs",
       "briefly": "Brièvement",
+      "briefSummary": "Résumé bref",
+      "briefSummaryDesc": "Aperçu rapide",
       "inDepth": "En profondeur",
+      "inDepthDesc": "Complet",
       "keyPoints": "Points clés",
+      "keyPointsDesc": "Puces structurées",
       "explainToChild": "Expliquer à un enfant",
+      "child": "Enfant (5-10)",
+      "childDesc": "Langage simple",
       "explainToTeen": "Expliquer à un adolescent",
+      "teen": "Adolescent (13-17)",
+      "teenDesc": "Exemples engageants",
       "explainToAdult": "Expliquer à un adulte",
-      "explainToSenior": "Expliquer à un senior"
+      "adult": "Adulte (18+)",
+      "adultDesc": "Professionnel",
+      "explainToSenior": "Expliquer à un senior",
+      "senior": "Senior (65+)",
+      "seniorDesc": "Patient et clair"
     },
     "errors": {
       "missingContent": "Contenu manquant",
       "missingContentDesc": "Veuillez fournir à la fois le matériel à étudier et votre explication.",
       "missingMaterial": "Veuillez fournir du matériel à {{mode}}.",
       "uploadFailed": "Échec du traitement du fichier",
-      "youtubeFailed": "Échec du traitement de la vidéo YouTube"
+      "youtubeFailed": "Échec du traitement de la vidéo YouTube",
+      "requestFailed": "Échec de la requête",
+      "requestFailedDesc": "Une erreur s'est produite lors du traitement de votre requête {{mode}}. Veuillez réessayer."
     },
     "success": {
       "fileProcessed": "Fichier traité",
       "fileProcessedDesc": "Votre fichier a été traité. Vous pouvez maintenant générer des questions, un résumé ou des commentaires.",
       "sessionSaved": "Session {{mode}} enregistrée",
-      "sessionSavedDesc": "Votre session {{mode}} a été enregistrée dans votre tableau de bord"
+      "sessionSavedDesc": "Votre session {{mode}} a été enregistrée dans votre tableau de bord",
+      "requestComplete": "Requête terminée",
+      "requestCompleteDesc": "Votre requête {{mode}} a été traitée avec succès"
     }
   },
   "questions": {
@@ -100,9 +152,15 @@
     "goodJobDesc": "Vous êtes sur la bonne voie. Consultez les explications ci-dessous.",
     "keepPracticingDesc": "Envisagez de revoir le matériel et réessayez.",
     "questionNumber": "Question {{number}} sur {{total}}",
+    "questionsCount": "{{count}} Questions",
     "yourAnswer": "Votre réponse:",
     "correctAnswer": "Réponse correcte:",
     "notAnswered": "Non répondu",
+    "true": "Vrai",
+    "false": "Faux",
+    "fillBlankPlaceholder": "Entrez votre réponse...",
+    "openEndedPlaceholder": "Écrivez votre réponse détaillée ici...",
+    "submitAnswers": "Soumettre les réponses",
     "explanation": "Explication:",
     "showAnswer": "Afficher la réponse",
     "hideAnswer": "Masquer la réponse",
@@ -160,6 +218,7 @@
     "privacyPolicy": "Politique de Confidentialité",
     "termsOfService": "Conditions d'Utilisation",
     "contact": "Contact",
-    "cookies": "Cookies"
+    "cookies": "Cookies",
+    "copyright": "© {{year}} Retentia.app Tous droits réservés"
   }
 }

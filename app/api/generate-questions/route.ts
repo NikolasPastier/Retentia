@@ -1,12 +1,16 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { createGroq } from "@ai-sdk/groq"
+import { validateGroqApiKey } from "@/lib/utils"
 
 const groq = createGroq({
   apiKey: process.env.GROQ_API_KEY,
 })
 
 export async function POST(request: NextRequest) {
+  const apiKeyError = validateGroqApiKey()
+  if (apiKeyError) return apiKeyError
+
   try {
     const {
       text,
