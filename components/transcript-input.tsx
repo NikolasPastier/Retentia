@@ -127,26 +127,28 @@ export default function TranscriptInput({
   const handleSubmit = async () => {
     setIsGenerating(true)
     try {
+      const currentMode = mode || "questions"
+
       let apiEndpoint = "/api/generate-questions"
       let requestBody: any = {
         text: transcript,
         setting: setting,
       }
 
-      if (mode === "questions") {
+      if (currentMode === "questions") {
         requestBody = {
           ...requestBody,
           difficulty,
           questionCount: Number.parseInt(questionCount),
           questionType,
         }
-      } else if (mode === "explain") {
+      } else if (currentMode === "explain") {
         apiEndpoint = "/api/explain-feedback"
         requestBody = {
           explanation: transcript,
           audience: explainSetting,
         }
-      } else if (mode === "summarize") {
+      } else if (currentMode === "summarize") {
         apiEndpoint = "/api/summarize"
         requestBody = {
           text: transcript,
@@ -165,24 +167,28 @@ export default function TranscriptInput({
       if (!response.ok) {
         throw new Error(
           `Failed to ${
-            mode === "summarize" ? "generate summary" : mode === "explain" ? "get feedback" : "generate questions"
+            currentMode === "summarize"
+              ? "generate summary"
+              : currentMode === "explain"
+                ? "get feedback"
+                : "generate questions"
           }`,
         )
       }
 
       const data = await response.json()
 
-      if (mode === "questions") {
+      if (currentMode === "questions") {
         onQuestionsGenerated(data.questions)
-      } else if (mode === "explain") {
+      } else if (currentMode === "explain") {
         setResult(data)
-      } else if (mode === "summarize") {
+      } else if (currentMode === "summarize") {
         setResult(data)
       }
 
       toast({
-        title: `${mode.charAt(0).toUpperCase() + mode.slice(1)} Complete`,
-        description: `Your ${mode} request has been processed successfully`,
+        title: `${currentMode.charAt(0).toUpperCase() + currentMode.slice(1)} Complete`,
+        description: `Your ${currentMode} request has been processed successfully`,
       })
     } catch (error) {
       toast({
