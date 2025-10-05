@@ -27,12 +27,12 @@ export default function LearningApp() {
 
   return (
     <ShaderBackground>
-      <div className="min-h-screen relative">
+      <div className="min-h-screen relative flex flex-col">
         <Header />
 
         <HeroSection />
 
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-4 py-8 mb-32 flex-1">
           <div className="space-y-8">
             <TranscriptInput
               transcript={transcript}

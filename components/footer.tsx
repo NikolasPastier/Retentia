@@ -34,8 +34,8 @@ export default function Footer() {
   }, [])
 
   return (
-    <footer className={`${hasContent ? "relative mt-8" : "fixed bottom-0 left-0 right-0"} z-10`}>
-      <div className="container mx-auto px-4 py-3">
+    <footer className="relative mt-auto z-10">
+      <div className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-center text-xs sm:text-sm text-muted-foreground">
           <p>© 2025 Retentia.app All rights reserved</p>
         </div>

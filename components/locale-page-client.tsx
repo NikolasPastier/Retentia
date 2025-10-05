@@ -50,7 +50,7 @@ export default function LocalePageClient() {
     <>
       <Header />
 
-      <main className="container mx-auto px-4 py-8 pt-32">
+      <main className="container mx-auto px-4 py-8 pt-32 mb-32">
         <div className="space-y-8">
           <Hero />
 
