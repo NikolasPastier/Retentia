@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-import StudySettingsDropdown from "@/components/study-settings-dropdown"
 import { useTranslations } from "@/lib/i18n/context"
 
 import { useState, useRef, useEffect } from "react"
@@ -53,9 +52,6 @@ export default function TranscriptInput({
   const [isGenerating, setIsGenerating] = useState(false)
   const [showModeSelector, setShowModeSelector] = useState(false)
   const [showSettingsDropdown, setShowSettingsDropdown] = useState(false)
-  const [showDifficultyDropdown, setShowDifficultyDropdown] = useState(false)
-  const [showCountDropdown, setShowCountDropdown] = useState(false)
-  const [showTypeDropdown, setShowTypeDropdown] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const settingsButtonRef = useRef<HTMLButtonElement>(null)
 
@@ -92,15 +88,13 @@ export default function TranscriptInput({
 
   const closeAllDropdowns = () => {
     setShowSettingsDropdown(false)
-    setShowDifficultyDropdown(false)
-    setShowCountDropdown(false)
-    setShowTypeDropdown(false)
     setShowModeSelector(false)
   }
 
   const openDropdown = (dropdownType: string) => {
     if (dropdownType === "settings") {
       setShowSettingsDropdown(!showSettingsDropdown)
+      setShowModeSelector(false)
       return
     }
 
@@ -108,19 +102,8 @@ export default function TranscriptInput({
 
     closeAllDropdowns()
 
-    switch (dropdownType) {
-      case "mode":
-        setShowModeSelector(true)
-        break
-      case "difficulty":
-        setShowDifficultyDropdown(true)
-        break
-      case "count":
-        setShowCountDropdown(true)
-        break
-      case "type":
-        setShowTypeDropdown(true)
-        break
+    if (dropdownType === "mode") {
+      setShowModeSelector(true)
     }
   }
 
@@ -230,252 +213,177 @@ export default function TranscriptInput({
                 <ChevronDown className="h-4 w-4" />
               </Button>
 
-              {showDifficultyDropdown && (
-                <div className="absolute left-full top-0 ml-1 bg-background/95 backdrop-blur-sm border border-border rounded-xl p-2 shadow-lg z-30 min-w-[120px]">
-                  <div className="space-y-1">
-                    {["easy", "medium", "hard"].map((diff) => (
-                      <Button
-                        key={diff}
-                        variant="ghost"
-                        size="sm"
-                        className={`w-full justify-start text-sm ${
-                          difficulty === diff
-                            ? "bg-cyan-500/30 text-cyan-300 border border-cyan-400/50 shadow-lg shadow-cyan-500/20"
-                            : "hover:bg-muted/50"
-                        }`}
-                        onClick={() => {
-                          setDifficulty(diff)
-                          setShowDifficultyDropdown(false)
-                        }}
-                      >
-                        {diff.charAt(0).toUpperCase() + diff.slice(1)}
-                      </Button>
-                    ))}
+              {showSettingsDropdown && mode === "questions" && (
+                <div className="absolute top-full mt-2 left-0 bg-gradient-to-b from-slate-800/95 via-slate-800/90 to-emerald-900/40 backdrop-blur-xl border border-white/10 rounded-xl p-3 shadow-2xl z-50 min-w-[240px] max-w-[280px] max-h-[70vh] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200 scrollbar-thin scrollbar-thumb-gray-700/50 scrollbar-track-transparent">
+                  {/* Caret arrow */}
+                  <div className="absolute -top-2 left-4 w-4 h-4 bg-slate-800/95 rotate-45 border-l border-t border-white/10" />
+
+                  <div className="relative space-y-3">
+                    {/* Questions Mode Settings */}
+                    <div className="space-y-1">
+                      <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold px-1 mb-2">
+                        Difficulty
+                      </p>
+                      {["easy", "medium", "hard"].map((diff) => (
+                        <button
+                          key={diff}
+                          onClick={() => setDifficulty(diff)}
+                          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-all duration-200 ${
+                            difficulty === diff
+                              ? "bg-cyan-500/30 border border-cyan-400/50 text-cyan-300 shadow-lg shadow-cyan-500/20"
+                              : "text-gray-300 hover:bg-white/10 hover:text-white"
+                          }`}
+                        >
+                          <span>{diff.charAt(0).toUpperCase() + diff.slice(1)}</span>
+                          {difficulty === diff && <Check className="h-4 w-4 text-cyan-300" />}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="h-px bg-white/10" />
+
+                    <div className="space-y-1">
+                      <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold px-1 mb-2">
+                        Number of Questions
+                      </p>
+                      {["3", "5", "10", "15"].map((count) => (
+                        <button
+                          key={count}
+                          onClick={() => setQuestionCount(count)}
+                          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-all duration-200 ${
+                            questionCount === count
+                              ? "bg-cyan-500/30 border border-cyan-400/50 text-cyan-300 shadow-lg shadow-cyan-500/20"
+                              : "text-gray-300 hover:bg-white/10 hover:text-white"
+                          }`}
+                        >
+                          <span>{count} Questions</span>
+                          {questionCount === count && <Check className="h-4 w-4 text-cyan-300" />}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="h-px bg-white/10" />
+
+                    <div className="space-y-1">
+                      <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold px-1 mb-2">
+                        Question Type
+                      </p>
+                      {[
+                        { value: "mixed", label: "Mixed Types" },
+                        { value: "multiple-choice", label: "Multiple Choice" },
+                        { value: "true-false", label: "True/False" },
+                        { value: "open-ended", label: "Open Ended" },
+                        { value: "fill-blank", label: "Fill in the Blank" },
+                      ].map((type) => (
+                        <button
+                          key={type.value}
+                          onClick={() => setQuestionType(type.value)}
+                          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-all duration-200 ${
+                            questionType === type.value
+                              ? "bg-cyan-500/30 border border-cyan-400/50 text-cyan-300 shadow-lg shadow-cyan-500/20"
+                              : "text-gray-300 hover:bg-white/10 hover:text-white"
+                          }`}
+                        >
+                          <span>{type.label}</span>
+                          {questionType === type.value && <Check className="h-4 w-4 text-cyan-300" />}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Question Count Setting */}
-            <div className="relative">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-between gap-2 text-sm"
-                onClick={() => openDropdown("count")}
-              >
-                <span>Questions: {questionCount}</span>
-                <ChevronDown className="h-4 w-4" />
-              </Button>
+            {/* Summarize Mode Settings */}
+            {showSettingsDropdown && mode === "summarize" && (
+              <div className="absolute top-full mt-2 left-0 bg-gradient-to-b from-slate-800/95 via-slate-800/90 to-emerald-900/40 backdrop-blur-xl border border-white/10 rounded-xl p-3 shadow-2xl z-50 min-w-[240px] max-w-[280px] max-h-[70vh] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200 scrollbar-thin scrollbar-thumb-gray-700/50 scrollbar-track-transparent">
+                {/* Caret arrow */}
+                <div className="absolute -top-2 left-4 w-4 h-4 bg-slate-800/95 rotate-45 border-l border-t border-white/10" />
 
-              {showCountDropdown && (
-                <div className="absolute left-full top-0 ml-1 bg-background/95 backdrop-blur-sm border border-border rounded-xl p-2 shadow-lg z-30 min-w-[140px]">
+                <div className="relative space-y-3">
                   <div className="space-y-1">
-                    {["3", "5", "10", "15"].map((count) => (
-                      <Button
-                        key={count}
-                        variant="ghost"
-                        size="sm"
-                        className={`w-full justify-start text-sm ${
-                          questionCount === count
-                            ? "bg-cyan-500/30 text-cyan-300 border border-cyan-400/50 shadow-lg shadow-cyan-500/20"
-                            : "hover:bg-muted/50"
-                        }`}
-                        onClick={() => {
-                          setQuestionCount(count)
-                          setShowCountDropdown(false)
-                        }}
-                      >
-                        {count} Questions
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Question Type Setting */}
-            <div className="relative">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-between gap-2 text-sm"
-                onClick={() => openDropdown("type")}
-              >
-                <span>
-                  Type:{" "}
-                  {questionType === "mixed"
-                    ? "Mixed Types"
-                    : questionType
-                        .split("-")
-                        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                        .join(" ")}
-                </span>
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-
-              {showTypeDropdown && (
-                <div className="absolute left-full top-0 ml-1 bg-background/95 backdrop-blur-sm border border-border rounded-xl p-2 shadow-lg z-30 min-w-[160px]">
-                  <div className="space-y-1">
+                    <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold px-1 mb-2">
+                      Summary Style
+                    </p>
                     {[
-                      { value: "mixed", label: "Mixed Types" },
-                      { value: "multiple-choice", label: "Multiple Choice" },
-                      { value: "true-false", label: "True/False" },
-                      { value: "open-ended", label: "Open Ended" },
-                      { value: "fill-blank", label: "Fill in the Blank" },
-                    ].map((type) => (
-                      <Button
-                        key={type.value}
-                        variant="ghost"
-                        size="sm"
-                        className={`w-full justify-start text-sm ${
-                          questionType === type.value
-                            ? "bg-cyan-500/30 text-cyan-300 border border-cyan-400/50 shadow-lg shadow-cyan-500/20"
-                            : "hover:bg-muted/50"
-                        }`}
+                      { value: "brief", label: "Brief Summary", desc: "Quick overview" },
+                      { value: "key-points", label: "Key Points", desc: "Structured bullets" },
+                      { value: "in-depth", label: "In-Depth", desc: "Comprehensive" },
+                    ].map((option) => (
+                      <button
+                        key={option.value}
                         onClick={() => {
-                          setQuestionType(type.value)
-                          setShowTypeDropdown(false)
+                          setResult(null)
+                          setSummarizeSetting(option.value as "brief" | "in-depth" | "key-points")
                         }}
+                        className={`w-full px-3 py-2.5 rounded-lg text-left transition-all duration-200 ${
+                          summarizeSetting === option.value
+                            ? "bg-cyan-500/30 border border-cyan-400/50 text-cyan-300 shadow-lg shadow-cyan-500/20"
+                            : "text-gray-300 hover:bg-white/10 hover:text-white"
+                        }`}
                       >
-                        {type.label}
-                      </Button>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="text-sm font-medium">{option.label}</div>
+                            <div className="text-xs text-gray-400">{option.desc}</div>
+                          </div>
+                          {summarizeSetting === option.value && <Check className="h-4 w-4 text-cyan-300" />}
+                        </div>
+                      </button>
                     ))}
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
+
+            {/* Explain Mode Settings */}
+            {showSettingsDropdown && mode === "explain" && (
+              <div className="absolute top-full mt-2 left-0 bg-gradient-to-b from-slate-800/95 via-slate-800/90 to-emerald-900/40 backdrop-blur-xl border border-white/10 rounded-xl p-3 shadow-2xl z-50 min-w-[240px] max-w-[280px] max-h-[70vh] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200 scrollbar-thin scrollbar-thumb-gray-700/50 scrollbar-track-transparent">
+                {/* Caret arrow */}
+                <div className="absolute -top-2 left-4 w-4 h-4 bg-slate-800/95 rotate-45 border-l border-t border-white/10" />
+
+                <div className="relative space-y-3">
+                  <div className="space-y-1">
+                    <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold px-1 mb-2">
+                      Target Audience
+                    </p>
+                    {[
+                      { value: "child", label: "Child (5-10)", desc: "Simple language" },
+                      { value: "teen", label: "Teenager (13-17)", desc: "Engaging examples" },
+                      { value: "adult", label: "Adult (18+)", desc: "Professional" },
+                      { value: "senior", label: "Senior (65+)", desc: "Patient & clear" },
+                    ].map((option) => (
+                      <button
+                        key={option.value}
+                        onClick={() => {
+                          setResult(null)
+                          setExplainSetting(option.value as "child" | "teen" | "adult" | "senior")
+                        }}
+                        className={`w-full px-3 py-2.5 rounded-lg text-left transition-all duration-200 ${
+                          explainSetting === option.value
+                            ? "bg-cyan-500/30 border border-cyan-400/50 text-cyan-300 shadow-lg shadow-cyan-500/20"
+                            : "text-gray-300 hover:bg-white/10 hover:text-white"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="text-sm font-medium">{option.label}</div>
+                            <div className="text-xs text-gray-400">{option.desc}</div>
+                          </div>
+                          {explainSetting === option.value && <Check className="h-4 w-4 text-cyan-300" />}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         )
       case "summarize":
-        return (
-          <>
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`w-full justify-start text-sm ${
-                summarizeSetting === "brief"
-                  ? "bg-emerald-500/30 text-emerald-300 border border-emerald-400/50 shadow-lg shadow-emerald-500/20"
-                  : "hover:bg-muted/50"
-              }`}
-              onClick={() => {
-                setResult(null)
-                setSummarizeSetting("brief")
-                onModeChange("summarize")
-                setShowSettingsDropdown(false)
-              }}
-            >
-              Briefly
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`w-full justify-start text-sm ${
-                summarizeSetting === "in-depth"
-                  ? "bg-emerald-500/30 text-emerald-300 border border-emerald-400/50 shadow-lg shadow-emerald-500/20"
-                  : "hover:bg-muted/50"
-              }`}
-              onClick={() => {
-                setResult(null)
-                setSummarizeSetting("in-depth")
-                onModeChange("summarize")
-                setShowSettingsDropdown(false)
-              }}
-            >
-              In Depth
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`w-full justify-start text-sm ${
-                summarizeSetting === "key-points"
-                  ? "bg-emerald-500/30 text-emerald-300 border border-emerald-400/50 shadow-lg shadow-emerald-500/20"
-                  : "hover:bg-muted/50"
-              }`}
-              onClick={() => {
-                setResult(null)
-                setSummarizeSetting("key-points")
-                onModeChange("summarize")
-                setShowSettingsDropdown(false)
-              }}
-            >
-              Key Points
-            </Button>
-          </>
-        )
+        return null
       case "explain":
-        return (
-          <>
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`w-full justify-start text-sm ${
-                explainSetting === "child"
-                  ? "bg-purple-500/30 text-purple-300 border border-purple-400/50 shadow-lg shadow-purple-500/20"
-                  : "hover:bg-muted/50"
-              }`}
-              onClick={() => {
-                setResult(null)
-                setExplainSetting("child")
-                onModeChange("explain")
-                setShowSettingsDropdown(false)
-              }}
-            >
-              Explain to a Child
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`w-full justify-start text-sm ${
-                explainSetting === "teen"
-                  ? "bg-purple-500/30 text-purple-300 border border-purple-400/50 shadow-lg shadow-purple-500/20"
-                  : "hover:bg-muted/50"
-              }`}
-              onClick={() => {
-                setResult(null)
-                setExplainSetting("teen")
-                onModeChange("explain")
-                setShowSettingsDropdown(false)
-              }}
-            >
-              Explain to a Teenager
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`w-full justify-start text-sm ${
-                explainSetting === "adult"
-                  ? "bg-purple-500/30 text-purple-300 border border-purple-400/50 shadow-lg shadow-purple-500/20"
-                  : "hover:bg-muted/50"
-              }`}
-              onClick={() => {
-                setResult(null)
-                setExplainSetting("adult")
-                onModeChange("explain")
-                setShowSettingsDropdown(false)
-              }}
-            >
-              Explain to an Adult
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`w-full justify-start text-sm ${
-                explainSetting === "senior"
-                  ? "bg-purple-500/30 text-purple-300 border border-purple-400/50 shadow-lg shadow-purple-500/20"
-                  : "hover:bg-muted/50"
-              }`}
-              onClick={() => {
-                setResult(null)
-                setExplainSetting("senior")
-                onModeChange("explain")
-                setShowSettingsDropdown(false)
-              }}
-            >
-              Explain to a Senior
-            </Button>
-          </>
-        )
+        return null
       default:
         return null
     }
@@ -713,23 +621,6 @@ export default function TranscriptInput({
           </CardContent>
         </Card>
       )}
-
-      <StudySettingsDropdown
-        isOpen={showSettingsDropdown}
-        onClose={() => setShowSettingsDropdown(false)}
-        mode={mode}
-        buttonRef={settingsButtonRef}
-        difficulty={difficulty}
-        questionCount={questionCount}
-        questionType={questionType}
-        onDifficultyChange={setDifficulty}
-        onQuestionCountChange={setQuestionCount}
-        onQuestionTypeChange={setQuestionType}
-        summarizeSetting={summarizeSetting}
-        onSummarizeSettingChange={setSummarizeSetting}
-        explainSetting={explainSetting}
-        onExplainSettingChange={setExplainSetting}
-      />
     </div>
   )
 }
