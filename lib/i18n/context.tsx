@@ -10,7 +10,7 @@ type Translations = Record<string, any>
 interface I18nContextType {
   locale: string
   translations: Translations
-  t: (key: TranslationKey, fallback?: string) => string
+  t: (key: TranslationKey, optionsOrFallback?: Record<string, any> | string) => string
   setLocale: (locale: string) => void
   isLoading: boolean
 }
@@ -68,7 +68,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const t = (key: TranslationKey, fallback?: string): string => {
+  const t = (key: TranslationKey, optionsOrFallback?: Record<string, any> | string): string => {
     const keys = key.split(".")
     let value: any = translations
 
@@ -76,11 +76,24 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       if (value && typeof value === "object" && k in value) {
         value = value[k]
       } else {
-        return fallback || key
+        // If fallback is a string, return it; otherwise return the key
+        return typeof optionsOrFallback === "string" ? optionsOrFallback : key
       }
     }
 
-    return typeof value === "string" ? value : fallback || key
+    // If value is not a string, return fallback or key
+    if (typeof value !== "string") {
+      return typeof optionsOrFallback === "string" ? optionsOrFallback : key
+    }
+
+    // If optionsOrFallback is an object, perform variable interpolation
+    if (typeof optionsOrFallback === "object" && optionsOrFallback !== null) {
+      return value.replace(/\{\{(\w+)\}\}/g, (match, variable) => {
+        return optionsOrFallback[variable] !== undefined ? String(optionsOrFallback[variable]) : match
+      })
+    }
+
+    return value
   }
 
   const setLocale = (newLocale: string) => {
