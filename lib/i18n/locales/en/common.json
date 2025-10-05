@@ -37,57 +37,55 @@
   },
   "transcript": {
     "placeholder": {
-      "study": "Enter your transcript or paste a YouTube link here",
-      "explain": "Paste your study material here...",
+      "questions": "Enter your study material here...",
+      "explain": "Write your explanation here as if explaining to a 10-year-old...",
       "summarize": "Paste your material here..."
     },
-    "explanationPlaceholder": "Write your explanation here as if explaining to a 10-year-old...",
-    "characterCount": "{{count}}/{{max}}",
-    "uploadFile": "Upload File",
-    "supportedFormats": "Supported: MP3, WAV, M4A, MP4, MOV, AVI, TXT, MD (max 100MB)",
-    "youtubeVideo": "YouTube Video",
+    "modeButton": "Mode",
     "modes": {
-      "study": "Study",
+      "questions": "Questions",
       "explain": "Explain",
       "summarize": "Summarize"
     },
-    "actions": {
-      "generateQuestions": "Generate Questions",
-      "getFeedback": "Get Feedback",
-      "generateSummary": "Generate Summary"
-    },
+    "characterCount": "{{count}}/{{max}}",
     "settings": {
+      "quizOptions": "Quiz Options",
+      "summaryStyle": "Summary Style",
+      "targetAudience": "Target Audience",
       "difficulty": "Difficulty",
-      "questions": "Questions",
-      "type": "Type",
       "easy": "Easy",
       "medium": "Medium",
       "hard": "Hard",
+      "numberOfQuestions": "Number of Questions",
+      "questionsCount": "{{count}} Questions",
+      "questionType": "Question Type",
       "mixedTypes": "Mixed Types",
       "multipleChoice": "Multiple Choice",
       "trueFalse": "True/False",
       "openEnded": "Open Ended",
       "fillBlank": "Fill in the Blank",
-      "briefly": "Briefly",
-      "inDepth": "In Depth",
+      "briefSummary": "Brief Summary",
+      "briefSummaryDesc": "Quick overview",
       "keyPoints": "Key Points",
-      "explainToChild": "Explain to a Child",
-      "explainToTeen": "Explain to a Teenager",
-      "explainToAdult": "Explain to an Adult",
-      "explainToSenior": "Explain to a Senior"
+      "keyPointsDesc": "Structured bullets",
+      "inDepth": "In-Depth",
+      "inDepthDesc": "Comprehensive",
+      "child": "Child (5-10)",
+      "childDesc": "Simple language",
+      "teen": "Teenager (13-17)",
+      "teenDesc": "Engaging examples",
+      "adult": "Adult (18+)",
+      "adultDesc": "Professional",
+      "senior": "Senior (65+)",
+      "seniorDesc": "Patient & clear"
     },
     "errors": {
-      "missingContent": "Missing Content",
-      "missingContentDesc": "Please provide both material to study and your explanation.",
-      "missingMaterial": "Please provide material to {{mode}}.",
-      "uploadFailed": "Failed to process file",
-      "youtubeFailed": "Failed to process YouTube video"
+      "requestFailed": "Request Failed",
+      "requestFailedDesc": "There was an error processing your {{mode}} request. Please try again."
     },
     "success": {
-      "fileProcessed": "File Processed",
-      "fileProcessedDesc": "Your file has been processed. You can now generate questions, summary, or feedback.",
-      "sessionSaved": "{{mode}} Session Saved",
-      "sessionSavedDesc": "Your {{mode}} session has been saved to your dashboard"
+      "requestComplete": "Request Complete",
+      "requestCompleteDesc": "Your {{mode}} request has been processed successfully"
     }
   },
   "questions": {
@@ -100,18 +98,17 @@
     "goodJobDesc": "You're on the right track. Review the explanations below.",
     "keepPracticingDesc": "Consider reviewing the material and trying again.",
     "questionNumber": "Question {{number}} of {{total}}",
+    "questionsCount": "{{count}} Questions",
     "yourAnswer": "Your answer:",
     "correctAnswer": "Correct answer:",
     "notAnswered": "Not answered",
-    "explanation": "Explanation:",
-    "showAnswer": "Show Answer",
-    "hideAnswer": "Hide Answer",
-    "save": "Save",
-    "saved": "Saved",
+    "true": "True",
+    "false": "False",
+    "fillBlankPlaceholder": "Enter your answer...",
+    "openEndedPlaceholder": "Write your detailed answer here...",
+    "submitAnswers": "Submit Answers",
     "retakeQuiz": "Retake Quiz",
-    "clearQuestions": "Clear Questions",
-    "finishQuiz": "Finish Quiz",
-    "sampleAnswer": "Sample answer:"
+    "clearQuestions": "Clear Questions"
   },
   "results": {
     "aiFeedback": "AI Feedback",
@@ -124,42 +121,7 @@
     "keyPoints": "Key Points",
     "importantConcepts": "Important Concepts"
   },
-  "auth": {
-    "login": "Log In",
-    "signup": "Sign Up",
-    "getStarted": "Get Started",
-    "email": "Email",
-    "password": "Password",
-    "confirmPassword": "Confirm Password",
-    "username": "Username",
-    "forgotPassword": "Forgot Password?",
-    "createAccount": "Create Account",
-    "alreadyHaveAccount": "Already have an account?",
-    "dontHaveAccount": "Don't have an account?",
-    "enterEmail": "Enter your email",
-    "enterPassword": "Enter your password",
-    "chooseUsername": "Choose a username",
-    "createPassword": "Create a password",
-    "confirmYourPassword": "Confirm your password",
-    "signingIn": "Signing In...",
-    "creatingAccount": "Creating Account...",
-    "loginError": "Login Error",
-    "signupError": "Signup Error",
-    "welcomeBack": "Welcome Back",
-    "welcomeBackDesc": "You've been signed in successfully!",
-    "accountCreated": "Account Created",
-    "accountCreatedDesc": "Your account has been created successfully!",
-    "passwordMismatch": "Password Mismatch",
-    "passwordMismatchDesc": "Passwords don't match",
-    "unexpectedError": "An unexpected error occurred"
-  },
   "footer": {
-    "howItWorks": "How it Works",
-    "pricing": "Pricing",
-    "helpCenter": "Help Center",
-    "privacyPolicy": "Privacy Policy",
-    "termsOfService": "Terms of Service",
-    "contact": "Contact",
-    "cookies": "Cookies"
+    "copyright": "© {{year}} Retentia.app All rights reserved"
   }
 }

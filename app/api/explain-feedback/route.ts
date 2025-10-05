@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
   try {
     console.log("[v0] Explain feedback API called")
 
-    const { explanation, userId, audience = "child" } = await request.json()
+    const { explanation, userId, audience = "child", locale = "en" } = await request.json()
 
     if (!explanation || explanation.trim().length === 0) {
       return NextResponse.json({ error: "Your explanation is required" }, { status: 400 })
@@ -34,10 +34,12 @@ export async function POST(request: NextRequest) {
 
     const prompt = `You are an expert educator evaluating how well someone explained a topic to ${audienceContext[audience as keyof typeof audienceContext]}.
 
+IMPORTANT: Provide your feedback in ${locale === "en" ? "English" : locale === "es" ? "Spanish" : locale === "fr" ? "French" : locale === "de" ? "German" : locale === "it" ? "Italian" : locale === "pt" ? "Portuguese" : locale === "cs" ? "Czech" : locale === "sk" ? "Slovak" : "English"}.
+
 STUDENT'S EXPLANATION:
 ${explanation}
 
-Please evaluate this explanation and provide:
+Please evaluate this explanation and provide (in ${locale}):
 1. A rating from 0-100 on how well ${audienceContext[audience as keyof typeof audienceContext]} would understand this explanation
 2. Detailed feedback on what works well and what could be improved
 3. Specific suggestions for making the explanation clearer and more appropriate for the target audience

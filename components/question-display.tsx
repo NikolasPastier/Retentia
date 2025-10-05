@@ -171,7 +171,7 @@ export default function QuestionDisplay({ questions, onBack }: QuestionDisplayPr
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Badge variant="outline" className="border-white/20 text-gray-300">
-              {questions.length} {questions.length === 1 ? "Question" : "Questions"}
+              {t("questions.questionsCount", { count: questions.length })}
             </Badge>
           </div>
           <Button
@@ -249,7 +249,7 @@ export default function QuestionDisplay({ questions, onBack }: QuestionDisplayPr
 
               {question.type === "true-false" && (
                 <div className="grid gap-3">
-                  {["True", "False"].map((option) => {
+                  {[t("questions.true"), t("questions.false")].map((option) => {
                     const isSelected = selectedAnswers[index] === option
 
                     return (
@@ -272,7 +272,7 @@ export default function QuestionDisplay({ questions, onBack }: QuestionDisplayPr
 
               {question.type === "fill-blank" && (
                 <Input
-                  placeholder="Enter your answer..."
+                  placeholder={t("questions.fillBlankPlaceholder")}
                   value={selectedAnswers[index]}
                   onChange={(e) => handleAnswerSelect(index, e.target.value)}
                   className="text-lg p-4 bg-white/5 border-white/10 text-white placeholder:text-gray-500"
@@ -281,7 +281,7 @@ export default function QuestionDisplay({ questions, onBack }: QuestionDisplayPr
 
               {question.type === "open-ended" && (
                 <Textarea
-                  placeholder="Write your detailed answer here..."
+                  placeholder={t("questions.openEndedPlaceholder")}
                   value={selectedAnswers[index]}
                   onChange={(e) => handleAnswerSelect(index, e.target.value)}
                   className="min-h-[120px] text-base bg-white/5 border-white/10 text-white placeholder:text-gray-500"
@@ -299,7 +299,7 @@ export default function QuestionDisplay({ questions, onBack }: QuestionDisplayPr
           className="px-8 py-6 text-lg bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700 text-white border-0 shadow-lg shadow-emerald-500/20"
         >
           <CheckCircle className="h-5 w-5 mr-2" />
-          Submit Answers
+          {t("questions.submitAnswers")}
         </Button>
       </div>
     </div>

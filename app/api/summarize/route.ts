@@ -10,7 +10,7 @@ export async function POST(request: Request) {
   try {
     console.log("[v0] Summarize API called")
 
-    const { text, userId, setting = "brief" } = await request.json()
+    const { text, userId, setting = "brief", locale = "en" } = await request.json()
 
     if (!text || text.trim().length === 0) {
       return NextResponse.json({ error: "Text content is required" }, { status: 400 })
@@ -27,9 +27,11 @@ export async function POST(request: Request) {
 
     const prompt = `Please provide a comprehensive summary of the following text. Structure your response as follows:
 
-1. A concise overview paragraph (2-3 sentences)
-2. Key points (3-5 main points as bullet points)
-3. Important concepts or terms mentioned
+IMPORTANT: Respond in ${locale === "en" ? "English" : locale === "es" ? "Spanish" : locale === "fr" ? "French" : locale === "de" ? "German" : locale === "it" ? "Italian" : locale === "pt" ? "Portuguese" : locale === "cs" ? "Czech" : locale === "sk" ? "Slovak" : "English"}.
+
+1. A concise overview paragraph (2-3 sentences, in ${locale})
+2. Key points (3-5 main points as bullet points, in ${locale})
+3. Important concepts or terms mentioned (in ${locale})
 
 Text to summarize:
 ${text}

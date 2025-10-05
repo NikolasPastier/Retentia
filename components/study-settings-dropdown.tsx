@@ -6,6 +6,7 @@ import { useEffect, useRef } from "react"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import type { StudyMode } from "./locale-page-client"
+import { useTranslations } from "@/lib/i18n/context"
 
 interface StudySettingsDropdownProps {
   isOpen: boolean
@@ -44,6 +45,7 @@ export default function StudySettingsDropdown({
   onExplainSettingChange,
 }: StudySettingsDropdownProps) {
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const { t } = useTranslations()
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -79,12 +81,14 @@ export default function StudySettingsDropdown({
           {mode === "questions" && (
             <>
               <div className="px-3 py-2">
-                <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Quiz Options</p>
+                <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">
+                  {t("transcript.settings.quizOptions")}
+                </p>
               </div>
 
               {/* Difficulty */}
               <div className="space-y-1">
-                <Label className="text-xs text-gray-400 px-3">Difficulty</Label>
+                <Label className="text-xs text-gray-400 px-3">{t("transcript.settings.difficulty")}</Label>
                 <RadioGroup value={difficulty} onValueChange={onDifficultyChange} className="space-y-0.5">
                   {["easy", "medium", "hard"].map((diff) => (
                     <div
@@ -98,7 +102,7 @@ export default function StudySettingsDropdown({
                     >
                       <RadioGroupItem value={diff} id={`diff-${diff}`} className="border-gray-600" />
                       <Label htmlFor={`diff-${diff}`} className="flex-1 cursor-pointer text-sm">
-                        {diff.charAt(0).toUpperCase() + diff.slice(1)}
+                        {t(`transcript.settings.${diff}`)}
                       </Label>
                     </div>
                   ))}
@@ -109,7 +113,7 @@ export default function StudySettingsDropdown({
 
               {/* Question Count */}
               <div className="space-y-1">
-                <Label className="text-xs text-gray-400 px-3">Number of Questions</Label>
+                <Label className="text-xs text-gray-400 px-3">{t("transcript.settings.numberOfQuestions")}</Label>
                 <div className="space-y-0.5">
                   {["3", "5", "10", "15"].map((count) => (
                     <button
@@ -121,7 +125,7 @@ export default function StudySettingsDropdown({
                           : "text-[#d1d5db] hover:bg-white/5 hover:text-white"
                       }`}
                     >
-                      {count} Questions
+                      {t("transcript.settings.questionsCount", { count })}
                     </button>
                   ))}
                 </div>
@@ -131,14 +135,14 @@ export default function StudySettingsDropdown({
 
               {/* Question Type */}
               <div className="space-y-1">
-                <Label className="text-xs text-gray-400 px-3">Question Type</Label>
+                <Label className="text-xs text-gray-400 px-3">{t("transcript.settings.questionType")}</Label>
                 <RadioGroup value={questionType} onValueChange={onQuestionTypeChange} className="space-y-0.5">
                   {[
-                    { value: "mixed", label: "Mixed Types" },
-                    { value: "multiple-choice", label: "Multiple Choice" },
-                    { value: "true-false", label: "True/False" },
-                    { value: "open-ended", label: "Open Ended" },
-                    { value: "fill-blank", label: "Fill in the Blank" },
+                    { value: "mixed", label: t("transcript.settings.mixedTypes") },
+                    { value: "multiple-choice", label: t("transcript.settings.multipleChoice") },
+                    { value: "true-false", label: t("transcript.settings.trueFalse") },
+                    { value: "open-ended", label: t("transcript.settings.openEnded") },
+                    { value: "fill-blank", label: t("transcript.settings.fillBlank") },
                   ].map((type) => (
                     <div
                       key={type.value}
@@ -164,7 +168,9 @@ export default function StudySettingsDropdown({
           {mode === "summarize" && (
             <>
               <div className="px-3 py-2">
-                <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Summary Style</p>
+                <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">
+                  {t("transcript.settings.summaryStyle")}
+                </p>
               </div>
 
               <RadioGroup
@@ -173,9 +179,21 @@ export default function StudySettingsDropdown({
                 className="space-y-0.5"
               >
                 {[
-                  { value: "brief", label: "Brief Summary", desc: "Quick overview" },
-                  { value: "key-points", label: "Key Points", desc: "Structured bullets" },
-                  { value: "in-depth", label: "In-Depth", desc: "Comprehensive" },
+                  {
+                    value: "brief",
+                    label: t("transcript.settings.briefSummary"),
+                    desc: t("transcript.settings.briefSummaryDesc"),
+                  },
+                  {
+                    value: "key-points",
+                    label: t("transcript.settings.keyPoints"),
+                    desc: t("transcript.settings.keyPointsDesc"),
+                  },
+                  {
+                    value: "in-depth",
+                    label: t("transcript.settings.inDepth"),
+                    desc: t("transcript.settings.inDepthDesc"),
+                  },
                 ].map((option) => (
                   <div
                     key={option.value}
@@ -208,7 +226,9 @@ export default function StudySettingsDropdown({
           {mode === "explain" && (
             <>
               <div className="px-3 py-2">
-                <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Target Audience</p>
+                <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">
+                  {t("transcript.settings.targetAudience")}
+                </p>
               </div>
 
               <RadioGroup
@@ -217,10 +237,26 @@ export default function StudySettingsDropdown({
                 className="space-y-0.5"
               >
                 {[
-                  { value: "child", label: "Child (5-10)", desc: "Simple language" },
-                  { value: "teen", label: "Teenager (13-17)", desc: "Engaging examples" },
-                  { value: "adult", label: "Adult (18+)", desc: "Professional" },
-                  { value: "senior", label: "Senior (65+)", desc: "Patient & clear" },
+                  {
+                    value: "child",
+                    label: t("transcript.settings.child"),
+                    desc: t("transcript.settings.childDesc"),
+                  },
+                  {
+                    value: "teen",
+                    label: t("transcript.settings.teen"),
+                    desc: t("transcript.settings.teenDesc"),
+                  },
+                  {
+                    value: "adult",
+                    label: t("transcript.settings.adult"),
+                    desc: t("transcript.settings.adultDesc"),
+                  },
+                  {
+                    value: "senior",
+                    label: t("transcript.settings.senior"),
+                    desc: t("transcript.settings.seniorDesc"),
+                  },
                 ].map((option) => (
                   <div
                     key={option.value}

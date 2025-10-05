@@ -60,7 +60,7 @@ export default function TranscriptInput({
   const [summarizeSetting, setSummarizeSetting] = useState<"brief" | "in-depth" | "key-points">("brief")
   const [explainSetting, setExplainSetting] = useState<"child" | "teen" | "adult" | "senior">("child")
 
-  const { t } = useTranslations()
+  const { t, locale } = useTranslations()
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -133,6 +133,7 @@ export default function TranscriptInput({
       let requestBody: any = {
         text: transcript,
         setting: setting,
+        locale,
       }
 
       if (currentMode === "questions") {
@@ -147,12 +148,14 @@ export default function TranscriptInput({
         requestBody = {
           explanation: transcript,
           audience: explainSetting,
+          locale,
         }
       } else if (currentMode === "summarize") {
         apiEndpoint = "/api/summarize"
         requestBody = {
           text: transcript,
           setting: summarizeSetting,
+          locale,
         }
       }
 
@@ -165,15 +168,7 @@ export default function TranscriptInput({
       })
 
       if (!response.ok) {
-        throw new Error(
-          `Failed to ${
-            currentMode === "summarize"
-              ? "generate summary"
-              : currentMode === "explain"
-                ? "get feedback"
-                : "generate questions"
-          }`,
-        )
+        throw new Error(t("transcript.errors.requestFailed"))
       }
 
       const data = await response.json()
@@ -187,13 +182,13 @@ export default function TranscriptInput({
       }
 
       toast({
-        title: `${currentMode.charAt(0).toUpperCase() + currentMode.slice(1)} Complete`,
-        description: `Your ${currentMode} request has been processed successfully`,
+        title: t("transcript.success.requestComplete"),
+        description: t("transcript.success.requestCompleteDesc", { mode: t(`transcript.modes.${currentMode}`) }),
       })
     } catch (error) {
       toast({
-        title: `${mode.charAt(0).toUpperCase() + mode.slice(1)} Failed`,
-        description: `There was an error processing your ${mode} request. Please try again.`,
+        title: t("transcript.errors.requestFailed"),
+        description: t("transcript.errors.requestFailedDesc", { mode: t(`transcript.modes.${mode}`) }),
         variant: "destructive",
       })
     } finally {
@@ -216,7 +211,7 @@ export default function TranscriptInput({
         <div className="bg-gradient-to-b from-slate-800/90 via-slate-800/80 to-emerald-900/30 backdrop-blur-xl border border-white/10 shadow-2xl rounded-2xl p-6">
           <div className="relative">
             <Textarea
-              placeholder={getPlaceholderText(mode)}
+              placeholder={t(`transcript.placeholder.${mode}`)}
               value={transcript}
               onChange={handleTextareaChange}
               className="min-h-[200px] bg-transparent border-none resize-none text-lg text-white placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0 caret-white"
@@ -233,20 +228,19 @@ export default function TranscriptInput({
                     className="h-10 px-4 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 flex items-center gap-2 text-white"
                     onClick={() => openDropdown("mode")}
                   >
-                    <span className="text-sm">Mode</span>
+                    <span className="text-sm">{t("transcript.modeButton")}</span>
                     <ChevronDown className="h-4 w-4" />
                   </Button>
 
                   {showModeSelector && (
                     <div className="absolute bottom-full mb-2 left-0 bg-gradient-to-b from-slate-800/95 via-slate-800/90 to-emerald-900/40 backdrop-blur-xl border border-white/10 rounded-xl p-3 shadow-2xl z-[110] min-w-[180px] animate-in fade-in slide-in-from-bottom-2 duration-200">
-                      {/* Caret arrow */}
                       <div className="absolute -bottom-2 left-4 w-4 h-4 bg-slate-800/95 rotate-45 border-r border-b border-white/10" />
 
                       <div className="relative space-y-1">
                         {[
-                          { id: "questions", label: "Questions" },
-                          { id: "explain", label: "Explain" },
-                          { id: "summarize", label: "Summarize" },
+                          { id: "questions", label: t("transcript.modes.questions") },
+                          { id: "explain", label: t("transcript.modes.explain") },
+                          { id: "summarize", label: t("transcript.modes.summarize") },
                         ].map((modeOption) => (
                           <button
                             key={modeOption.id}
@@ -279,7 +273,7 @@ export default function TranscriptInput({
                     onClick={() => openDropdown("settings")}
                   >
                     <Settings className="h-4 w-4" />
-                    <span className="text-sm">Settings</span>
+                    <span className="text-sm">{t("settings")}</span>
                   </Button>
 
                   <StudySettingsDropdown
@@ -309,7 +303,10 @@ export default function TranscriptInput({
 
               <div className="flex items-center gap-4">
                 <span className="text-xs text-gray-400">
-                  {transcript.length}/{mode === "summarize" ? "15,000" : mode === "explain" ? "5,000" : "10,000"}
+                  {t("transcript.characterCount", {
+                    count: transcript.length,
+                    max: mode === "summarize" ? "15,000" : mode === "explain" ? "5,000" : "10,000",
+                  })}
                 </span>
 
                 <button
