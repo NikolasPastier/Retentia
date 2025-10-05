@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect, useRef } from "react"
+import { useEffect, useRef } from "react"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import type { StudyMode } from "./locale-page-client"
@@ -44,17 +44,6 @@ export default function StudySettingsDropdown({
   onExplainSettingChange,
 }: StudySettingsDropdownProps) {
   const dropdownRef = useRef<HTMLDivElement>(null)
-  const [position, setPosition] = useState({ top: 0, left: 0 })
-
-  useEffect(() => {
-    if (isOpen && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect()
-      setPosition({
-        top: rect.bottom + 8,
-        left: rect.left,
-      })
-    }
-  }, [isOpen, buttonRef])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -80,22 +69,17 @@ export default function StudySettingsDropdown({
     <div
       ref={dropdownRef}
       data-study-settings-dropdown
-      className="fixed z-50 animate-in fade-in slide-in-from-top-2 duration-200"
-      style={{
-        top: `${position.top}px`,
-        left: `${position.left}px`,
-      }}
+      className="absolute left-0 top-full mt-2 z-[60] animate-in fade-in slide-in-from-top-2 duration-200"
     >
-      {/* Caret arrow */}
-      <div className="absolute -top-2 left-4 w-4 h-4 bg-[#0b1724]/95 rotate-45 border-l border-t border-border/50" />
+      <div className="absolute -top-2 left-4 w-4 h-4 bg-slate-800/95 rotate-45 border-l border-t border-white/10" />
 
-      <div className="relative bg-[#0b1724]/95 backdrop-blur-sm border border-border/50 rounded-xl shadow-2xl min-w-[280px] max-w-[320px] max-h-[70vh] overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+      <div className="relative bg-gradient-to-b from-slate-800/95 via-slate-800/90 to-emerald-900/40 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl min-w-[280px] max-w-[320px] max-h-[70vh] overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
         <div className="p-3 space-y-1">
-          {/* Study Mode Settings */}
-          {mode === "study" && (
+          {/* Questions Mode Settings */}
+          {mode === "questions" && (
             <>
               <div className="px-3 py-2">
-                <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Study Options</p>
+                <p className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Quiz Options</p>
               </div>
 
               {/* Difficulty */}
@@ -107,7 +91,7 @@ export default function StudySettingsDropdown({
                       key={diff}
                       className={`flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 ${
                         difficulty === diff
-                          ? "bg-blue-500/20 border border-blue-400/30 text-blue-300"
+                          ? "bg-cyan-500/30 border border-cyan-400/50 text-cyan-300"
                           : "text-[#d1d5db] hover:bg-white/5 hover:text-white"
                       }`}
                       onClick={() => onDifficultyChange(diff)}
@@ -133,7 +117,7 @@ export default function StudySettingsDropdown({
                       onClick={() => onQuestionCountChange(count)}
                       className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
                         questionCount === count
-                          ? "bg-blue-500/20 border border-blue-400/30 text-blue-300"
+                          ? "bg-cyan-500/30 border border-cyan-400/50 text-cyan-300"
                           : "text-[#d1d5db] hover:bg-white/5 hover:text-white"
                       }`}
                     >
@@ -160,7 +144,7 @@ export default function StudySettingsDropdown({
                       key={type.value}
                       className={`flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 ${
                         questionType === type.value
-                          ? "bg-blue-500/20 border border-blue-400/30 text-blue-300"
+                          ? "bg-cyan-500/30 border border-cyan-400/50 text-cyan-300"
                           : "text-[#d1d5db] hover:bg-white/5 hover:text-white"
                       }`}
                       onClick={() => onQuestionTypeChange(type.value)}
@@ -197,7 +181,7 @@ export default function StudySettingsDropdown({
                     key={option.value}
                     className={`flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 ${
                       summarizeSetting === option.value
-                        ? "bg-blue-500/20 border border-blue-400/30"
+                        ? "bg-cyan-500/30 border border-cyan-400/50"
                         : "hover:bg-white/5"
                     }`}
                     onClick={() => onSummarizeSettingChange(option.value as "brief" | "in-depth" | "key-points")}
@@ -207,7 +191,7 @@ export default function StudySettingsDropdown({
                       <Label
                         htmlFor={`sum-${option.value}`}
                         className={`cursor-pointer text-sm block ${
-                          summarizeSetting === option.value ? "text-blue-300" : "text-[#d1d5db]"
+                          summarizeSetting === option.value ? "text-cyan-300" : "text-[#d1d5db]"
                         }`}
                       >
                         {option.label}
@@ -241,7 +225,7 @@ export default function StudySettingsDropdown({
                   <div
                     key={option.value}
                     className={`flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 ${
-                      explainSetting === option.value ? "bg-blue-500/20 border border-blue-400/30" : "hover:bg-white/5"
+                      explainSetting === option.value ? "bg-cyan-500/30 border border-cyan-400/50" : "hover:bg-white/5"
                     }`}
                     onClick={() => onExplainSettingChange(option.value as "child" | "teen" | "adult" | "senior")}
                   >
@@ -250,7 +234,7 @@ export default function StudySettingsDropdown({
                       <Label
                         htmlFor={`exp-${option.value}`}
                         className={`cursor-pointer text-sm block ${
-                          explainSetting === option.value ? "text-blue-300" : "text-[#d1d5db]"
+                          explainSetting === option.value ? "text-cyan-300" : "text-[#d1d5db]"
                         }`}
                       >
                         {option.label}

@@ -4,7 +4,7 @@ import { Figtree } from "next/font/google"
 import { GeistMono } from "geist/font/mono"
 import { Instrument_Serif } from "next/font/google"
 import "./globals.css"
-import I18nProvider from "@/components/i18n-provider"
+import { I18nProvider } from "@/lib/i18n/context"
 
 const figtree = Figtree({
   subsets: ["latin"],
