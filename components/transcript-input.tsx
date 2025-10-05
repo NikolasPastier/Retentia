@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { Settings, Loader2, ChevronDown, CheckCircle, Check } from "lucide-react"
+import { Settings, Loader2, CheckCircle, Check } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import StudySettingsDropdown from "@/components/study-settings-dropdown"
 import type { StudyMode } from "./locale-page-client"
@@ -229,7 +229,6 @@ export default function TranscriptInput({
                     onClick={() => openDropdown("mode")}
                   >
                     <span className="text-sm">{t("transcript.modeButton")}</span>
-                    
                   </Button>
 
                   {showModeSelector && (
@@ -391,18 +390,20 @@ export default function TranscriptInput({
 
             {mode === "summarize" && (
               <>
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-white">{t("results.overview")}</h3>
-                  <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                    <p className="text-gray-300 whitespace-pre-wrap">{result.summary || result?.data?.summary || ""}</p>
+                {(summarizeSetting === "brief" || summarizeSetting === "in-depth") && result.summary && (
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-white">{t("results.overview")}</h3>
+                    <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                      <p className="text-gray-300 whitespace-pre-wrap">{result.summary}</p>
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {(result.keyPoints?.length ? result.keyPoints : result?.data?.keyPoints) && (
+                {summarizeSetting === "key-points" && result.keyPoints && result.keyPoints.length > 0 && (
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold text-white">{t("results.keyPoints")}</h3>
                     <div className="space-y-2">
-                      {(result.keyPoints ?? result?.data?.keyPoints).map((point: string, index: number) => (
+                      {result.keyPoints.map((point: string, index: number) => (
                         <div
                           key={index}
                           className="flex items-start gap-3 p-3 bg-emerald-500/10 rounded-lg border border-emerald-400/30"
@@ -412,23 +413,6 @@ export default function TranscriptInput({
                           </Badge>
                           <p className="text-emerald-200 text-sm">{point}</p>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {(result.concepts?.length ? result.concepts : result?.data?.concepts) && (
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-white">{t("results.importantConcepts")}</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {(result.concepts ?? result?.data?.concepts).map((concept: string, index: number) => (
-                        <Badge
-                          key={index}
-                          variant="secondary"
-                          className="text-xs bg-white/10 border-white/20 text-gray-300"
-                        >
-                          {concept}
-                        </Badge>
                       ))}
                     </div>
                   </div>
