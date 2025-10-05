@@ -69,9 +69,9 @@ export default function StudySettingsDropdown({
     <div
       ref={dropdownRef}
       data-study-settings-dropdown
-      className="absolute left-0 top-full mt-2 z-[110] animate-in fade-in slide-in-from-top-2 duration-200"
+      className="absolute left-0 bottom-full mb-2 z-[110] animate-in fade-in slide-in-from-bottom-2 duration-200"
     >
-      <div className="absolute -top-2 left-4 w-4 h-4 bg-slate-800/95 rotate-45 border-l border-t border-white/10" />
+      <div className="absolute -bottom-2 left-4 w-4 h-4 bg-slate-800/95 rotate-45 border-r border-b border-white/10" />
 
       <div className="relative bg-gradient-to-b from-slate-800/95 via-slate-800/90 to-emerald-900/40 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl min-w-[280px] max-w-[320px] max-h-[70vh] overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
         <div className="p-3 space-y-1">

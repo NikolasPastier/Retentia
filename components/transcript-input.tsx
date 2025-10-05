@@ -238,9 +238,9 @@ export default function TranscriptInput({
                   </Button>
 
                   {showModeSelector && (
-                    <div className="absolute top-full mt-2 left-0 bg-gradient-to-b from-slate-800/95 via-slate-800/90 to-emerald-900/40 backdrop-blur-xl border border-white/10 rounded-xl p-3 shadow-2xl z-[110] min-w-[180px] animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="absolute bottom-full mb-2 left-0 bg-gradient-to-b from-slate-800/95 via-slate-800/90 to-emerald-900/40 backdrop-blur-xl border border-white/10 rounded-xl p-3 shadow-2xl z-[110] min-w-[180px] animate-in fade-in slide-in-from-bottom-2 duration-200">
                       {/* Caret arrow */}
-                      <div className="absolute -top-2 left-4 w-4 h-4 bg-slate-800/95 rotate-45 border-l border-t border-white/10" />
+                      <div className="absolute -bottom-2 left-4 w-4 h-4 bg-slate-800/95 rotate-45 border-r border-b border-white/10" />
 
                       <div className="relative space-y-1">
                         {[
