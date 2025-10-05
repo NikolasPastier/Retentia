@@ -120,13 +120,13 @@ importers:
         specifier: ^10.4.20
         version: 10.4.20(postcss@8.5.0)
       aws-sdk:
-        specifier: latest
+        specifier: 2.1692.0
         version: 2.1692.0
       buffer:
         specifier: 6.0.3
         version: 6.0.3
       child_process:
-        specifier: latest
+        specifier: 1.0.2
         version: 1.0.2
       class-variance-authority:
         specifier: ^0.7.1
@@ -138,7 +138,7 @@ importers:
         specifier: 1.0.4
         version: 1.0.4(@types/react-dom@18.0.0)(@types/react@18.0.0)(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
       cors:
-        specifier: latest
+        specifier: 2.8.5
         version: 2.8.5
       date-fns:
         specifier: 4.1.0
@@ -147,7 +147,7 @@ importers:
         specifier: 8.5.1
         version: 8.5.1(react@18.0.0)
       express:
-        specifier: latest
+        specifier: 5.1.0
         version: 5.1.0
       firebase:
         specifier: 12.2.1
@@ -156,7 +156,7 @@ importers:
         specifier: latest
         version: 12.23.22(@emotion/is-prop-valid@1.4.0)(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
       fs:
-        specifier: latest
+        specifier: 0.0.1-security
         version: 0.0.1-security
       geist:
         specifier: latest
@@ -186,7 +186,7 @@ importers:
         specifier: latest
         version: 0.4.6(react-dom@18.0.0(react@18.0.0))(react@18.0.0)
       path:
-        specifier: latest
+        specifier: 0.12.7
         version: 0.12.7
       react:
         specifier: ^18
