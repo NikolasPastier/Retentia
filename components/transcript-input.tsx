@@ -493,13 +493,13 @@ export default function TranscriptInput({
           if (e.target === e.currentTarget) closeAllDropdowns()
         }}
       >
-        <div className="bg-background/60 backdrop-blur-sm border border-border/50 rounded-3xl p-6 shadow-lg">
+        <div className="bg-gradient-to-b from-slate-800/90 via-slate-800/80 to-emerald-900/30 backdrop-blur-xl border border-white/10 shadow-2xl rounded-2xl p-6">
           <div className="relative">
             <Textarea
               placeholder={getPlaceholderText(mode)}
               value={transcript}
               onChange={handleTextareaChange}
-              className="min-h-[200px] bg-transparent border-none resize-none text-lg text-white placeholder:text-muted-foreground/70 focus-visible:ring-0 focus-visible:ring-offset-0 caret-white"
+              className="min-h-[200px] bg-transparent border-none resize-none text-lg text-white placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0 caret-white"
               maxLength={mode === "summarize" ? 15000 : 10000}
             />
 
@@ -509,11 +509,11 @@ export default function TranscriptInput({
                   placeholder={t("transcript.explanationPlaceholder")}
                   value={userExplanation}
                   onChange={(e) => setUserExplanation(e.target.value)}
-                  className="min-h-[150px] bg-transparent border border-border/50 rounded-xl resize-none text-lg text-white placeholder:text-muted-foreground/70 focus-visible:ring-1 focus-visible:ring-ring caret-white"
+                  className="min-h-[150px] bg-white/5 border border-white/10 rounded-xl resize-none text-lg text-white placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-cyan-500/50 caret-white"
                   maxLength={5000}
                 />
                 <div className="flex justify-end mt-2">
-                  <span className="text-xs text-muted-foreground">{userExplanation.length}/5,000</span>
+                  <span className="text-xs text-gray-400">{userExplanation.length}/5,000</span>
                 </div>
               </div>
             )}
@@ -525,7 +525,7 @@ export default function TranscriptInput({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-10 px-4 rounded-full bg-muted/50 hover:bg-muted border border-border/50 flex items-center gap-2"
+                    className="h-10 px-4 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 flex items-center gap-2 text-white"
                     onClick={() => openDropdown("mode")}
                   >
                     <span className="text-sm">Mode</span>
@@ -533,9 +533,9 @@ export default function TranscriptInput({
                   </Button>
 
                   {showModeSelector && (
-                    <div className="absolute top-full mt-2 left-0 bg-[#0b1724]/95 backdrop-blur-sm border border-border/50 rounded-xl p-3 shadow-2xl z-50 min-w-[180px] animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="absolute top-full mt-2 left-0 bg-gradient-to-b from-slate-800/95 via-slate-800/90 to-emerald-900/40 backdrop-blur-xl border border-white/10 rounded-xl p-3 shadow-2xl z-50 min-w-[180px] animate-in fade-in slide-in-from-top-2 duration-200">
                       {/* Caret arrow */}
-                      <div className="absolute -top-2 left-4 w-4 h-4 bg-[#0b1724]/95 rotate-45 border-l border-t border-border/50" />
+                      <div className="absolute -top-2 left-4 w-4 h-4 bg-slate-800/95 rotate-45 border-l border-t border-white/10" />
 
                       <div className="relative space-y-1">
                         {[
@@ -551,12 +551,12 @@ export default function TranscriptInput({
                             }}
                             className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-all duration-200 ${
                               mode === modeOption.id
-                                ? "bg-blue-500/20 border border-blue-400/30 text-blue-300"
-                                : "text-[#d1d5db] hover:bg-white/5 hover:text-white"
+                                ? "bg-cyan-500/30 border border-cyan-400/50 text-cyan-300 shadow-lg shadow-cyan-500/20"
+                                : "text-gray-300 hover:bg-white/10 hover:text-white"
                             }`}
                           >
                             <span>{modeOption.label}</span>
-                            {mode === modeOption.id && <Check className="h-4 w-4 text-blue-300" />}
+                            {mode === modeOption.id && <Check className="h-4 w-4 text-cyan-300" />}
                           </button>
                         ))}
                       </div>
@@ -570,7 +570,7 @@ export default function TranscriptInput({
                     ref={settingsButtonRef}
                     variant="ghost"
                     size="sm"
-                    className="h-10 px-4 rounded-full bg-muted/50 hover:bg-muted border border-border/50 flex items-center gap-2"
+                    className="h-10 px-4 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 flex items-center gap-2 text-white"
                     onClick={() => openDropdown("settings")}
                   >
                     <Settings className="h-4 w-4" />
@@ -580,7 +580,7 @@ export default function TranscriptInput({
               </div>
 
               <div className="flex items-center gap-4">
-                <span className="text-xs text-muted-foreground">
+                <span className="text-xs text-gray-400">
                   {transcript.length}/{mode === "summarize" ? "15,000" : "10,000"}
                 </span>
 
@@ -617,10 +617,10 @@ export default function TranscriptInput({
       </div>
 
       {result && (mode === "explain" || mode === "summarize") && (
-        <Card className="glass-card">
+        <Card className="bg-gradient-to-b from-slate-800/90 via-slate-800/80 to-emerald-900/30 backdrop-blur-xl border border-white/10 shadow-2xl rounded-2xl animate-in fade-in slide-in-from-bottom-4 duration-500">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-500" />
+            <CardTitle className="flex items-center gap-2 text-white">
+              <CheckCircle className="h-5 w-5 text-green-400" />
               {mode === "explain" ? t("results.aiFeedback") : t("results.summary")}
             </CardTitle>
           </CardHeader>
@@ -629,35 +629,35 @@ export default function TranscriptInput({
               <>
                 <div className="text-center space-y-4">
                   <div className="space-y-2">
-                    <h3 className="text-lg font-semibold">{t("results.understandingRating")}</h3>
+                    <h3 className="text-lg font-semibold text-white">{t("results.understandingRating")}</h3>
                     <div
                       className={`text-6xl font-bold ${
                         result.rating >= 80
-                          ? "text-green-500"
+                          ? "text-green-400"
                           : result.rating >= 60
-                            ? "text-yellow-500"
-                            : "text-red-500"
+                            ? "text-yellow-400"
+                            : "text-red-400"
                       }`}
                     >
                       {result.rating}%
                     </div>
                     <Progress value={result.rating} className="w-full max-w-md mx-auto h-3" />
-                    <p className="text-sm text-muted-foreground">{t("results.ratingDescription")}</p>
+                    <p className="text-sm text-gray-300">{t("results.ratingDescription")}</p>
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  <h4 className="text-lg font-semibold">{t("results.detailedFeedback")}</h4>
-                  <div className="bg-muted/20 rounded-lg p-4">
-                    <p className="text-muted-foreground whitespace-pre-wrap">{result.feedback}</p>
+                  <h4 className="text-lg font-semibold text-white">{t("results.detailedFeedback")}</h4>
+                  <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                    <p className="text-gray-300 whitespace-pre-wrap">{result.feedback}</p>
                   </div>
                 </div>
 
                 {result.improvements && (
                   <div className="space-y-4">
-                    <h4 className="text-lg font-semibold">{t("results.suggestedImprovements")}</h4>
-                    <div className="bg-blue-50 dark:bg-blue-950/20 rounded-lg p-4">
-                      <p className="text-blue-800 dark:text-blue-200 text-sm">{result.improvements}</p>
+                    <h4 className="text-lg font-semibold text-white">{t("results.suggestedImprovements")}</h4>
+                    <div className="bg-cyan-500/10 rounded-lg p-4 border border-cyan-400/30">
+                      <p className="text-cyan-200 text-sm">{result.improvements}</p>
                     </div>
                   </div>
                 )}
@@ -667,27 +667,25 @@ export default function TranscriptInput({
             {mode === "summarize" && (
               <>
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">{t("results.overview")}</h3>
-                  <div className="bg-muted/20 rounded-lg p-4">
-                    <p className="text-muted-foreground whitespace-pre-wrap">
-                      {result.summary || result?.data?.summary || ""}
-                    </p>
+                  <h3 className="text-lg font-semibold text-white">{t("results.overview")}</h3>
+                  <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                    <p className="text-gray-300 whitespace-pre-wrap">{result.summary || result?.data?.summary || ""}</p>
                   </div>
                 </div>
 
                 {(result.keyPoints?.length ? result.keyPoints : result?.data?.keyPoints) && (
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">{t("results.keyPoints")}</h3>
+                    <h3 className="text-lg font-semibold text-white">{t("results.keyPoints")}</h3>
                     <div className="space-y-2">
                       {(result.keyPoints ?? result?.data?.keyPoints).map((point: string, index: number) => (
                         <div
                           key={index}
-                          className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg"
+                          className="flex items-start gap-3 p-3 bg-emerald-500/10 rounded-lg border border-emerald-400/30"
                         >
-                          <Badge variant="outline" className="mt-0.5 text-xs">
+                          <Badge variant="outline" className="mt-0.5 text-xs border-white/20 text-gray-300">
                             {index + 1}
                           </Badge>
-                          <p className="text-blue-800 dark:text-blue-200 text-sm">{point}</p>
+                          <p className="text-emerald-200 text-sm">{point}</p>
                         </div>
                       ))}
                     </div>
@@ -696,10 +694,14 @@ export default function TranscriptInput({
 
                 {(result.concepts?.length ? result.concepts : result?.data?.concepts) && (
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">{t("results.importantConcepts")}</h3>
+                    <h3 className="text-lg font-semibold text-white">{t("results.importantConcepts")}</h3>
                     <div className="flex flex-wrap gap-2">
                       {(result.concepts ?? result?.data?.concepts).map((concept: string, index: number) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
+                        <Badge
+                          key={index}
+                          variant="secondary"
+                          className="text-xs bg-white/10 border-white/20 text-gray-300"
+                        >
                           {concept}
                         </Badge>
                       ))}

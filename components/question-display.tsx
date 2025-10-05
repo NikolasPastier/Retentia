@@ -4,10 +4,9 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
-import { CheckCircle, XCircle, RotateCcw, Eye, EyeOff, Bookmark, BookmarkCheck, X } from "lucide-react"
+import { CheckCircle, XCircle, RotateCcw, X } from "lucide-react"
 import { useTranslations } from "@/lib/i18n/context"
 
 interface Question {
@@ -25,64 +24,18 @@ interface QuestionDisplayProps {
 }
 
 export default function QuestionDisplay({ questions, onBack }: QuestionDisplayProps) {
-  const [currentQuestion, setCurrentQuestion] = useState(0)
   const [selectedAnswers, setSelectedAnswers] = useState<string[]>(new Array(questions.length).fill(""))
   const [showResults, setShowResults] = useState(false)
-  const [quizCompleted, setQuizCompleted] = useState(false)
-  const [revealedAnswers, setRevealedAnswers] = useState<boolean[]>(new Array(questions.length).fill(false))
-  const [savedQuestions, setSavedQuestions] = useState<boolean[]>(new Array(questions.length).fill(false))
   const { t } = useTranslations()
 
-  const handleAnswerSelect = (answer: string) => {
+  const handleAnswerSelect = (questionIndex: number, answer: string) => {
     const newAnswers = [...selectedAnswers]
-    newAnswers[currentQuestion] = answer
+    newAnswers[questionIndex] = answer
     setSelectedAnswers(newAnswers)
   }
 
-  const handleNext = () => {
-    if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1)
-    } else {
-      setQuizCompleted(true)
-      setShowResults(true)
-    }
-  }
-
-  const handlePrevious = () => {
-    if (currentQuestion > 0) {
-      setCurrentQuestion(currentQuestion - 1)
-    }
-  }
-
-  const toggleAnswerReveal = (questionIndex: number) => {
-    const newRevealed = [...revealedAnswers]
-    newRevealed[questionIndex] = !newRevealed[questionIndex]
-    setRevealedAnswers(newRevealed)
-  }
-
-  const toggleSaveQuestion = (questionIndex: number) => {
-    const newSaved = [...savedQuestions]
-    newSaved[questionIndex] = !newSaved[questionIndex]
-    setSavedQuestions(newSaved)
-
-    // In a real app, this would save to a database
-    console.log(`Question ${questionIndex + 1} ${newSaved[questionIndex] ? "saved" : "unsaved"} for later`)
-  }
-
-  const getCorrectAnswer = (question: Question) => {
-    if (question.type === "multiple-choice" && typeof question.correctAnswer === "number") {
-      return String.fromCharCode(65 + question.correctAnswer) // Convert index to letter
-    }
-    return String(question.correctAnswer)
-  }
-
-  const isAnswerCorrect = (question: Question, userAnswer: string) => {
-    const correctAnswer = getCorrectAnswer(question)
-    if (question.type === "open-ended") {
-      // For open-ended questions, we'll consider any non-empty answer as "attempted"
-      return userAnswer.trim().length > 0
-    }
-    return userAnswer.toLowerCase().trim() === correctAnswer.toLowerCase().trim()
+  const handleSubmitAnswers = () => {
+    setShowResults(true)
   }
 
   const calculateScore = () => {
@@ -92,38 +45,48 @@ export default function QuestionDisplay({ questions, onBack }: QuestionDisplayPr
   }
 
   const resetQuiz = () => {
-    setCurrentQuestion(0)
     setSelectedAnswers(new Array(questions.length).fill(""))
     setShowResults(false)
-    setQuizCompleted(false)
-    setRevealedAnswers(new Array(questions.length).fill(false))
   }
 
-  const progress = ((currentQuestion + 1) / questions.length) * 100
+  const isAnswerCorrect = (question: Question, userAnswer: string) => {
+    const correctAnswer = getCorrectAnswer(question)
+    if (question.type === "open-ended") {
+      return userAnswer.trim().length > 0
+    }
+    return userAnswer.toLowerCase().trim() === correctAnswer.toLowerCase().trim()
+  }
+
+  const getCorrectAnswer = (question: Question) => {
+    if (question.type === "multiple-choice" && typeof question.correctAnswer === "number") {
+      return String.fromCharCode(65 + question.correctAnswer)
+    }
+    return String(question.correctAnswer)
+  }
 
   if (showResults) {
     const score = calculateScore()
     const percentage = Math.round((score / questions.length) * 100)
 
     return (
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold text-foreground">{t("questions.title")}</h1>
-          <p className="text-xl text-muted-foreground">
+          <h1 className="text-4xl font-bold text-white">{t("questions.title")}</h1>
+          <p className="text-xl text-gray-300">
             {t("questions.score", { score, total: questions.length, percentage })}
           </p>
         </div>
 
-        <Card className="glass-card">
+        <Card className="bg-gradient-to-b from-slate-800/90 via-slate-800/80 to-emerald-900/30 backdrop-blur-xl border border-white/10 shadow-2xl rounded-2xl">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">
+            <CardTitle className="text-2xl text-white">
               {percentage >= 80
                 ? t("questions.excellent")
                 : percentage >= 60
                   ? t("questions.goodJob")
                   : t("questions.keepPracticing")}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-gray-300">
               {percentage >= 80
                 ? t("questions.excellentDesc")
                 : percentage >= 60
@@ -138,37 +101,40 @@ export default function QuestionDisplay({ questions, onBack }: QuestionDisplayPr
               const isCorrect = isAnswerCorrect(question, userAnswer)
 
               return (
-                <div key={index} className="border border-border rounded-lg p-4 space-y-3">
+                <div
+                  key={index}
+                  className="border border-white/10 rounded-xl p-4 space-y-3 bg-slate-900/40 backdrop-blur-sm"
+                >
                   <div className="flex items-start gap-3">
                     {isCorrect ? (
-                      <CheckCircle className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" />
+                      <CheckCircle className="h-5 w-5 text-green-400 mt-1 flex-shrink-0" />
                     ) : (
-                      <XCircle className="h-5 w-5 text-red-500 mt-1 flex-shrink-0" />
+                      <XCircle className="h-5 w-5 text-red-400 mt-1 flex-shrink-0" />
                     )}
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <h3 className="font-semibold">
+                        <h3 className="font-semibold text-white">
                           {t("questions.questionNumber", { number: index + 1, total: questions.length })}:{" "}
                           {question.question}
                         </h3>
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-xs border-white/20 text-gray-300">
                           {question.type.replace("-", " ")}
                         </Badge>
                       </div>
                       <div className="space-y-1 text-sm">
-                        <p>
+                        <p className="text-gray-300">
                           <span className="font-medium">{t("questions.yourAnswer")}</span>{" "}
-                          <span className={isCorrect ? "text-green-600" : "text-red-600"}>
+                          <span className={isCorrect ? "text-green-400" : "text-red-400"}>
                             {userAnswer || t("questions.notAnswered")}
                           </span>
                         </p>
                         {question.type !== "open-ended" && (
-                          <p>
+                          <p className="text-gray-300">
                             <span className="font-medium">{t("questions.correctAnswer")}</span>{" "}
-                            <span className="text-green-600">{correctAnswer}</span>
+                            <span className="text-green-400">{correctAnswer}</span>
                           </p>
                         )}
-                        <p className="text-muted-foreground mt-2">{question.explanation}</p>
+                        <p className="text-gray-400 mt-2">{question.explanation}</p>
                       </div>
                     </div>
                   </div>
@@ -177,11 +143,18 @@ export default function QuestionDisplay({ questions, onBack }: QuestionDisplayPr
             })}
 
             <div className="flex gap-4 justify-center pt-4">
-              <Button onClick={resetQuiz} variant="outline" className="flex items-center gap-2 bg-transparent">
+              <Button
+                onClick={resetQuiz}
+                variant="outline"
+                className="flex items-center gap-2 bg-transparent border-white/20 text-white hover:bg-white/10"
+              >
                 <RotateCcw className="h-4 w-4" />
                 {t("questions.retakeQuiz")}
               </Button>
-              <Button onClick={onBack} className="flex items-center gap-2">
+              <Button
+                onClick={onBack}
+                className="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700 text-white border-0"
+              >
                 <X className="h-4 w-4" />
                 {t("questions.clearQuestions")}
               </Button>
@@ -192,202 +165,143 @@ export default function QuestionDisplay({ questions, onBack }: QuestionDisplayPr
     )
   }
 
-  const question = questions[currentQuestion]
-  const isAnswerRevealed = revealedAnswers[currentQuestion]
-  const isQuestionSaved = savedQuestions[currentQuestion]
-
-  const renderQuestionInput = () => {
-    switch (question.type) {
-      case "multiple-choice":
-        return (
-          <div className="grid gap-3">
-            {question.options?.map((option, index) => {
-              const optionLetter = String.fromCharCode(65 + index) // A, B, C, D
-              const isSelected = selectedAnswers[currentQuestion] === optionLetter
-              const correctAnswer = getCorrectAnswer(question)
-              const isCorrectOption = optionLetter === correctAnswer
-
-              let buttonVariant: "default" | "outline" | "secondary" = "outline"
-              let buttonClass = "justify-start text-left h-auto p-4 whitespace-normal"
-
-              if (isAnswerRevealed && isCorrectOption) {
-                buttonVariant = "default"
-                buttonClass += " bg-green-600 hover:bg-green-700 text-white border-green-600"
-              } else if (isSelected) {
-                buttonVariant = "secondary"
-              }
-
-              return (
-                <Button
-                  key={index}
-                  variant={buttonVariant}
-                  className={buttonClass}
-                  onClick={() => handleAnswerSelect(optionLetter)}
-                >
-                  <span className="font-semibold mr-3">{optionLetter}.</span>
-                  <span>{option}</span>
-                  {isAnswerRevealed && isCorrectOption && <CheckCircle className="h-4 w-4 ml-auto text-white" />}
-                </Button>
-              )
-            })}
-          </div>
-        )
-
-      case "true-false":
-        return (
-          <div className="grid gap-3">
-            {["True", "False"].map((option) => {
-              const isSelected = selectedAnswers[currentQuestion] === option
-              const correctAnswer = getCorrectAnswer(question)
-              const isCorrectOption = option === correctAnswer
-
-              let buttonVariant: "default" | "outline" | "secondary" = "outline"
-              let buttonClass = "justify-center h-auto p-4"
-
-              if (isAnswerRevealed && isCorrectOption) {
-                buttonVariant = "default"
-                buttonClass += " bg-green-600 hover:bg-green-700 text-white border-green-600"
-              } else if (isSelected) {
-                buttonVariant = "secondary"
-              }
-
-              return (
-                <Button
-                  key={option}
-                  variant={buttonVariant}
-                  className={buttonClass}
-                  onClick={() => handleAnswerSelect(option)}
-                >
-                  {option}
-                  {isAnswerRevealed && isCorrectOption && <CheckCircle className="h-4 w-4 ml-2 text-white" />}
-                </Button>
-              )
-            })}
-          </div>
-        )
-
-      case "fill-blank":
-        return (
-          <div className="space-y-3">
-            <Input
-              placeholder="Enter your answer..."
-              value={selectedAnswers[currentQuestion]}
-              onChange={(e) => handleAnswerSelect(e.target.value)}
-              className="text-lg p-4"
-            />
-            {isAnswerRevealed && (
-              <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                <p className="text-green-800">
-                  <span className="font-semibold">{t("questions.correctAnswer")}</span>: {getCorrectAnswer(question)}
-                </p>
-              </div>
-            )}
-          </div>
-        )
-
-      case "open-ended":
-        return (
-          <div className="space-y-3">
-            <Textarea
-              placeholder="Write your detailed answer here..."
-              value={selectedAnswers[currentQuestion]}
-              onChange={(e) => handleAnswerSelect(e.target.value)}
-              className="min-h-[120px] text-base"
-            />
-            {isAnswerRevealed && (
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-blue-800">
-                  <span className="font-semibold">{t("questions.sampleAnswer")}</span>: {getCorrectAnswer(question)}
-                </p>
-              </div>
-            )}
-          </div>
-        )
-
-      default:
-        return null
-    }
-  }
-
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Badge variant="outline">
-              {t("questions.questionNumber", { number: currentQuestion + 1, total: questions.length })}
+            <Badge variant="outline" className="border-white/20 text-gray-300">
+              {questions.length} {questions.length === 1 ? "Question" : "Questions"}
             </Badge>
-            <Badge variant="secondary" className="capitalize">
-              {question.type.replace("-", " ")}
-            </Badge>
-            {question.difficulty && (
-              <Badge
-                variant={
-                  question.difficulty === "hard"
-                    ? "destructive"
-                    : question.difficulty === "medium"
-                      ? "secondary"
-                      : "default"
-                }
-              >
-                {question.difficulty}
-              </Badge>
-            )}
           </div>
-          <Button onClick={onBack} variant="ghost" size="sm" className="flex items-center gap-2">
+          <Button
+            onClick={onBack}
+            variant="ghost"
+            size="sm"
+            className="flex items-center gap-2 text-gray-300 hover:text-white hover:bg-white/10"
+          >
             <X className="h-4 w-4" />
             {t("questions.clearQuestions")}
           </Button>
         </div>
-        <Progress value={progress} className="w-full" />
       </div>
 
-      <Card className="glass-card">
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <CardTitle className="text-xl flex-1">{question.question}</CardTitle>
-            <div className="flex gap-2 ml-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => toggleAnswerReveal(currentQuestion)}
-                className="flex items-center gap-2"
-              >
-                {isAnswerRevealed ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                {isAnswerRevealed ? t("questions.hideAnswer") : t("questions.showAnswer")}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => toggleSaveQuestion(currentQuestion)}
-                className="flex items-center gap-2"
-              >
-                {isQuestionSaved ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
-                {isQuestionSaved ? t("questions.saved") : t("questions.save")}
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {renderQuestionInput()}
+      <div className="space-y-6">
+        {questions.map((question, index) => (
+          <Card
+            key={index}
+            className="bg-gradient-to-b from-slate-800/90 via-slate-800/80 to-emerald-900/30 backdrop-blur-xl border border-white/10 shadow-2xl rounded-2xl"
+          >
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge variant="outline" className="border-white/20 text-gray-300">
+                      {t("questions.questionNumber", { number: index + 1, total: questions.length })}
+                    </Badge>
+                    <Badge variant="secondary" className="capitalize bg-white/10 text-gray-300 border-white/20">
+                      {question.type.replace("-", " ")}
+                    </Badge>
+                    {question.difficulty && (
+                      <Badge
+                        variant={
+                          question.difficulty === "hard"
+                            ? "destructive"
+                            : question.difficulty === "medium"
+                              ? "secondary"
+                              : "default"
+                        }
+                        className="bg-white/10 border-white/20"
+                      >
+                        {question.difficulty}
+                      </Badge>
+                    )}
+                  </div>
+                  <CardTitle className="text-xl text-white">{question.question}</CardTitle>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {question.type === "multiple-choice" && (
+                <div className="grid gap-3">
+                  {question.options?.map((option, optionIndex) => {
+                    const optionLetter = String.fromCharCode(65 + optionIndex)
+                    const isSelected = selectedAnswers[index] === optionLetter
 
-          {isAnswerRevealed && question.explanation && (
-            <div className="mt-4 p-4 bg-accent/10 rounded-lg border">
-              <h4 className="font-semibold text-foreground mb-2">{t("questions.explanation")}</h4>
-              <p className="text-muted-foreground">{question.explanation}</p>
-            </div>
-          )}
+                    return (
+                      <Button
+                        key={optionIndex}
+                        variant={isSelected ? "secondary" : "outline"}
+                        className={`justify-start text-left h-auto p-4 whitespace-normal ${
+                          isSelected
+                            ? "bg-cyan-500/30 border-cyan-400/50 text-cyan-300"
+                            : "bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:text-white"
+                        }`}
+                        onClick={() => handleAnswerSelect(index, optionLetter)}
+                      >
+                        <span className="font-semibold mr-3">{optionLetter}.</span>
+                        <span>{option}</span>
+                      </Button>
+                    )
+                  })}
+                </div>
+              )}
 
-          <div className="flex justify-between pt-4">
-            <Button onClick={handlePrevious} disabled={currentQuestion === 0} variant="outline">
-              {t("previous")}
-            </Button>
-            <Button onClick={handleNext} disabled={!selectedAnswers[currentQuestion] && !isAnswerRevealed}>
-              {currentQuestion === questions.length - 1 ? t("questions.finishQuiz") : t("next")}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+              {question.type === "true-false" && (
+                <div className="grid gap-3">
+                  {["True", "False"].map((option) => {
+                    const isSelected = selectedAnswers[index] === option
+
+                    return (
+                      <Button
+                        key={option}
+                        variant={isSelected ? "secondary" : "outline"}
+                        className={`justify-center h-auto p-4 ${
+                          isSelected
+                            ? "bg-cyan-500/30 border-cyan-400/50 text-cyan-300"
+                            : "bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:text-white"
+                        }`}
+                        onClick={() => handleAnswerSelect(index, option)}
+                      >
+                        {option}
+                      </Button>
+                    )
+                  })}
+                </div>
+              )}
+
+              {question.type === "fill-blank" && (
+                <Input
+                  placeholder="Enter your answer..."
+                  value={selectedAnswers[index]}
+                  onChange={(e) => handleAnswerSelect(index, e.target.value)}
+                  className="text-lg p-4 bg-white/5 border-white/10 text-white placeholder:text-gray-500"
+                />
+              )}
+
+              {question.type === "open-ended" && (
+                <Textarea
+                  placeholder="Write your detailed answer here..."
+                  value={selectedAnswers[index]}
+                  onChange={(e) => handleAnswerSelect(index, e.target.value)}
+                  className="min-h-[120px] text-base bg-white/5 border-white/10 text-white placeholder:text-gray-500"
+                />
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <div className="flex justify-center pt-4">
+        <Button
+          onClick={handleSubmitAnswers}
+          disabled={selectedAnswers.some((answer) => !answer.trim())}
+          className="px-8 py-6 text-lg bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700 text-white border-0 shadow-lg shadow-emerald-500/20"
+        >
+          <CheckCircle className="h-5 w-5 mr-2" />
+          Submit Answers
+        </Button>
+      </div>
     </div>
   )
 }
