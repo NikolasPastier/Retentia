@@ -79,6 +79,7 @@ export default function StudySettingsDropdown({
   return (
     <div
       ref={dropdownRef}
+      data-study-settings-dropdown
       className="fixed z-50 animate-in fade-in slide-in-from-top-2 duration-200"
       style={{
         top: `${position.top}px`,

@@ -10,13 +10,13 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { Settings, Loader2, ChevronRight, Grid3X3, CheckCircle } from "lucide-react"
+import { Settings, Loader2, ChevronDown, CheckCircle, Check } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import type { StudyMode } from "./locale-page-client"
 
 const getPlaceholderText = (mode: StudyMode) => {
   switch (mode) {
-    case "study":
+    case "questions":
       return "Enter your study material here..."
     case "explain":
       return "Paste your study material here..."
@@ -68,7 +68,10 @@ export default function TranscriptInput({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      const target = event.target as Node
+      const isInsideStudySettings = (target as Element).closest?.("[data-study-settings-dropdown]")
+
+      if (dropdownRef.current && !dropdownRef.current.contains(target) && !isInsideStudySettings) {
         closeAllDropdowns()
       }
     }
@@ -123,14 +126,14 @@ export default function TranscriptInput({
 
   const getModeDisplayName = (m: StudyMode) => {
     switch (m) {
-      case "study":
-        return "Study"
+      case "questions":
+        return "Questions"
       case "explain":
         return "Explain"
       case "summarize":
         return "Summarize"
       default:
-        return "Study"
+        return "Questions"
     }
   }
 
@@ -147,7 +150,7 @@ export default function TranscriptInput({
         setting: setting,
       }
 
-      if (mode === "study") {
+      if (mode === "questions") {
         requestBody = {
           ...requestBody,
           difficulty,
@@ -187,7 +190,7 @@ export default function TranscriptInput({
 
       const data = await response.json()
 
-      if (mode === "study") {
+      if (mode === "questions") {
         onQuestionsGenerated(data.questions)
       } else if (mode === "explain") {
         setResult(data)
@@ -212,7 +215,7 @@ export default function TranscriptInput({
 
   const getSettingsOptions = () => {
     switch (mode) {
-      case "study":
+      case "questions":
         return (
           <>
             {/* Difficulty Setting */}
@@ -224,7 +227,7 @@ export default function TranscriptInput({
                 onClick={() => openDropdown("difficulty")}
               >
                 <span>Difficulty: {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}</span>
-                <ChevronRight className="h-4 w-4" />
+                <ChevronDown className="h-4 w-4" />
               </Button>
 
               {showDifficultyDropdown && (
@@ -262,7 +265,7 @@ export default function TranscriptInput({
                 onClick={() => openDropdown("count")}
               >
                 <span>Questions: {questionCount}</span>
-                <ChevronRight className="h-4 w-4" />
+                <ChevronDown className="h-4 w-4" />
               </Button>
 
               {showCountDropdown && (
@@ -308,7 +311,7 @@ export default function TranscriptInput({
                         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
                         .join(" ")}
                 </span>
-                <ChevronRight className="h-4 w-4" />
+                <ChevronDown className="h-4 w-4" />
               </Button>
 
               {showTypeDropdown && (
@@ -517,6 +520,7 @@ export default function TranscriptInput({
 
             <div className="flex items-center justify-between mt-4">
               <div className="flex items-center gap-3" ref={dropdownRef}>
+                {/* Mode Selector */}
                 <div className="relative">
                   <Button
                     variant="ghost"
@@ -524,18 +528,18 @@ export default function TranscriptInput({
                     className="h-10 px-4 rounded-full bg-muted/50 hover:bg-muted border border-border/50 flex items-center gap-2"
                     onClick={() => openDropdown("mode")}
                   >
-                    <Grid3X3 className="h-4 w-4" />
-                    <span className="text-sm">{getModeDisplayName(mode)}</span>
+                    <span className="text-sm">Mode</span>
+                    <ChevronDown className="h-4 w-4" />
                   </Button>
 
                   {showModeSelector && (
-                    <div className="absolute top-full mt-2 left-0 bg-[#0b1724]/95 backdrop-blur-sm border border-border/50 rounded-xl p-3 shadow-2xl z-10 min-w-[180px] animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="absolute top-full mt-2 left-0 bg-[#0b1724]/95 backdrop-blur-sm border border-border/50 rounded-xl p-3 shadow-2xl z-50 min-w-[180px] animate-in fade-in slide-in-from-top-2 duration-200">
                       {/* Caret arrow */}
                       <div className="absolute -top-2 left-4 w-4 h-4 bg-[#0b1724]/95 rotate-45 border-l border-t border-border/50" />
 
                       <div className="relative space-y-1">
                         {[
-                          { id: "study", label: "Study" },
+                          { id: "questions", label: "Questions" },
                           { id: "explain", label: "Explain" },
                           { id: "summarize", label: "Summarize" },
                         ].map((modeOption) => (
@@ -545,13 +549,14 @@ export default function TranscriptInput({
                               onModeChange(modeOption.id as StudyMode)
                               setShowModeSelector(false)
                             }}
-                            className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-all duration-200 ${
+                            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-all duration-200 ${
                               mode === modeOption.id
                                 ? "bg-blue-500/20 border border-blue-400/30 text-blue-300"
                                 : "text-[#d1d5db] hover:bg-white/5 hover:text-white"
                             }`}
                           >
-                            {modeOption.label}
+                            <span>{modeOption.label}</span>
+                            {mode === modeOption.id && <Check className="h-4 w-4 text-blue-300" />}
                           </button>
                         ))}
                       </div>
@@ -559,6 +564,7 @@ export default function TranscriptInput({
                   )}
                 </div>
 
+                {/* Settings Button */}
                 <div className="relative">
                   <Button
                     ref={settingsButtonRef}

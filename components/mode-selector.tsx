@@ -13,8 +13,8 @@ interface ModeSelectorProps {
 export default function ModeSelector({ currentMode, onModeChange }: ModeSelectorProps) {
   const modes = [
     {
-      id: "study" as StudyMode,
-      name: "Study",
+      id: "questions" as StudyMode,
+      name: "Questions",
       description: "Generate practice questions from your material",
       icon: Brain,
       color: "text-blue-500",

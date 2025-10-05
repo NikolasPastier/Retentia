@@ -152,3 +152,30 @@
   background: rgba(0, 31, 63, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+/* Added floating animation for particles */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0) translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(-100vh) translateX(20px);
+    opacity: 0.5;
+  }
+  90% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(-100vh) translateX(0);
+    opacity: 0;
+  }
+}
+
+.animate-float {
+  animation: float linear infinite;
+}

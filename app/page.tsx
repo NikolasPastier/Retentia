@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Header from "@/components/header"
+import HeroSection from "@/components/hero-section"
 import TranscriptInput from "@/components/transcript-input"
 import QuestionDisplay from "@/components/question-display"
 import Footer from "@/components/footer"
@@ -13,7 +14,7 @@ export default function LearningApp() {
   const [activeSection, setActiveSection] = useState("input")
   const [transcript, setTranscript] = useState("")
   const [questions, setQuestions] = useState([])
-  const [currentMode, setCurrentMode] = useState<StudyMode>("study")
+  const [currentMode, setCurrentMode] = useState<StudyMode>("questions")
   const [currentSetting, setCurrentSetting] = useState("medium")
 
   const handleQuestionsGenerated = (generatedQuestions: any[]) => {
@@ -29,7 +30,9 @@ export default function LearningApp() {
       <div className="min-h-screen relative">
         <Header />
 
-        <main className="container mx-auto px-4 py-8 pt-32">
+        <HeroSection />
+
+        <main className="container mx-auto px-4 py-8">
           <div className="space-y-8">
             <TranscriptInput
               transcript={transcript}
