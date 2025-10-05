@@ -10,11 +10,7 @@ export async function POST(request: NextRequest) {
   try {
     console.log("[v0] Explain feedback API called")
 
-    const { material, explanation, userId, audience = "adult" } = await request.json()
-
-    if (!material || material.trim().length === 0) {
-      return NextResponse.json({ error: "Study material is required" }, { status: 400 })
-    }
+    const { explanation, userId, audience = "child" } = await request.json()
 
     if (!explanation || explanation.trim().length === 0) {
       return NextResponse.json({ error: "Your explanation is required" }, { status: 400 })
@@ -38,22 +34,19 @@ export async function POST(request: NextRequest) {
 
     const prompt = `You are an expert educator evaluating how well someone explained a topic to ${audienceContext[audience as keyof typeof audienceContext]}.
 
-ORIGINAL MATERIAL:
-${material}
-
 STUDENT'S EXPLANATION:
 ${explanation}
 
 Please evaluate this explanation and provide:
 1. A rating from 0-100 on how well ${audienceContext[audience as keyof typeof audienceContext]} would understand this explanation
 2. Detailed feedback on what works well and what could be improved
-3. Specific suggestions for making the explanation more appropriate for the target audience
+3. Specific suggestions for making the explanation clearer and more appropriate for the target audience
 
 Consider:
 - Vocabulary level appropriate for ${audience}
 - Clarity and structure
 - Use of examples and analogies
-- Completeness of key concepts
+- Completeness and logical flow
 - Engagement level for the target audience
 
 Format your response as JSON:

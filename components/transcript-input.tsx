@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Settings, Loader2, ChevronDown, CheckCircle, Check } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import StudySettingsDropdown from "@/components/study-settings-dropdown"
 import type { StudyMode } from "./locale-page-client"
 
 const getPlaceholderText = (mode: StudyMode) => {
@@ -18,7 +19,7 @@ const getPlaceholderText = (mode: StudyMode) => {
     case "questions":
       return "Enter your study material here..."
     case "explain":
-      return "Paste your study material here..."
+      return "Write your explanation here as if explaining to a 10-year-old..."
     case "summarize":
       return "Paste your material here..."
     default:
@@ -46,7 +47,6 @@ export default function TranscriptInput({
   const [difficulty, setDifficulty] = useState("medium")
   const [questionCount, setQuestionCount] = useState("5")
   const [questionType, setQuestionType] = useState("mixed")
-  const [userExplanation, setUserExplanation] = useState("")
   const [result, setResult] = useState<any>(null)
 
   const [isGenerating, setIsGenerating] = useState(false)
@@ -58,7 +58,7 @@ export default function TranscriptInput({
   const { toast } = useToast()
 
   const [summarizeSetting, setSummarizeSetting] = useState<"brief" | "in-depth" | "key-points">("brief")
-  const [explainSetting, setExplainSetting] = useState<"child" | "teen" | "adult" | "senior">("adult")
+  const [explainSetting, setExplainSetting] = useState<"child" | "teen" | "adult" | "senior">("child")
 
   const { t } = useTranslations()
 
@@ -143,8 +143,7 @@ export default function TranscriptInput({
       } else if (mode === "explain") {
         apiEndpoint = "/api/explain-feedback"
         requestBody = {
-          material: transcript,
-          explanation: userExplanation,
+          explanation: transcript,
           audience: explainSetting,
         }
       } else if (mode === "summarize") {
@@ -196,199 +195,6 @@ export default function TranscriptInput({
     }
   }
 
-  const getSettingsOptions = () => {
-    switch (mode) {
-      case "questions":
-        return (
-          <>
-            {/* Difficulty Setting */}
-            <div className="relative">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-between gap-2 text-sm"
-                onClick={() => openDropdown("difficulty")}
-              >
-                <span>Difficulty: {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}</span>
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-
-              {showSettingsDropdown && mode === "questions" && (
-                <div className="absolute top-full mt-2 left-0 bg-gradient-to-b from-slate-800/95 via-slate-800/90 to-emerald-900/40 backdrop-blur-xl border border-white/10 rounded-xl p-3 shadow-2xl z-50 min-w-[240px] max-w-[280px] max-h-[70vh] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200 scrollbar-thin scrollbar-thumb-gray-700/50 scrollbar-track-transparent">
-                  {/* Caret arrow */}
-                  <div className="absolute -top-2 left-4 w-4 h-4 bg-slate-800/95 rotate-45 border-l border-t border-white/10" />
-
-                  <div className="relative space-y-3">
-                    {/* Questions Mode Settings */}
-                    <div className="space-y-1">
-                      <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold px-1 mb-2">
-                        Difficulty
-                      </p>
-                      {["easy", "medium", "hard"].map((diff) => (
-                        <button
-                          key={diff}
-                          onClick={() => setDifficulty(diff)}
-                          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-all duration-200 ${
-                            difficulty === diff
-                              ? "bg-cyan-500/30 border border-cyan-400/50 text-cyan-300 shadow-lg shadow-cyan-500/20"
-                              : "text-gray-300 hover:bg-white/10 hover:text-white"
-                          }`}
-                        >
-                          <span>{diff.charAt(0).toUpperCase() + diff.slice(1)}</span>
-                          {difficulty === diff && <Check className="h-4 w-4 text-cyan-300" />}
-                        </button>
-                      ))}
-                    </div>
-
-                    <div className="h-px bg-white/10" />
-
-                    <div className="space-y-1">
-                      <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold px-1 mb-2">
-                        Number of Questions
-                      </p>
-                      {["3", "5", "10", "15"].map((count) => (
-                        <button
-                          key={count}
-                          onClick={() => setQuestionCount(count)}
-                          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-all duration-200 ${
-                            questionCount === count
-                              ? "bg-cyan-500/30 border border-cyan-400/50 text-cyan-300 shadow-lg shadow-cyan-500/20"
-                              : "text-gray-300 hover:bg-white/10 hover:text-white"
-                          }`}
-                        >
-                          <span>{count} Questions</span>
-                          {questionCount === count && <Check className="h-4 w-4 text-cyan-300" />}
-                        </button>
-                      ))}
-                    </div>
-
-                    <div className="h-px bg-white/10" />
-
-                    <div className="space-y-1">
-                      <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold px-1 mb-2">
-                        Question Type
-                      </p>
-                      {[
-                        { value: "mixed", label: "Mixed Types" },
-                        { value: "multiple-choice", label: "Multiple Choice" },
-                        { value: "true-false", label: "True/False" },
-                        { value: "open-ended", label: "Open Ended" },
-                        { value: "fill-blank", label: "Fill in the Blank" },
-                      ].map((type) => (
-                        <button
-                          key={type.value}
-                          onClick={() => setQuestionType(type.value)}
-                          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-all duration-200 ${
-                            questionType === type.value
-                              ? "bg-cyan-500/30 border border-cyan-400/50 text-cyan-300 shadow-lg shadow-cyan-500/20"
-                              : "text-gray-300 hover:bg-white/10 hover:text-white"
-                          }`}
-                        >
-                          <span>{type.label}</span>
-                          {questionType === type.value && <Check className="h-4 w-4 text-cyan-300" />}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Summarize Mode Settings */}
-            {showSettingsDropdown && mode === "summarize" && (
-              <div className="absolute top-full mt-2 left-0 bg-gradient-to-b from-slate-800/95 via-slate-800/90 to-emerald-900/40 backdrop-blur-xl border border-white/10 rounded-xl p-3 shadow-2xl z-50 min-w-[240px] max-w-[280px] max-h-[70vh] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200 scrollbar-thin scrollbar-thumb-gray-700/50 scrollbar-track-transparent">
-                {/* Caret arrow */}
-                <div className="absolute -top-2 left-4 w-4 h-4 bg-slate-800/95 rotate-45 border-l border-t border-white/10" />
-
-                <div className="relative space-y-3">
-                  <div className="space-y-1">
-                    <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold px-1 mb-2">
-                      Summary Style
-                    </p>
-                    {[
-                      { value: "brief", label: "Brief Summary", desc: "Quick overview" },
-                      { value: "key-points", label: "Key Points", desc: "Structured bullets" },
-                      { value: "in-depth", label: "In-Depth", desc: "Comprehensive" },
-                    ].map((option) => (
-                      <button
-                        key={option.value}
-                        onClick={() => {
-                          setResult(null)
-                          setSummarizeSetting(option.value as "brief" | "in-depth" | "key-points")
-                        }}
-                        className={`w-full px-3 py-2.5 rounded-lg text-left transition-all duration-200 ${
-                          summarizeSetting === option.value
-                            ? "bg-cyan-500/30 border border-cyan-400/50 text-cyan-300 shadow-lg shadow-cyan-500/20"
-                            : "text-gray-300 hover:bg-white/10 hover:text-white"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="text-sm font-medium">{option.label}</div>
-                            <div className="text-xs text-gray-400">{option.desc}</div>
-                          </div>
-                          {summarizeSetting === option.value && <Check className="h-4 w-4 text-cyan-300" />}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Explain Mode Settings */}
-            {showSettingsDropdown && mode === "explain" && (
-              <div className="absolute top-full mt-2 left-0 bg-gradient-to-b from-slate-800/95 via-slate-800/90 to-emerald-900/40 backdrop-blur-xl border border-white/10 rounded-xl p-3 shadow-2xl z-50 min-w-[240px] max-w-[280px] max-h-[70vh] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200 scrollbar-thin scrollbar-thumb-gray-700/50 scrollbar-track-transparent">
-                {/* Caret arrow */}
-                <div className="absolute -top-2 left-4 w-4 h-4 bg-slate-800/95 rotate-45 border-l border-t border-white/10" />
-
-                <div className="relative space-y-3">
-                  <div className="space-y-1">
-                    <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold px-1 mb-2">
-                      Target Audience
-                    </p>
-                    {[
-                      { value: "child", label: "Child (5-10)", desc: "Simple language" },
-                      { value: "teen", label: "Teenager (13-17)", desc: "Engaging examples" },
-                      { value: "adult", label: "Adult (18+)", desc: "Professional" },
-                      { value: "senior", label: "Senior (65+)", desc: "Patient & clear" },
-                    ].map((option) => (
-                      <button
-                        key={option.value}
-                        onClick={() => {
-                          setResult(null)
-                          setExplainSetting(option.value as "child" | "teen" | "adult" | "senior")
-                        }}
-                        className={`w-full px-3 py-2.5 rounded-lg text-left transition-all duration-200 ${
-                          explainSetting === option.value
-                            ? "bg-cyan-500/30 border border-cyan-400/50 text-cyan-300 shadow-lg shadow-cyan-500/20"
-                            : "text-gray-300 hover:bg-white/10 hover:text-white"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="text-sm font-medium">{option.label}</div>
-                            <div className="text-xs text-gray-400">{option.desc}</div>
-                          </div>
-                          {explainSetting === option.value && <Check className="h-4 w-4 text-cyan-300" />}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-          </>
-        )
-      case "summarize":
-        return null
-      case "explain":
-        return null
-      default:
-        return null
-    }
-  }
-
   useEffect(() => {
     setResult(null)
   }, [mode])
@@ -408,23 +214,8 @@ export default function TranscriptInput({
               value={transcript}
               onChange={handleTextareaChange}
               className="min-h-[200px] bg-transparent border-none resize-none text-lg text-white placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0 caret-white"
-              maxLength={mode === "summarize" ? 15000 : 10000}
+              maxLength={mode === "summarize" ? 15000 : mode === "explain" ? 5000 : 10000}
             />
-
-            {mode === "explain" && (
-              <div className="mt-4">
-                <Textarea
-                  placeholder={t("transcript.explanationPlaceholder")}
-                  value={userExplanation}
-                  onChange={(e) => setUserExplanation(e.target.value)}
-                  className="min-h-[150px] bg-white/5 border border-white/10 rounded-xl resize-none text-lg text-white placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-cyan-500/50 caret-white"
-                  maxLength={5000}
-                />
-                <div className="flex justify-end mt-2">
-                  <span className="text-xs text-gray-400">{userExplanation.length}/5,000</span>
-                </div>
-              </div>
-            )}
 
             <div className="flex items-center justify-between mt-4">
               <div className="flex items-center gap-3" ref={dropdownRef}>
@@ -484,17 +275,40 @@ export default function TranscriptInput({
                     <Settings className="h-4 w-4" />
                     <span className="text-sm">Settings</span>
                   </Button>
+
+                  <StudySettingsDropdown
+                    isOpen={showSettingsDropdown}
+                    onClose={closeAllDropdowns}
+                    mode={mode}
+                    buttonRef={settingsButtonRef}
+                    difficulty={difficulty}
+                    questionCount={questionCount}
+                    questionType={questionType}
+                    onDifficultyChange={setDifficulty}
+                    onQuestionCountChange={setQuestionCount}
+                    onQuestionTypeChange={setQuestionType}
+                    summarizeSetting={summarizeSetting}
+                    onSummarizeSettingChange={(setting) => {
+                      setResult(null)
+                      setSummarizeSetting(setting)
+                    }}
+                    explainSetting={explainSetting}
+                    onExplainSettingChange={(setting) => {
+                      setResult(null)
+                      setExplainSetting(setting)
+                    }}
+                  />
                 </div>
               </div>
 
               <div className="flex items-center gap-4">
                 <span className="text-xs text-gray-400">
-                  {transcript.length}/{mode === "summarize" ? "15,000" : "10,000"}
+                  {transcript.length}/{mode === "summarize" ? "15,000" : mode === "explain" ? "5,000" : "10,000"}
                 </span>
 
                 <button
                   onClick={handleGenerate}
-                  disabled={isProcessing || !transcript.trim() || (mode === "explain" && !userExplanation.trim())}
+                  disabled={isProcessing || !transcript.trim()}
                   className="group relative h-12 w-12 rounded-full bg-gradient-to-b from-gray-200 to-gray-300 hover:from-gray-300 hover:to-gray-400 disabled:from-gray-100 disabled:to-gray-200 disabled:cursor-not-allowed transition-all duration-200 ease-in-out hover:scale-105 active:scale-95 shadow-md hover:shadow-lg disabled:shadow-sm"
                   title={t("generate")}
                   aria-label={t("generate")}
