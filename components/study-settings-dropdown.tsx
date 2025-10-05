@@ -73,7 +73,7 @@ export default function StudySettingsDropdown({
     >
       <div className="absolute -bottom-2 left-4 w-4 h-4 bg-slate-800/95 rotate-45 border-r border-b border-white/10" />
 
-      <div className="relative bg-gradient-to-b from-slate-800/95 via-slate-800/90 to-emerald-900/40 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl min-w-[280px] max-w-[320px] max-h-[70vh] overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+      <div className="relative bg-gradient-to-b from-slate-800/95 via-slate-800/90 to-emerald-900/40 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl min-w-[280px] max-w-[320px] max-h-[400px] overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent hover:scrollbar-thumb-gray-600">
         <div className="p-3 space-y-1">
           {/* Questions Mode Settings */}
           {mode === "questions" && (

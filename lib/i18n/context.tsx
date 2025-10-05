@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { createContext, useContext, useEffect, useState } from "react"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
 
 type TranslationKey = string
 type Translations = Record<string, any>
@@ -30,7 +30,6 @@ const translationFiles = {
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  const router = useRouter()
   const [locale, setLocaleState] = useState("en")
   const [translations, setTranslations] = useState<Translations>({})
   const [isLoading, setIsLoading] = useState(true)
@@ -97,28 +96,27 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   }
 
   const setLocale = (newLocale: string) => {
-    const segments = pathname.split("/").filter(Boolean)
-
-    // Remove current locale if it exists
-    if (segments[0] && Object.keys(translationFiles).includes(segments[0])) {
-      segments.shift()
-    }
-
-    // Build new path with new locale
-    const newPath = `/${newLocale}${segments.length > 0 ? "/" + segments.join("/") : ""}`
-
-    // Store preference
+    // Store preference in localStorage
     localStorage.setItem("preferred-language", newLocale)
 
-    // Navigate to new path
-    router.push(newPath)
+    // Update local state
+    setLocaleState(newLocale)
+
+    // Load new translations directly
+    loadTranslations(newLocale)
   }
 
   useEffect(() => {
-    const currentLocale = getLocaleFromPath()
+    // Check localStorage first for saved preference
+    const savedLocale = typeof window !== "undefined" ? localStorage.getItem("preferred-language") : null
+
+    // Fall back to path segment if no saved preference
+    const currentLocale =
+      savedLocale && Object.keys(translationFiles).includes(savedLocale) ? savedLocale : getLocaleFromPath()
+
     setLocaleState(currentLocale)
     loadTranslations(currentLocale)
-  }, [pathname])
+  }, []) // Removed pathname dependency to prevent reloading on navigation
 
   const contextValue: I18nContextType = {
     locale,
